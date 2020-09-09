@@ -422,3 +422,4 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/linux,macos,windows,visualstudio
 /(S)NES Mini - Lua Compiler  - Copy.csproj
+/App.config--
