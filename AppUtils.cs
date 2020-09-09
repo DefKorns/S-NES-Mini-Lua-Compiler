@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing.Drawing2D;
 using System.IO;
-using System.Linq.Expressions;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 
@@ -21,7 +20,8 @@ namespace SNESMiniLuaCompiler
         public static readonly string luaJitPath = Path.Combine("modules", "luajit");
         public static readonly string decompilerPath = Path.Combine("modules", "decompiler");
         public static readonly string decompilerScript = Path.Combine(decompilerPath, "main.py");
-        public static readonly string batFile = Path.Combine(appPath, "encode.bat");
+        public static readonly string decodedHashFile = Path.Combine("lib", "hashes");
+        public static readonly string batFile = "encode.bat";
 
         public static void CopyAssets(string sourceFolder, string destFolder)
         {
@@ -49,9 +49,9 @@ namespace SNESMiniLuaCompiler
             {
                 if (string.IsNullOrEmpty(Path.GetDirectoryName(exe)))
                 {
-                    foreach (string test in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
+                    foreach (string arg in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
                     {
-                        string path = test.Trim();
+                        string path = arg.Trim();
                         if (!string.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, exe)))
                             return Path.GetFullPath(path);
                     }
@@ -65,8 +65,8 @@ namespace SNESMiniLuaCompiler
         {
             ProcessStartInfo start = new ProcessStartInfo
             {
-                FileName = cmd,//cmd is full path to python.exe
-                Arguments = args,//args is path to .py file and any cmd line args
+                FileName = cmd,
+                Arguments = args,
                 UseShellExecute = false,
                 RedirectStandardOutput = true
             };
@@ -93,6 +93,40 @@ namespace SNESMiniLuaCompiler
                 w.WriteLine("%LuaJit%\\luajit.exe -b %1 %2");
                 w.Close();
             }
+        }
+
+        public static string GetMD5HashFromFile(string fileName)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(fileName))
+                {
+                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower();
+                }
+            }
+        }
+
+        public static void GenerateFileHash(string fileName)
+        {
+            string fileHash = GetMD5HashFromFile(fileName);
+                       
+            using (StreamWriter sw = File.AppendText(decodedHashFile))
+            {
+                sw.WriteLine(fileHash);
+            }
+        }
+
+        public static bool HasEditedFiles(string hash)
+        {
+            foreach (var line in File.ReadAllLines(decodedHashFile))
+            {
+                if (line.Contains(hash))
+                {
+                    return false;
+                }
+
+            }
+            return true;
         }
 
         public static void RunLuaJit(string args)

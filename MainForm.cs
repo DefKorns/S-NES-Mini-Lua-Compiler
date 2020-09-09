@@ -192,6 +192,7 @@ namespace SNESMiniLuaCompiler
                 AppUtils.RunCmd(AppUtils.FindExePath("pythonw.exe"), AppUtils.decompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
                 File.Delete(file);
                 File.Move(decFile, file);
+                AppUtils.GenerateFileHash(file);
 
             }
 
@@ -212,7 +213,11 @@ namespace SNESMiniLuaCompiler
 
                 AppUtils.CreatePath(recodedFullPath);
                 AppUtils.CreateLuaJitLauncher();
-                AppUtils.RunLuaJit(decodedFile + " " + recodedFile);
+
+                if (AppUtils.HasEditedFiles(AppUtils.GetMD5HashFromFile(decodedFile)))
+                {
+                    AppUtils.RunLuaJit(decodedFile + " " + recodedFile);
+                }
                 AppUtils.DeleteFile(AppUtils.batFile);
             }
         }
@@ -247,9 +252,9 @@ namespace SNESMiniLuaCompiler
             if (!string.IsNullOrEmpty(AppUtils.FindExePath("python.exe")))
             {
                 AppUtils.LoadSpinner(true, picLoader, this);
-
                 AppUtils.DeletePath(AppUtils.decodedPath);
                 AppUtils.CopyAssets(SelectecSystem, AppUtils.decodedPath);
+                AppUtils.DeleteFile(AppUtils.decodedHashFile);
 
                 Decrypt("decoded");
 
