@@ -34,7 +34,7 @@ public partial class MsgBox : Form
             BackColor = Color.FromArgb(39, 41, 45);
             StartPosition = FormStartPosition.CenterScreen;
             Padding = new Padding(3);
-            Width = 400;
+            //Width = 400;
 
             Icon = (Icon)resources.GetObject("$this.Icon");
 
@@ -63,9 +63,9 @@ public partial class MsgBox : Form
             _plHeader.Controls.Add(_lblTitle);
 
             _plFooter.Dock = DockStyle.Bottom;
-            _plFooter.Padding = new Padding(20);
+            _plFooter.Padding = new Padding(10);
             _plFooter.BackColor = Color.Transparent;
-            _plFooter.Height = 80;
+            _plFooter.Height = 60;
             _plFooter.Controls.Add(_flpButtons);
 
             _picIcon.Width = 38;
@@ -174,7 +174,16 @@ public partial class MsgBox : Form
                     break;
 
                 case AnimateStyle.FadeIn:
+                    _msgBox.AutoSize = true;
+                    _msgBox.AutoSizeMode = AutoSizeMode.GrowOnly;
                     _msgBox.Size = formSize;
+                    _msgBox.Opacity = 0;
+                    _timer.Interval = 20;
+                    _timer.Tag = new AnimateMsgBox(formSize, style);
+                    break;
+
+                case AnimateStyle.FadeInHelp:
+                    _msgBox.Size = new Size(500, 360);
                     _msgBox.Opacity = 0;
                     _timer.Interval = 20;
                     _timer.Tag = new AnimateMsgBox(formSize, style);
@@ -216,6 +225,18 @@ public partial class MsgBox : Form
                     break;
 
                 case AnimateStyle.FadeIn:
+                    if (_msgBox.Opacity < 1)
+                    {
+                        _msgBox.Opacity += 0.1;
+                        _msgBox.Invalidate();
+                    }
+                    else
+                    {
+                        _timer.Stop();
+                        _timer.Dispose();
+                    }
+                    break;
+                case AnimateStyle.FadeInHelp:
                     if (_msgBox.Opacity < 1)
                     {
                         _msgBox.Opacity += 0.1;
@@ -561,7 +582,8 @@ public partial class MsgBox : Form
         {
             SlideDown = 1,
             FadeIn = 2,
-            ZoomIn = 3
+            ZoomIn = 3,
+            FadeInHelp = 4
         }
 
     }
