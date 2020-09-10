@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Reflection;
+using System.Diagnostics;
 
 namespace SNESMiniLuaCompiler
 {
@@ -74,9 +74,10 @@ namespace SNESMiniLuaCompiler
             }
 
         }
-        //########################
-        // Button related methods
-        //########################
+        /// <summary>
+        /// Acts as angular disable atribute
+        /// </summary>
+        /// <param name="con">Control to be disabled</param>
         private void DisableControls(Control con)
         {
             if (con.InvokeRequired)
@@ -89,6 +90,10 @@ namespace SNESMiniLuaCompiler
                 con.Enabled = false;
             }
         }
+        /// <summary>
+        /// Acts as angular disable="false" atribute
+        /// </summary>
+        /// <param name="con">Control to be enabled</param>
         private void EnableControls(Control con)
         {
             if (con.InvokeRequired)
@@ -120,6 +125,9 @@ namespace SNESMiniLuaCompiler
             drawBrush.Dispose();
             sf.Dispose();
         }
+        /// <summary>
+        /// Restore default backgroundcolor to buttons
+        /// </summary>
         private void ResetButtonBackColor()
         {
             foreach (object item in Controls)
@@ -129,6 +137,10 @@ namespace SNESMiniLuaCompiler
                     button.FlatAppearance.BorderSize = 0;
                 }
             }
+        }
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            MsgBox.Show("- Select the icon for your desired system\n\n- Press the \"Decode\" button to proceed\n\n- After conclusion, navigate to the \"decoded\" folder and edit the lua files as desired\n\n- With all your files saved press the \"Encode\" button\n\n- Copy all the edited files to you theme's location", "Instructions", MsgBox.ButtonType.OK, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeInHelp);
         }
         private void SelectedSystem_Click(object sender, EventArgs e)
         {
@@ -214,7 +226,7 @@ namespace SNESMiniLuaCompiler
                 AppUtils.CreatePath(recodedFullPath);
                 AppUtils.CreateLuaJitLauncher();
 
-                if (AppUtils.HasEditedFiles(AppUtils.GetMD5HashFromFile(decodedFile)))
+                if (AppUtils.HasEditedFiles(AppUtils.GetSHA256HashFromFile(decodedFile)))
                 {
                     AppUtils.RunLuaJit(decodedFile + " " + recodedFile);
                 }
@@ -263,6 +275,12 @@ namespace SNESMiniLuaCompiler
                 recode_button.FlatAppearance.BorderSize = 2;
                 AppUtils.LoadSpinner(false, picLoader, this);
                 AppUtils.CreatePath(AppUtils.recodedPath);
+                DialogResult dialog = MsgBox.Show("The decrytion has finished.\n\nDo you want to navigate to the output directory?", "Success", MsgBox.ButtonType.YesNo, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeIn);
+
+                if (dialog == DialogResult.Yes)
+                {
+                    Process.Start(@AppUtils.decodedPath);
+                }
             }
             else
             {
@@ -288,7 +306,6 @@ namespace SNESMiniLuaCompiler
             DisableControls(decode_button);
             recode_button.FlatAppearance.BorderSize = 2;
         }
-
         private static void ThreadLauncher(ThreadStart data)
         {
             try
@@ -297,13 +314,10 @@ namespace SNESMiniLuaCompiler
                 threadInput.Start();
 
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch (ThreadStateException ex)
             {
                 MsgBox.Show(ex.Message, "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
             }
         }
-
     }
 }

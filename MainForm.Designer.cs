@@ -32,6 +32,7 @@
             this.app_exit = new System.Windows.Forms.Label();
             this.app_title = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.help = new System.Windows.Forms.Label();
             this.decode_button = new System.Windows.Forms.Button();
             this.recode_button = new System.Windows.Forms.Button();
             this.picLoader = new System.Windows.Forms.PictureBox();
@@ -42,7 +43,6 @@
             this.snesPALButton = new System.Windows.Forms.Button();
             this.snesButton = new System.Windows.Forms.Button();
             this.nesButton = new System.Windows.Forms.Button();
-            this.help = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLoader)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.app_icon)).BeginInit();
@@ -85,6 +85,19 @@
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Title_Header_MouseDown);
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Title_Header_MouseMove);
             this.panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Title_Header_MouseUp);
+            // 
+            // help
+            // 
+            this.help.AutoSize = true;
+            this.help.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.help.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.help.ForeColor = System.Drawing.Color.White;
+            this.help.Location = new System.Drawing.Point(549, 6);
+            this.help.Name = "help";
+            this.help.Size = new System.Drawing.Size(14, 13);
+            this.help.TabIndex = 6;
+            this.help.Text = "?";
+            this.help.Click += new System.EventHandler(this.HelpButton_Click);
             // 
             // decode_button
             // 
@@ -273,18 +286,6 @@
             this.nesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.nesButton.UseVisualStyleBackColor = false;
             this.nesButton.Click += new System.EventHandler(this.SelectedSystem_Click);
-            // 
-            // help
-            // 
-            this.help.AutoSize = true;
-            this.help.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.help.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.help.ForeColor = System.Drawing.Color.White;
-            this.help.Location = new System.Drawing.Point(549, 6);
-            this.help.Name = "help";
-            this.help.Size = new System.Drawing.Size(14, 13);
-            this.help.TabIndex = 6;
-            this.help.Text = "?";
             // 
             // MainForm
             // 
