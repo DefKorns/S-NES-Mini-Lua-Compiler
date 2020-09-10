@@ -425,3 +425,4 @@ MigrationBackup/
 /App.config--
 .vscode/settings.json
 (S)NES Mini - Lua Compiler .sln
+lib/hashes
