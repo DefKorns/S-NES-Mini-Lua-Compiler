@@ -22,6 +22,7 @@ namespace SNESMiniLuaCompiler
         public static readonly string decompilerPath = Path.Combine("modules", "decompiler");
         public static readonly string decompilerScript = Path.Combine(decompilerPath, "main.py");
         public static readonly string decodedHashFile = Path.Combine("lib", "hashes");
+        public static readonly string firstRun = Path.Combine("lib", "firstRun");
         public static readonly string batFile = "encode.bat";
 
         public static void CopyAssets(string sourceFolder, string destFolder)

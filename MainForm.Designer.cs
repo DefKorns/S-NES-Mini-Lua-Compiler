@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.app_exit = new System.Windows.Forms.Label();
             this.app_title = new System.Windows.Forms.Label();
@@ -43,6 +44,8 @@
             this.snesPALButton = new System.Windows.Forms.Button();
             this.snesButton = new System.Windows.Forms.Button();
             this.nesButton = new System.Windows.Forms.Button();
+            this.fadeOutTimer = new System.Windows.Forms.Timer(this.components);
+            this.fadeInTimer = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLoader)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.app_icon)).BeginInit();
@@ -287,6 +290,10 @@
             this.nesButton.UseVisualStyleBackColor = false;
             this.nesButton.Click += new System.EventHandler(this.SelectedSystem_Click);
             // 
+            // fadeOutTimer
+            // 
+            this.fadeOutTimer.Tick += new System.EventHandler(this.FadeOutTimer_Tick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -311,6 +318,7 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLoader)).EndInit();
@@ -336,5 +344,7 @@
         private System.Windows.Forms.Button snesButton;
         private System.Windows.Forms.Button nesButton;
         private System.Windows.Forms.Label help;
+        private System.Windows.Forms.Timer fadeOutTimer;
+        private System.Windows.Forms.Timer fadeInTimer;
     }
 }

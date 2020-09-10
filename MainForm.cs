@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler
 {
@@ -17,7 +18,6 @@ namespace SNESMiniLuaCompiler
         private bool ActiveButton { get; set; }
         delegate void SetButtonCallback(Button button);
 
-
         public MainForm()
         {
 
@@ -25,6 +25,12 @@ namespace SNESMiniLuaCompiler
             backgroundImage = Properties.Resources.app_bg;
             DoubleBuffered = true;
             picLoader.Visible = false;
+
+            if (File.Exists(AppUtils.firstRun))
+            {
+                MsgBox.Show("Make sure you have python 3.x installed!\n\nPlease download it from python.org", "Requirement", MsgBox.ButtonType.OK, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeIn);
+                File.Delete(AppUtils.firstRun);
+            }
 
             SetStyle(ControlStyles.ResizeRedraw, true);
 
@@ -65,14 +71,43 @@ namespace SNESMiniLuaCompiler
         /// </summary>
         private void App_Exit_MouseClick(object sender, MouseEventArgs e)
         {
-            DialogResult dialog = MsgBox.Show("Are you sure you want to exit?", "Exit application", MsgBox.ButtonType.YesNo, MsgBox.Ico.Warning);
+            DialogResult dialog = MsgBox.Show("Are you sure you want to exit?", "Exit application", MsgBox.ButtonType.YesNo, MsgBox.Ico.Warning, MsgBox.AnimateStyle.FadeIn);
 
             if (dialog == DialogResult.Yes)
             {
-                Environment.ExitCode = 1;
-                Application.Exit();
+                fadeOutTimer.Start();
             }
 
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Opacity = 0;
+            fadeInTimer.Interval = 20;
+            fadeInTimer.Tick += new EventHandler(FadeIn);
+            fadeInTimer.Start();
+        }
+
+        void FadeIn(object sender, EventArgs e)
+        {
+            if (Opacity >= 1)
+                fadeInTimer.Stop();
+            else
+                Opacity += 0.05;
+        }
+
+        private void FadeOutTimer_Tick(object sender, EventArgs e)
+        {
+            fadeOutTimer.Interval = 20;
+            if (Opacity > 0.0)
+            {
+                Opacity -= 0.05;
+            }
+            else
+            {
+                fadeOutTimer.Stop();
+                Application.Exit();
+            }
         }
         /// <summary>
         /// Acts as angular disable atribute
