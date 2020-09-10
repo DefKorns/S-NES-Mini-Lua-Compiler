@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Forms;
@@ -56,7 +57,6 @@ namespace SNESMiniLuaCompiler
                             return Path.GetFullPath(path);
                     }
                 }
-                return "";
             }
             return "";
         }
@@ -95,20 +95,20 @@ namespace SNESMiniLuaCompiler
             }
         }
 
-        public static string GetMD5HashFromFile(string fileName)
+        public static string GetSHA256HashFromFile(string fileName)
         {
-            using (var md5 = MD5.Create())
+            using (var sha256 = SHA256.Create())
             {
                 using (var stream = File.OpenRead(fileName))
                 {
-                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower();
+                    return BitConverter.ToString(sha256.ComputeHash(stream)).Replace("-", string.Empty).ToLower(CultureInfo.CurrentCulture);
                 }
             }
         }
 
         public static void GenerateFileHash(string fileName)
         {
-            string fileHash = GetMD5HashFromFile(fileName);
+            string fileHash = GetSHA256HashFromFile(fileName);
                        
             using (StreamWriter sw = File.AppendText(decodedHashFile))
             {
