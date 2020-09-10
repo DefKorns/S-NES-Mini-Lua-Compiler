@@ -19,5 +19,6 @@ Enjoy
 - [frostyfire03530](https://github.com/frostyfire03530) - Initial development 
 
 ### Thanks to (alphabetically)
+- AluCarD (testing)
 - [bobsayshilol](https://github.com/bobsayshilol/)
 - [znixian](https://gitlab.com/znixian)
