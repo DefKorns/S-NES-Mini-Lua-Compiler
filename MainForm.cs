@@ -22,6 +22,10 @@ namespace SNESMiniLuaCompiler
         {
 
             InitializeComponent();
+            //this.app_title.Text = "(S)NES Mini - Lua Compiler";
+            var name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            app_title.Text = name + " " + version.Major + "." + version.Minor + " (build " + version.Build + ")";
             backgroundImage = Properties.Resources.app_bg;
             DoubleBuffered = true;
             picLoader.Visible = false;
