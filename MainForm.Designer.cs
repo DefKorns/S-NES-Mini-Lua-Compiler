@@ -73,7 +73,7 @@
             this.app_title.Name = "app_title";
             this.app_title.Size = new System.Drawing.Size(160, 13);
             this.app_title.TabIndex = 0;
-            this.app_title.Text = "(S)NES Mini - Lua Compiler";
+            this.app_title.Text = "(S)NES Mini - Lua Compiler v1.0.1";
             // 
             // panel1
             // 

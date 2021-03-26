@@ -26,7 +26,7 @@ namespace SNESMiniLuaCompiler
                 {
                     if (!hasModulesPath || emptyModules)
                     {
-                        Repository.Clone("https://github.com/bobsayshilol/luajit-decomp.git", AppUtils.luaJitPath);
+                        Repository.Clone("https://github.com/bobsayshilol/luajit-decomp.git", AppUtils.luaJitPath, new CloneOptions { BranchName = "deprecated" });
                         Repository.Clone("https://gitlab.com/znixian/luajit-decompiler.git", AppUtils.decompilerPath);
                     }
 
