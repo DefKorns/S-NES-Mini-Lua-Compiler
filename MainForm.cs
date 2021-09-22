@@ -22,7 +22,6 @@ namespace SNESMiniLuaCompiler
         {
 
             InitializeComponent();
-            //this.app_title.Text = "(S)NES Mini - Lua Compiler";
             var name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             app_title.Text = name + " " + version.Major + "." + version.Minor + " (build " + version.Build + ")";
@@ -269,8 +268,9 @@ namespace SNESMiniLuaCompiler
                 {
                     AppUtils.RunLuaJit(decodedFile + " " + recodedFile);
                 }
-                AppUtils.DeleteFile(AppUtils.batFile);
             }
+            AppUtils.DeleteFile(AppUtils.batFile);
+            AppUtils.DeleteEmptyDirectories(AppUtils.recodedPath);
         }
 
         private void DisableAllButtons()

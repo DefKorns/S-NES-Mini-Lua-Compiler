@@ -187,6 +187,19 @@ namespace SNESMiniLuaCompiler
                 Directory.Delete(path, true);
             }
         }
+        
+        public static void DeleteEmptyDirectories(string startLocation)
+        {
+            foreach (var directory in Directory.GetDirectories(startLocation))
+            {
+                DeleteEmptyDirectories(directory);
+                if (Directory.GetFiles(directory).Length == 0 &&
+                    Directory.GetDirectories(directory).Length == 0)
+                {
+                    Directory.Delete(directory, false);
+                }
+            }
+        }
 
         public static void DeleteFile(string file)
         {
