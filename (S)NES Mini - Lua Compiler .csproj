@@ -1,11 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
-  <Import Project="packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" />
-  <Import Project="packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" />
-  <Import Project="packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" />
-  <Import Project="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
-  <Import Project="packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props" Condition="Exists('packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -14,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>SNESMiniLuaCompiler</RootNamespace>
     <AssemblyName>%28S%29NES Mini - Lua Compiler</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>false</Deterministic>
@@ -22,7 +16,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
+    <PublishUrl>E:\Desktop\canais\</PublishUrl>
     <Install>false</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -32,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -85,9 +79,6 @@
     <ApplicationManifest>Properties/app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibGit2Sharp, Version=0.26.0.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
-      <HintPath>packages\LibGit2Sharp.0.26.2\lib\net46\LibGit2Sharp.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
     </Reference>
@@ -105,6 +96,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utils\ExceptionUtils.cs" />
+    <Compile Include="Utils\ProcessUtils.cs" />
+    <Compile Include="Utils\FileUtils.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,7 +113,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AppUtils.cs" />
+    <Compile Include="Utils\AppUtils.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -133,6 +127,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include=".editorconfig" />
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -152,6 +147,98 @@
   <ItemGroup>
     <Content Include="AppIcon.ico" />
     <Content Include="Icon.ico" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\builder.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\helpers.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\locals.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\mutator.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\nodes.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\printast.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\slotworks.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\traverse.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\unwarper.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\validator.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\ast\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\constants.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\debuginfo.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\helpers.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\instructions.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\prototype.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\bytecode\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\lua\writer.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\lua\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\pseudoasm\constants.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\pseudoasm\instructions.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\pseudoasm\prototype.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\pseudoasm\writer.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\pseudoasm\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\code.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\constants.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\debuginfo.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\header.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\luajit\v2_0\luajit_opcode.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\luajit\v2_1\luajit_opcode.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\parser.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\prototype.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\rawdump\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\util\binstream.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\util\indentedstream.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\util\log.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\util\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\ljd\__init__.py" />
+    <EmbeddedResource Include="lib\decompiler\main.py" />
+    <EmbeddedResource Include="lib\luajit\lua51.dll" />
+    <EmbeddedResource Include="lib\luajit\luajit.exe" />
+    <None Include="lib\decompiler\LICENSE" />
+    <None Include="lib\decompiler\LICENSE-upstream" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\builder.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\helpers.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\locals.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\mutator.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\nodes.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\printast.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\slotworks.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\traverse.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\unwarper.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\validator.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\ast\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\constants.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\debuginfo.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\helpers.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\instructions.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\prototype.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\bytecode\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\lua\__pycache__\writer.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\lua\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\pseudoasm\__pycache__\constants.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\pseudoasm\__pycache__\instructions.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\pseudoasm\__pycache__\prototype.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\pseudoasm\__pycache__\writer.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\pseudoasm\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\luajit\v2_0\__pycache__\luajit_opcode.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\code.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\constants.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\debuginfo.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\header.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\parser.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\prototype.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\rawdump\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\util\__pycache__\binstream.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\util\__pycache__\indentedstream.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\util\__pycache__\log.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\util\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\ljd\__pycache__\__init__.cpython-312.pyc" />
+    <None Include="lib\decompiler\README.md" />
+    <EmbeddedResource Include="lib\luajit\jit\bc.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\bcsave.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_arm.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_mips.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_mipsel.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_ppc.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_x64.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dis_x86.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\dump.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\v.lua" />
+    <EmbeddedResource Include="lib\luajit\jit\vmdef.lua" />
     <None Include="Resources\snes.png" />
     <None Include="Resources\shonen.png" />
     <None Include="Resources\sfamicom.png" />
@@ -2028,28 +2115,11 @@
     <None Include="$(SolutionDir)lib\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
-    <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
-    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Humanizer.dll" />
-    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
-    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
-    <Analyzer Include="packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
-    <Analyzer Include="packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
-    <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
-    <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.CodeAnalysis.NetAnalyzers.9.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />
+    <Analyzer Include="packages\Microsoft.CodeAnalysis.NetAnalyzers.9.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
-  </Target>
   <Target Name="RemoveNonWindowsLibGit2SharpLibraries" BeforeTargets="_DeploymentComputeClickOnceManifestInfo">
     <ItemGroup>
       <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Extension)' == '.so'" />

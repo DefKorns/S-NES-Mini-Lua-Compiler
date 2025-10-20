@@ -1,8 +1,9 @@
-﻿using LibGit2Sharp;
+﻿//using LibGit2Sharp;
 using System;
-using System.IO;
+//using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using static SNESMiniLuaCompiler.Utils.AppUtils;
 
 namespace SNESMiniLuaCompiler
 {
@@ -14,36 +15,49 @@ namespace SNESMiniLuaCompiler
         [STAThread]
         static void Main()
         {
-            bool hasModulesPath = Directory.Exists(AppUtils.modulesPath);
-            if (!hasModulesPath)
-                Directory.CreateDirectory(AppUtils.modulesPath);
-            bool emptyModules = Directory.GetFileSystemEntries(AppUtils.modulesPath).Length == 0;
-
-            using (Mutex mutex = new Mutex(true, "SNESMiniLuaCompiler", out bool singleExecution))
+            try
             {
+                EnsureAllModuleDirectories();
 
-                if (singleExecution)
+                using (var mutex = new Mutex(true, "SNESMiniLuaCompiler", out bool singleExecution))
                 {
-                    if (!hasModulesPath || emptyModules)
+                    if (singleExecution)
                     {
-                        Repository.Clone("https://github.com/bobsayshilol/luajit-decomp.git", AppUtils.luaJitPath, new CloneOptions { BranchName = "deprecated" });
-                        Repository.Clone("https://gitlab.com/znixian/luajit-decompiler.git", AppUtils.decompilerPath);
-                    }
+                        ExtractAllResources();
 
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    using (MainForm mainWindow = new MainForm())
+                        // Initialize and run the application
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        using (var mainWindow = new MainForm())
+                        {
+                            Application.Run(mainWindow);
+                        }
+                    }
+                    else
                     {
-                        Application.Run(mainWindow);
+                        ShowAlreadyRunningMessage();
                     }
-
-                }
-                else
-                {
-                    MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                // Log or display the error message
+                MessageBox.Show($"An application error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                // Log or display unexpected errors
+                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw; // Rethrow to ensure the application doesn't continue in an unstable state
+            }
+        }
 
+        /// <summary>
+        /// Displays a message indicating the application is already running.
+        /// </summary>
+        private static void ShowAlreadyRunningMessage()
+        {
+            MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
         }
     }
 }

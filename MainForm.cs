@@ -1,11 +1,10 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using SNESMiniLuaCompiler.Utils;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SNESMiniLuaCompiler
 {
@@ -13,62 +12,99 @@ namespace SNESMiniLuaCompiler
     {
         private bool _dragging;
         private Point _start_point = new Point(0, 0);
-        private readonly Image backgroundImage;
-        private string SelectecSystem { get; set; }
-        private bool ActiveButton { get; set; }
+        private readonly Image _backgroundImage;
+        private string _selectedSystem;
+        private bool _activeButton { get; set; }
+
         delegate void SetButtonCallback(Button button);
 
         public MainForm()
         {
-
             InitializeComponent();
-            var name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            app_title.Text = name + " " + version.Major + "." + version.Minor + " (build " + version.Build + ")";
-            backgroundImage = Properties.Resources.app_bg;
-            DoubleBuffered = true;
-            picLoader.Visible = false;
-
-            if (File.Exists(AppUtils.firstRun))
-            {
-                MsgBox.Show("Make sure you have python 3.x installed!\n\nPlease download it from python.org", "Requirement", MsgBox.ButtonType.OK, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeIn);
-                File.Delete(AppUtils.firstRun);
-            }
-
+            InitializeAppTitle();
+            _backgroundImage = Properties.Resources.app_bg;
+            InitializeBackground();
+            InitializeFirstRunCheck();
             SetStyle(ControlStyles.ResizeRedraw, true);
+            InitializeButtonStates();
+        }
 
-            if (!ActiveButton)
-            {
-                if (!Directory.Exists(AppUtils.recodedPath) || !Directory.Exists(AppUtils.decodedPath))
-                {
-                    DisableControls(recode_button);
-                    recode_button.FlatAppearance.BorderSize = 0;
-                }
-                DisableControls(decode_button);
-                decode_button.FlatAppearance.BorderSize = 0;
-            }
+        #region Initialization
+        /// <summary>
+        /// Sets the application title with the assembly name and version.
+        /// </summary>
+        private void InitializeAppTitle()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+            app_title.Text = $"{assembly.Name} {AppUtils.GetAppVersion()}";
         }
 
         /// <summary>
-        /// The methods Title_Header_Mouse* allows dragging and move the app around
+        /// Sets the default background image and enables double buffering.
         /// </summary>
-        private void Title_Header_MouseDown(object sender, MouseEventArgs e)
+        private void InitializeBackground()
         {
-            _dragging = true;
-            _start_point = new Point(e.X, e.Y);
+            DoubleBuffered = true;
+            picLoader.Visible = false;
         }
-        private void Title_Header_MouseUp(object sender, MouseEventArgs e)
+
+        /// <summary>
+        /// Initializes the state of buttons based on directory existence and active button status.
+        /// </summary>
+        private void InitializeButtonStates()
         {
-            _dragging = false;
-        }
-        private void Title_Header_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_dragging)
+            if (_activeButton) return;
+
+            if (!Directory.Exists(AppUtils.RecodedPath) || !Directory.Exists(AppUtils.DecodedPath))
             {
-                Point p = PointToScreen(e.Location);
-                Location = new Point(p.X - _start_point.X, p.Y - _start_point.Y);
+                ConfigureButtonState(recode_button, 0);
             }
+
+            ConfigureButtonState(decode_button, 0);
         }
+
+        /// <summary>
+        /// Checks if this is the first run and verifies Python installation.
+        /// </summary>
+        private static void InitializeFirstRunCheck()
+        {
+            const string PythonRequirementMessage = "Make sure you have python 3.x installed!\n\nPlease download it from python.org";
+
+            ExceptionUtils.GlobalTryCatch(() =>
+            {
+                // Check if Python 3.x is installed
+                if (!ProcessUtils.PythonVersion())
+                {
+                    MsgBox.Show(
+                        PythonRequirementMessage,
+                        "Requirement",
+                        MsgBox.ButtonType.OK,
+                        MsgBox.Ico.Application,
+                        style: MsgBox.AnimateStyle.FadeInHelp
+                    );
+                }
+
+                // Remove the first-run marker file if it exists
+                if (FileUtils.SafeFileExists(AppUtils.FirstRun))
+                {
+                    File.Delete(AppUtils.FirstRun);
+                }
+            },
+            "An error occurred during the first run check.",
+            "MainForm.InitializeFirstRunCheck");
+        }
+        #endregion
+
+        #region UI Event Handlers
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Opacity = 0;
+            fadeInTimer.Interval = 20;
+            fadeInTimer.Tick += new EventHandler(FadeIn);
+            fadeInTimer.Start();
+        }
+
         /// <summary>
         /// Close application by clicking on the 'X'
         /// </summary>
@@ -81,22 +117,6 @@ namespace SNESMiniLuaCompiler
                 fadeOutTimer.Start();
             }
 
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            Opacity = 0;
-            fadeInTimer.Interval = 20;
-            fadeInTimer.Tick += new EventHandler(FadeIn);
-            fadeInTimer.Start();
-        }
-
-        void FadeIn(object sender, EventArgs e)
-        {
-            if (Opacity >= 1)
-                fadeInTimer.Stop();
-            else
-                Opacity += 0.05;
         }
 
         private void FadeOutTimer_Tick(object sender, EventArgs e)
@@ -112,47 +132,52 @@ namespace SNESMiniLuaCompiler
                 Application.Exit();
             }
         }
-        /// <summary>
-        /// Acts as angular disable atribute
-        /// </summary>
-        /// <param name="con">Control to be disabled</param>
-        private void DisableControls(Control con)
-        {
-            if (con.InvokeRequired)
-            {
-                SetButtonCallback d = new SetButtonCallback(DisableControls);
-                Invoke(d, new object[] { con });
-            }
-            else
-            {
-                con.Enabled = false;
-            }
-        }
-        /// <summary>
-        /// Acts as angular disable="false" atribute
-        /// </summary>
-        /// <param name="con">Control to be enabled</param>
-        private void EnableControls(Control con)
-        {
-            if (con.InvokeRequired)
-            {
-                SetButtonCallback d = new SetButtonCallback(EnableControls);
-                Invoke(d, new object[] { con });
-            }
-            else
-            {
-                con.Enabled = true;
-            }
 
+        void FadeIn(object sender, EventArgs e)
+        {
+            if (Opacity >= 1)
+                fadeInTimer.Stop();
+            else
+                Opacity += 0.05;
         }
+
+        /// <summary>
+        /// The methods Title_Header_Mouse* allows dragging and move the app around
+        /// </summary>
+        private void Title_Header_MouseDown(object sender, MouseEventArgs e)
+        {
+            _dragging = true;
+            _start_point = new Point(e.X, e.Y);
+        }
+
+        private void Title_Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_dragging) return;
+
+            Point p = PointToScreen(e.Location);
+            Location = new Point(p.X - _start_point.X, p.Y - _start_point.Y);
+        }
+
+        private void Title_Header_MouseUp(object sender, MouseEventArgs e)
+        {
+            _dragging = false;
+        }
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            MsgBox.Show("- Select the icon for your desired system\n\n- Press the \"Decode\" button to proceed\n\n- After conclusion, navigate to the \"decoded\" folder and edit the lua files as desired\n\n- With all your files saved press the \"Encode\" button\n\n- Copy all the edited files to you theme's location", "Instructions", MsgBox.ButtonType.OK, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeInHelp);
+        }
+
         private void BtnRestore_EnabledChanged(object sender, EventArgs e)
         {
             recode_button.ForeColor = recode_button.Enabled ? Color.FromArgb(68, 140, 203) : Color.FromArgb(81, 113, 127);
         }
+
         private void BtnBackup_EnabledChanged(object sender, EventArgs e)
         {
             decode_button.ForeColor = decode_button.Enabled ? Color.FromArgb(81, 172, 56) : Color.FromArgb(93, 129, 83);
         }
+
         private void Button_Paint(object sender, PaintEventArgs e)
         {
             var btn = (Button)sender;
@@ -163,6 +188,23 @@ namespace SNESMiniLuaCompiler
             drawBrush.Dispose();
             sf.Dispose();
         }
+
+        #endregion
+
+        #region Button State Management
+
+        /// <summary>
+        /// Configures the state and border size of a button.
+        /// </summary>
+        /// <param name="button">The button to configure.</param>
+        /// <param name="borderSize">The border size to apply to the button.</param>
+        private static void ConfigureButtonState(Button button, int borderSize)
+        {
+            //EnableControls(new Control[] { button }, false);
+            //button.FlatAppearance.BorderSize = borderSize;
+            AppUtils.SetButtonState(button, false, borderSize);
+        }
+
         /// <summary>
         /// Restore default backgroundcolor to buttons
         /// </summary>
@@ -172,191 +214,226 @@ namespace SNESMiniLuaCompiler
             {
                 if (item is Button button)
                 {
-                    button.FlatAppearance.BorderSize = 0;
+                    //button.FlatAppearance.BorderSize = 0;
+                    AppUtils.SetButtonState(button, button.Enabled, 0);
                 }
             }
         }
-        private void HelpButton_Click(object sender, EventArgs e)
-        {
-            MsgBox.Show("- Select the icon for your desired system\n\n- Press the \"Decode\" button to proceed\n\n- After conclusion, navigate to the \"decoded\" folder and edit the lua files as desired\n\n- With all your files saved press the \"Encode\" button\n\n- Copy all the edited files to you theme's location", "Instructions", MsgBox.ButtonType.OK, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeInHelp);
-        }
+
         private void SelectedSystem_Click(object sender, EventArgs e)
         {
             ResetButtonBackColor();
-            Button btn = (sender as Button);
-            btn.FlatAppearance.BorderColor = Color.FromArgb(215, 152, 43);//Color.FromArgb(110, 86, 48);
-            btn.FlatAppearance.BorderSize = 2;
+
+            if (!(sender is Button btn)) return;
+
+            const int BorderSize = 2;
+            var activeBorderColor = Color.FromArgb(215, 152, 43);
+            var inactiveBorderSize = 0;
+
+            // Set button styles
+            SetButtonStyle(btn, activeBorderColor, BorderSize);
+            SetButtonStyle(decode_button, Color.FromArgb(81, 172, 56), BorderSize);
+            SetButtonStyle(recode_button, Color.FromArgb(18, 108, 182), BorderSize);
+
+            EnableControls(new Control[] { decode_button, recode_button }, true);
+
+            //if (!Directory.Exists(DecodedPath) || !Directory.Exists(RecodedPath))
+            if (!AppUtils.AreDecodedAndRecodedDirsPresent())
+            {
+                SetButtonStyle(recode_button, activeBorderColor, inactiveBorderSize);
+                EnableControls(new Control[] { recode_button }, false);
+            }
+
+            _activeButton = true;
+
+            _selectedSystem = AppUtils.GetSystemPath(btn.Name);
+        }
+
+        private static void SetButtonStyle(Button button, Color borderColor, int borderSize)
+        {
+            AppUtils.SetButtonState(button, button.Enabled, borderSize, borderColor);
+        }
+
+        private void EnableAllButtons(bool enable)
+        {
+            EnableControls(new Control[] { recode_button, famicomButton, famicom50Button, sFamicomButton, nesButton, snesPALButton, snesButton, decode_button }, enable);
+        }
+
+        /// <summary>
+        /// Acts as angular disable="false" atribute
+        /// </summary>
+        /// <param name="con">Control to be enabled</param>
+        private void EnableControls(Control[] controls, bool enable)
+        {
+            foreach (var con in controls)
+            {
+                if (con.InvokeRequired)
+                {
+                    SetButtonCallback d = new SetButtonCallback(c => EnableControls(new[] { c }, enable));
+                    Invoke(d, new object[] { con });
+                }
+                else
+                {
+                    con.Enabled = enable;
+                    if (con is Button btn)
+                    {
+                        if (btn != recode_button && btn != decode_button)
+                        {
+                            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(186, 132, 37);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Decrypt/Encrypt Logic
+
+        private async void DecryptButton_Click(object sender, EventArgs e)
+        {
+            await DecryptFilesAsync().ConfigureAwait(false);
+
+        }
+
+        private async void EncryptButton_Click(object sender, EventArgs e)
+        {
+            await EncryptFilesAsync().ConfigureAwait(false);
+        }
+
+        private async Task DecryptFilesAsync()
+        {
+            EnableAllButtons(false);
+            if (string.IsNullOrEmpty(ProcessUtils.FindExePath("python.exe")))
+            {
+                MsgBox.Show("Python 3.x wasn't found on your system's PATH.\nPlease install it from python.org", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
+                return;
+            }
+
+            AppUtils.LoadSpinner(true, picLoader, this);
+            await Task.Run(() =>
+            {
+                FileUtils.DeletePath(AppUtils.DecodedPath);
+                FileUtils.CopyAssets(_selectedSystem, AppUtils.DecodedPath);
+                FileUtils.DeleteFile(FileUtils.DecodedHashFile);
+                Decrypt("decoded");
+            }).ConfigureAwait(false);
+            EnableAllButtons(true);
             decode_button.FlatAppearance.BorderSize = 2;
             recode_button.FlatAppearance.BorderSize = 2;
-            EnableControls(decode_button);
-            EnableControls(recode_button);
-            if (!Directory.Exists(AppUtils.decodedPath) || !Directory.Exists(AppUtils.recodedPath))
+            AppUtils.LoadSpinner(false, picLoader, this);
+            FileUtils.CreatePath(AppUtils.RecodedPath);
+
+            Action showDialog = ShowDecryptionFinishedDialog;
+            if (InvokeRequired)
+                Invoke(showDialog);
+            else
+                showDialog();
+        }
+
+        private void ShowDecryptionFinishedDialog()
+        {
+            DialogResult dialog = MsgBox.Show(this,
+                "The decryption process is complete.\n\nWould you like to open the output directory now?",
+                "Success",
+                MsgBox.ButtonType.YesNo,
+                MsgBox.Ico.Application,
+                MsgBox.AnimateStyle.FadeIn
+            );
+
+            if (dialog == DialogResult.Yes)
             {
-                recode_button.FlatAppearance.BorderSize = 0;
-                DisableControls(recode_button);
-            }
-
-            ActiveButton = true;
-
-            switch (btn.Name)
-            {
-                case "famicomButton":
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "hvc");
-                    break;
-                case "famicom50Button":
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "hvcj");
-                    break;
-                case "sFamicomButton":
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "shvc");
-                    break;
-                case "nesButton":
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "nes");
-                    break;
-                case "snesPALButton":
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "snes-eur");
-                    break;
-                default:
-                    SelectecSystem = Path.Combine(AppUtils.originalPath, "snes-usa");
-                    break;
-
+                ProcessUtils.OpenDirectory(AppUtils.DecodedPath);
             }
         }
-        private void DecryptButton_Click(object sender, EventArgs e)
-        {
-            ThreadLauncher(DecryptFiles);
 
-        }
-        private void EncryptButton_Click(object sender, EventArgs e)
+        private async Task EncryptFilesAsync()
         {
-            ThreadLauncher(EncryptFiles);
+            ResetButtonBackColor();
+            FileUtils.DeletePath(AppUtils.RecodedPath);
+            _activeButton = false;
+
+            EnableAllButtons(false);
+
+            AppUtils.LoadSpinner(true, picLoader, this);
+
+            // Run Encrypt on a background thread to make the method truly async
+            await Task.Run(() => Encrypt("decoded")).ConfigureAwait(false);
+
+            AppUtils.LoadSpinner(false, picLoader, this);
+
+            EnableAllButtons(true);
+            EnableControls(new Control[] { decode_button }, false);
+            recode_button.FlatAppearance.BorderSize = 2;
         }
+
         private void Decrypt(string sDir)
         {
             foreach (string d in Directory.GetDirectories(sDir))
             {
-                Decrypt(d);
+                ExceptionUtils.GlobalTryCatch(
+                    () => Decrypt(d),
+                    $"Error decrypting directory '{d}'.",
+                    "MainForm.Decrypt"
+                );
             }
+
             foreach (string file in Directory.GetFiles(sDir))
             {
                 string decFile = file + ".dec";
-                AppUtils.RunCmd(AppUtils.FindExePath("pythonw.exe"), AppUtils.decompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
-                File.Delete(file);
-                File.Move(decFile, file);
-                AppUtils.GenerateFileHash(file);
-
+                ExceptionUtils.GlobalTryCatch(
+                    () =>
+                    {
+                        ProcessUtils.RunCmd(ProcessUtils.FindExePath("pythonw.exe"), AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
+                        File.Delete(file);
+                        File.Move(decFile, file);
+                        FileUtils.GenerateFileHash(file);
+                    },
+                    $"Error decrypting file '{file}'.",
+                    "MainForm.Decrypt"
+                );
             }
-
         }
+
         private void Encrypt(string sDir)
         {
             foreach (string d in Directory.GetDirectories(sDir))
             {
-                Encrypt(d);
+                ExceptionUtils.GlobalTryCatch(
+                    () => Encrypt(d),
+                    $"Error encrypting directory '{d}'.",
+                    "MainForm.Encrypt"
+                );
             }
 
             foreach (string decodedFile in Directory.GetFiles(sDir))
             {
+                string decodedFullPath = Path.GetFullPath(decodedFile);
+                string recodedFullPath = Path.GetFullPath(Regex.Replace(decodedFullPath, "decoded", "recoded"));
+                string recodedFile = Path.GetFullPath(Regex.Replace(decodedFullPath, "decoded", "recoded"));
 
-                string decodedFullPath = Path.GetDirectoryName(decodedFile);
-                string recodedFullPath = Regex.Replace(decodedFullPath, "decoded", "recoded");
-                string recodedFile = Regex.Replace(decodedFile, "decoded", "recoded");
+                ExceptionUtils.GlobalTryCatch(
+                    () =>
+                    {
+                        FileUtils.CreatePath(Path.GetDirectoryName(recodedFullPath));
 
-                AppUtils.CreatePath(recodedFullPath);
-                AppUtils.CreateLuaJitLauncher();
-
-                if (AppUtils.HasEditedFiles(AppUtils.GetSHA256HashFromFile(decodedFile)))
-                {
-                    AppUtils.RunLuaJit(decodedFile + " " + recodedFile);
-                }
-            }
-            AppUtils.DeleteFile(AppUtils.batFile);
-            AppUtils.DeleteEmptyDirectories(AppUtils.recodedPath);
-        }
-
-        private void DisableAllButtons()
-        {
-            DisableControls(recode_button);
-            DisableControls(decode_button);
-            DisableControls(famicomButton);
-            DisableControls(famicom50Button);
-            DisableControls(sFamicomButton);
-            DisableControls(nesButton);
-            DisableControls(snesPALButton);
-            DisableControls(snesButton);
-
-        }
-        private void EnableAllButtons()
-        {
-            EnableControls(recode_button);
-            EnableControls(famicomButton);
-            EnableControls(famicom50Button);
-            EnableControls(sFamicomButton);
-            EnableControls(nesButton);
-            EnableControls(snesPALButton);
-            EnableControls(snesButton);
-            EnableControls(decode_button);
-        }
-        private void DecryptFiles()
-        {
-            DisableAllButtons();
-
-            if (!string.IsNullOrEmpty(AppUtils.FindExePath("python.exe")))
-            {
-                AppUtils.LoadSpinner(true, picLoader, this);
-                AppUtils.DeletePath(AppUtils.decodedPath);
-                AppUtils.CopyAssets(SelectecSystem, AppUtils.decodedPath);
-                AppUtils.DeleteFile(AppUtils.decodedHashFile);
-
-                Decrypt("decoded");
-
-                EnableAllButtons();
-                decode_button.FlatAppearance.BorderSize = 2;
-                recode_button.FlatAppearance.BorderSize = 2;
-                AppUtils.LoadSpinner(false, picLoader, this);
-                AppUtils.CreatePath(AppUtils.recodedPath);
-                DialogResult dialog = MsgBox.Show("The decrytion has finished.\n\nDo you want to navigate to the output directory?", "Success", MsgBox.ButtonType.YesNo, MsgBox.Ico.Application, MsgBox.AnimateStyle.FadeIn);
-
-                if (dialog == DialogResult.Yes)
-                {
-                    Process.Start(@AppUtils.decodedPath);
-                }
-            }
-            else
-            {
-                MsgBox.Show("Python 3.x wasn't found on your system's PATH.\nPlease install it from python.org", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
+                        if (FileUtils.HasEditedFiles(FileUtils.GetSHA256HashFromFile(decodedFullPath)))
+                        {
+                            ProcessUtils.RunLuaJit(decodedFullPath, recodedFile);
+                        }
+                    },
+                    $"Error encrypting file '{decodedFile}'.",
+                    "MainForm.Encrypt"
+                );
             }
 
+            ExceptionUtils.GlobalTryCatch(
+                () => FileUtils.DeleteEmptyDirectories(AppUtils.RecodedPath),
+                $"Error deleting empty directories in '{AppUtils.RecodedPath}'.",
+                "MainForm.Encrypt"
+            );
         }
-        private void EncryptFiles()
-        {
-            ResetButtonBackColor();
-            AppUtils.DeletePath(AppUtils.recodedPath);
-            ActiveButton = false;
 
-            DisableAllButtons();
-
-            AppUtils.LoadSpinner(true, picLoader, this);
-
-            Encrypt("decoded");
-
-            AppUtils.LoadSpinner(false, picLoader, this);
-
-            EnableAllButtons();
-            DisableControls(decode_button);
-            recode_button.FlatAppearance.BorderSize = 2;
-        }
-        private static void ThreadLauncher(ThreadStart data)
-        {
-            try
-            {
-                Thread threadInput = new Thread(data);
-                threadInput.Start();
-
-            }
-            catch (ThreadStateException ex)
-            {
-                MsgBox.Show(ex.Message, "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
-            }
-        }
+        #endregion
     }
 }

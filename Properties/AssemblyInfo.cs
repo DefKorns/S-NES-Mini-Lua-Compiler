@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("DefKorns")]
 [assembly: AssemblyProduct("(S)NES Mini - Lua Compiler")]
-[assembly: AssemblyCopyright("Copyright © DefKorns 2021")]
+[assembly: AssemblyCopyright("Copyright © DefKorns 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

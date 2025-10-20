@@ -1,20 +1,19 @@
-﻿using System;
+﻿using SNESMiniLuaCompiler.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
+using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace SNESMiniLuaCompiler
 {
 
-public partial class MsgBox : Form
+    public partial class MsgBox : Form
     {
         private const int CS_DROPSHADOW = 0x00020000;
-        private static MsgBox _msgBox;
         private readonly Panel _plHeader = new Panel();
         private readonly Panel _plFooter = new Panel();
         private readonly Panel _plIcon = new Panel();
@@ -23,21 +22,19 @@ public partial class MsgBox : Form
         private readonly Label _lblTitle;
         private readonly Label _lblMessage;
         private readonly List<Button> _buttonCollection = new List<Button>();
-        private static DialogResult _buttonResult;
-        private static Timer _timer;
+        private DialogResult _buttonResult;
+        private Timer _timer;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1304:Specify CultureInfo", Justification = "<Pending>")]
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1304:Specify CultureInfo", Justification = "<Pending>")]
         public MsgBox()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
             FormBorderStyle = FormBorderStyle.None;
             BackColor = Color.FromArgb(39, 41, 45);
             StartPosition = FormStartPosition.CenterScreen;
             Padding = new Padding(3);
-            //Width = 400;
 
-            Icon = (Icon)resources.GetObject("$this.Icon");
-
+            Icon = (Icon)resources.GetObject("$this.Icon", CultureInfo.CurrentUICulture);
 
             _lblTitle = new Label
             {
@@ -51,7 +48,9 @@ public partial class MsgBox : Form
             {
                 ForeColor = Color.White,
                 Font = new Font("Microsoft Sans Serif", 10),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                AutoSize = false,
+                MaximumSize = new Size(500, 0), // Set a max width for wrapping
             };
 
             _flpButtons.FlowDirection = FlowDirection.RightToLeft;
@@ -101,436 +100,319 @@ public partial class MsgBox : Form
 
         public static void Show(string message)
         {
-            _msgBox = new MsgBox();
-            _msgBox._lblMessage.Text = message;
-            _msgBox.ShowDialog();
-            NativeMethods.MessageBeepNative(0);
+            using (var msgBox = new MsgBox())
+            {
+                msgBox._lblMessage.Text = message;
+                msgBox.ShowDialog();
+                NativeMethods.MessageBeepNative(0);
+            }
         }
 
         public static void Show(string message, string title)
         {
-            AppUtils.ThrowArgNull(message);
-            _msgBox = new MsgBox();
-            _msgBox._lblMessage.Text = message;
-            _msgBox._lblTitle.Text = title;
-            _msgBox.StartPosition = FormStartPosition.CenterParent;
-            _msgBox.Size = MessageSize(message);
-            _msgBox.ShowDialog();
-            NativeMethods.MessageBeepNative(0);
+            ExceptionUtils.ThrowArgNull(message);
+            using (var msgBox = new MsgBox())
+            {
+                msgBox._lblMessage.Text = message;
+                msgBox._lblTitle.Text = title;
+                msgBox.StartPosition = FormStartPosition.CenterParent;
+                msgBox.Size = MessageSize(message);
+                msgBox.ShowDialog();
+                NativeMethods.MessageBeepNative(0);
+            }
         }
 
         public static DialogResult Show(string message, string title, ButtonType buttons)
         {
-            AppUtils.ThrowArgNull(message);
-            _msgBox = new MsgBox();
-            _msgBox._lblMessage.Text = message;
-            _msgBox._lblTitle.Text = title;
-            _msgBox._plIcon.Hide();
+            ExceptionUtils.ThrowArgNull(message);
+            using (var msgBox = new MsgBox())
+            {
+                msgBox._lblMessage.Text = message;
+                msgBox._lblTitle.Text = title;
+                msgBox._plIcon.Hide();
 
-            InitButtons(buttons);
+                msgBox.InitButtons(buttons);
 
-            _msgBox.Size = MessageSize(message);
-            _msgBox.ShowDialog();
-            NativeMethods.MessageBeepNative(0);
-            return _buttonResult;
+                msgBox.Size = MessageSize(message);
+                msgBox.ShowDialog();
+                NativeMethods.MessageBeepNative(0);
+                return msgBox._buttonResult;
+            }
         }
 
         public static DialogResult Show(string message, string title, ButtonType buttons, Ico icon)
         {
-            AppUtils.ThrowArgNull(message);
-            _msgBox = new MsgBox();
-            _msgBox._lblMessage.Text = message;
-            _msgBox._lblTitle.Text = title;
+            ExceptionUtils.ThrowArgNull(message);
+            using (var msgBox = new MsgBox())
+            {
+                msgBox._lblMessage.Text = message;
+                msgBox._lblTitle.Text = title;
 
-            InitButtons(buttons);
-            InitIcon(icon);
+                msgBox.InitButtons(buttons);
+                msgBox.InitIcon(icon);
 
-            _msgBox.Size = MsgBox.MessageSize(message);
-            _msgBox.ShowDialog();
-            NativeMethods.MessageBeepNative(0);
-            return _buttonResult;
+                msgBox.Size = MessageSize(message);
+                msgBox.ShowDialog();
+                NativeMethods.MessageBeepNative(0);
+                return msgBox._buttonResult;
+            }
+        }
+
+        private static DialogResult ShowInternal(IWin32Window owner, string message, string title, ButtonType buttons, Ico icon, AnimateStyle style)
+        {
+            ExceptionUtils.ThrowArgNull(message);
+            using (var msgBox = new MsgBox())
+            {
+                msgBox._lblMessage.Text = message;
+                msgBox._lblTitle.Text = title;
+                msgBox.Height = 0;
+
+                msgBox.InitButtons(buttons);
+                msgBox.InitIcon(icon);
+
+                msgBox._timer = new Timer();
+                Size formSize = MessageSize(message);
+
+                switch (style)
+                {
+                    case AnimateStyle.SlideDown:
+                        msgBox.Size = new Size(formSize.Width, 0);
+                        msgBox._timer.Interval = 1;
+                        break;
+                    case AnimateStyle.FadeIn:
+                        msgBox.AutoSize = true;
+                        msgBox.AutoSizeMode = AutoSizeMode.GrowOnly;
+                        msgBox.Size = new Size(formSize.Width + 100, formSize.Height);
+                        msgBox.Opacity = 0;
+                        msgBox._timer.Interval = 20;
+                        break;
+                    case AnimateStyle.FadeInHelp:
+                        msgBox.Size = new Size(500, 330);
+                        msgBox.Opacity = 0;
+                        msgBox._timer.Interval = 20;
+                        break;
+                    case AnimateStyle.ZoomIn:
+                        msgBox.Size = new Size(formSize.Width + 100, formSize.Height + 100);
+                        msgBox._timer.Interval = 1;
+                        break;
+                    default: throw new InvalidOperationException($"Unknown {nameof(style)}: {style}");
+                }
+                msgBox._timer.Tag = new AnimateMsgBox(formSize, style);
+                msgBox._timer.Tick += msgBox.Timer_Tick;
+                msgBox._timer.Start();
+
+                if (owner != null)
+                    msgBox.ShowDialog(owner);
+                else
+                    msgBox.ShowDialog();
+
+                NativeMethods.MessageBeepNative(0);
+                return msgBox._buttonResult;
+            }
         }
 
         public static DialogResult Show(string message, string title, ButtonType buttons, Ico icon, AnimateStyle style)
         {
-            AppUtils.ThrowArgNull(message);
-            _msgBox = new MsgBox();
-            _msgBox._lblMessage.Text = message;
-            _msgBox._lblTitle.Text = title;
-            _msgBox.Height = 0;
-
-            InitButtons(buttons);
-            InitIcon(icon);
-
-            _timer = new Timer();
-            Size formSize = MessageSize(message);
-
-            switch (style)
-            {
-                case AnimateStyle.SlideDown:
-                    _msgBox.Size = new Size(formSize.Width, 0);
-                    _timer.Interval = 1;
-                    _timer.Tag = new AnimateMsgBox(formSize, style);
-                    break;
-
-                case AnimateStyle.FadeIn:
-                    _msgBox.AutoSize = true;
-                    _msgBox.AutoSizeMode = AutoSizeMode.GrowOnly;
-                    _msgBox.Size = formSize;
-                    _msgBox.Opacity = 0;
-                    _timer.Interval = 20;
-                    _timer.Tag = new AnimateMsgBox(formSize, style);
-                    break;
-
-                case AnimateStyle.FadeInHelp:
-                    _msgBox.Size = new Size(500, 360);
-                    _msgBox.Opacity = 0;
-                    _timer.Interval = 20;
-                    _timer.Tag = new AnimateMsgBox(formSize, style);
-                    break;
-
-                case AnimateStyle.ZoomIn:
-                    _msgBox.Size = new Size(formSize.Width + 100, formSize.Height + 100);
-                    _timer.Tag = new AnimateMsgBox(formSize, style);
-                    _timer.Interval = 1;
-                    break;
-            }
-
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-
-            _msgBox.ShowDialog();
-            NativeMethods.MessageBeepNative(0);
-            return _buttonResult;
+            return ShowInternal(null, message, title, buttons, icon, style);
         }
 
-        static void Timer_Tick(object sender, EventArgs e)
+        public static DialogResult Show(IWin32Window owner, string message, string title, ButtonType buttons, Ico icon, AnimateStyle style)
+        {
+            return ShowInternal(owner, message, title, buttons, icon, style);
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
         {
             Timer timer = (Timer)sender;
             AnimateMsgBox animate = (AnimateMsgBox)timer.Tag;
+            bool stopTimer = false;
 
             switch (animate.Style)
             {
                 case AnimateStyle.SlideDown:
-                    if (_msgBox.Height < animate.FormSize.Height)
-                    {
-                        _msgBox.Height += 17;
-                        _msgBox.Invalidate();
-                    }
-                    else
-                    {
-                        _timer.Stop();
-                        _timer.Dispose();
-                    }
+                    int height = Height;
+                    stopTimer = !UpdateValue(ref height, animate.FormSize.Height, 17);
+                    Height = height;
                     break;
 
                 case AnimateStyle.FadeIn:
-                    if (_msgBox.Opacity < 1)
-                    {
-                        _msgBox.Opacity += 0.1;
-                        _msgBox.Invalidate();
-                    }
-                    else
-                    {
-                        _timer.Stop();
-                        _timer.Dispose();
-                    }
-                    break;
                 case AnimateStyle.FadeInHelp:
-                    if (_msgBox.Opacity < 1)
-                    {
-                        _msgBox.Opacity += 0.1;
-                        _msgBox.Invalidate();
-                    }
-                    else
-                    {
-                        _timer.Stop();
-                        _timer.Dispose();
-                    }
+                    double opacity = Opacity;
+                    stopTimer = !UpdateValue(ref opacity, 1.0, 0.1);
+                    Opacity = opacity;
                     break;
 
                 case AnimateStyle.ZoomIn:
-                    if (_msgBox.Width > animate.FormSize.Width)
-                    {
-                        _msgBox.Width -= 17;
-                        _msgBox.Invalidate();
-                    }
-                    if (_msgBox.Height > animate.FormSize.Height)
-                    {
-                        _msgBox.Height -= 17;
-                        _msgBox.Invalidate();
-                    }
+                    int width = Width;
+                    int zoomHeight = Height;
+                    bool widthChanged = UpdateValue(ref width, animate.FormSize.Width, -17);
+                    bool heightChanged = UpdateValue(ref zoomHeight, animate.FormSize.Height, -17);
+                    Width = width;
+                    Height = zoomHeight;
+                    stopTimer = !(widthChanged || heightChanged);
                     break;
+                default: throw new InvalidOperationException($"Unknown {nameof(animate.Style)}: {animate.Style}");
+            }
+
+            Invalidate();
+
+            if (stopTimer)
+            {
+                _timer.Stop();
+                _timer.Dispose();
             }
         }
 
-        private static void InitButtons(ButtonType buttons)
+        private static bool UpdateValue(ref int current, int target, int delta)
         {
+            if ((delta > 0 && current < target) || (delta < 0 && current > target))
+            {
+                current += delta;
+                if ((delta > 0 && current > target) || (delta < 0 && current < target))
+                    current = target;
+                return true;
+            }
+            return false;
+        }
+
+        private static bool UpdateValue(ref double current, double target, double delta)
+        {
+            if (current < target)
+            {
+                current += delta;
+                if (current > target)
+                    current = target;
+                return true;
+            }
+            return false;
+        }
+
+        private void InitButtons(ButtonType buttons)
+        {
+            _buttonCollection.Clear();
+            _flpButtons.Controls.Clear();
+
+            string[] labels;
             switch (buttons)
             {
-                case ButtonType.AbortRetryIgnore:
-                    _msgBox.InitAbortRetryIgnoreButtons();
-                    break;
-
-                case ButtonType.OK:
-                    _msgBox.InitOKButton();
-                    break;
-
-                case ButtonType.OKCancel:
-                    _msgBox.InitOKCancelButtons();
-                    break;
-
-                case ButtonType.RetryCancel:
-                    _msgBox.InitRetryCancelButtons();
-                    break;
-
-                case ButtonType.YesNo:
-                    _msgBox.InitYesNoButtons();
-                    break;
-
-                case ButtonType.YesNoCancel:
-                    _msgBox.InitYesNoCancelButtons();
-                    break;
+                case ButtonType.AbortRetryIgnore: labels = new[] { "Abort", "Retry", "Ignore" }; break;
+                case ButtonType.OK: labels = new[] { "OK" }; break;
+                case ButtonType.OKCancel: labels = new[] { "OK", "Cancel" }; break;
+                case ButtonType.RetryCancel: labels = new[] { "Retry", "Cancel" }; break;
+                case ButtonType.YesNo: labels = new[] { "Yes", "No" }; break;
+                case ButtonType.YesNoCancel: labels = new[] { "Yes", "No", "Cancel" }; break;
+                default: throw new InvalidOperationException($"Unknown {nameof(buttons)}: {buttons}");
             }
 
-            foreach (Button btn in _msgBox._buttonCollection)
+            foreach (var btn in CreateStyledButtons(labels))
+                _flpButtons.Controls.Add(btn);
+        }
+
+        private static DialogResult GetDialogResultForLabel(string label)
+        {
+            switch (label)
             {
-                btn.ForeColor = Color.FromArgb(170, 170, 170);
-                btn.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
-                btn.Padding = new Padding(3);
-                btn.FlatStyle = FlatStyle.Flat;
-                btn.Height = 30;
+                case "Abort": return DialogResult.Abort;
+                case "Retry": return DialogResult.Retry;
+                case "Ignore": return DialogResult.Ignore;
+                case "OK": return DialogResult.OK;
+                case "Cancel": return DialogResult.Cancel;
+                case "Yes": return DialogResult.Yes;
+                case "No": return DialogResult.No;
+                default: throw new InvalidOperationException($"Unknown {nameof(label)}: '{label}'");
+            }
+        }
+
+        private IEnumerable<Button> CreateStyledButtons(IEnumerable<string> labels)
+        {
+            foreach (var label in labels)
+            {
+                var btn = new Button
+                {
+                    Text = label,
+                    ForeColor = Color.FromArgb(170, 170, 170),
+                    DialogResult = GetDialogResultForLabel(label),
+                    Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0))),
+                    Padding = new Padding(3),
+                    FlatStyle = FlatStyle.Flat,
+                    Height = 30,
+                    UseVisualStyleBackColor = false
+                };
                 btn.FlatAppearance.BorderSize = 2;
                 btn.FlatAppearance.BorderColor = Color.FromArgb(99, 99, 98);
-                //btn.Size = new Size(77, 28);
-                btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(((int)(((byte)(47)))), ((int)(((byte)(49)))), ((int)(((byte)(54)))));
-                btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(((int)(((byte)(47)))), ((int)(((byte)(49)))), ((int)(((byte)(54)))));
-                btn.UseVisualStyleBackColor = false;
-
-                _msgBox._flpButtons.Controls.Add(btn);
+                btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(47, 49, 54);
+                btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(47, 49, 54);
+                btn.Click += ButtonClick;
+                _buttonCollection.Add(btn);
+                yield return btn;
             }
         }
 
-        private static void InitIcon(Ico icon)
+        private void InitIcon(Ico icon)
         {
+            if (_picIcon.Image != null)
+            {
+                _picIcon.Image.Dispose();
+                _picIcon.Image = null;
+            }
+
+            Image img;
             switch (icon)
             {
-                case Ico.Application:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_application;
-                    break;
-
-                case Ico.Exclamation:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_ok;
-                    break;
-
-                case Ico.Error:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_stop;
-                    break;
-
-                case Ico.Info:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_info;
-                    break;
-
-                case Ico.Question:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_question;
-                    break;
-
+                case Ico.Application: img = Properties.Resources.icn_application; break;
+                case Ico.Exclamation: img = Properties.Resources.icn_ok; break;
+                case Ico.Error: img = Properties.Resources.icn_stop; break;
+                case Ico.Info: img = Properties.Resources.icn_info; break;
+                case Ico.Question: img = Properties.Resources.icn_question; break;
                 case Ico.Shield:
-                    _msgBox._picIcon.Image = SystemIcons.Shield.ToBitmap();
+                    using (var bmp = SystemIcons.Shield.ToBitmap())
+                    {
+                        img = new Bitmap(bmp);
+                    }
                     break;
-
-                case Ico.Warning:
-                    _msgBox._picIcon.Image = Properties.Resources.icn_warn;
-                    break;
+                case Ico.Warning: img = Properties.Resources.icn_warn; break;
+                default: throw new InvalidOperationException($"Unknown {nameof(icon)}: '{icon}'");
             }
+            _picIcon.Image = img;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitAbortRetryIgnoreButtons()
+        private void ButtonClick(object sender, EventArgs e)
         {
-            Button btnAbort = new Button
-            {
-                Text = "Abort"
-            };
-            btnAbort.Click += ButtonClick;
-
-            Button btnRetry = new Button
-            {
-                Text = "Retry"
-            };
-            btnRetry.Click += ButtonClick;
-
-            Button btnIgnore = new Button
-            {
-                Text = "Ignore"
-            };
-            btnIgnore.Click += ButtonClick;
-
-            _buttonCollection.Add(btnAbort);
-            _buttonCollection.Add(btnRetry);
-            _buttonCollection.Add(btnIgnore);
+            var btn = (Button)sender;
+            _buttonResult = btn.DialogResult;
+            Dispose();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitOKButton()
-        {
-            Button btnOK = new Button
-            {
-                Text = "OK"
-            };
-            btnOK.Click += ButtonClick;
-
-            _buttonCollection.Add(btnOK);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitOKCancelButtons()
-        {
-            Button btnOK = new Button
-            {
-                Text = "OK"
-            };
-            btnOK.Click += ButtonClick;
-
-            Button btnCancel = new Button
-            {
-                Text = "Cancel"
-            };
-            btnCancel.Click += ButtonClick;
-
-
-            _buttonCollection.Add(btnOK);
-            _buttonCollection.Add(btnCancel);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitRetryCancelButtons()
-        {
-            Button btnRetry = new Button
-            {
-                Text = "OK"
-            };
-            btnRetry.Click += ButtonClick;
-
-            Button btnCancel = new Button
-            {
-                Text = "Cancel"
-            };
-            btnCancel.Click += ButtonClick;
-
-
-            _buttonCollection.Add(btnRetry);
-            _buttonCollection.Add(btnCancel);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitYesNoButtons()
-        {
-            Button btnYes = new Button
-            {
-                Text = "Yes"
-            };
-            btnYes.Click += ButtonClick;
-
-            Button btnNo = new Button
-            {
-                Text = "No"
-            };
-            btnNo.Click += ButtonClick;
-
-
-            _buttonCollection.Add(btnYes);
-            _buttonCollection.Add(btnNo);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private void InitYesNoCancelButtons()
-        {
-            Button btnYes = new Button
-            {
-                Text = "Abort"
-            };
-            btnYes.Click += ButtonClick;
-
-            Button btnNo = new Button
-            {
-                Text = "Retry"
-            };
-            btnNo.Click += ButtonClick;
-
-            Button btnCancel = new Button
-            {
-                Text = "Cancel"
-            };
-            btnCancel.Click += ButtonClick;
-
-            _buttonCollection.Add(btnYes);
-            _buttonCollection.Add(btnNo);
-            _buttonCollection.Add(btnCancel);
-        }
-
-        private static void ButtonClick(object sender, EventArgs e)
-        {
-            Button btn = (Button)sender;
-
-            switch (btn.Text)
-            {
-                case "Abort":
-                    _buttonResult = DialogResult.Abort;
-                    break;
-
-                case "Retry":
-                    _buttonResult = DialogResult.Retry;
-                    break;
-
-                case "Ignore":
-                    _buttonResult = DialogResult.Ignore;
-                    break;
-
-                case "OK":
-                    _buttonResult = DialogResult.OK;
-                    break;
-
-                case "Cancel":
-                    _buttonResult = DialogResult.Cancel;
-                    break;
-
-                case "Yes":
-                    _buttonResult = DialogResult.Yes;
-                    break;
-
-                case "No":
-                    _buttonResult = DialogResult.No;
-                    break;
-            }
-
-            _msgBox.Dispose();
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private static Size MessageSize(string message)
         {
-            Graphics g = _msgBox.CreateGraphics();
-            int width = 350;
-            int height = 230;
+            const int MinWidth = 350;
+            const int BaseHeight = 230;
+            const int MaxLineLength = 180;
+            const int WideWidth = 700;
+            const int LineSpacing = 10;
 
-            SizeF size = g.MeasureString(message, new Font("Microsoft Sans Serif", 10));
-
-            if (message.Length < 150)
+            using (var font = new Font("Microsoft Sans Serif", 10))
             {
-                if ((int)size.Width > 350)
+                // Use TextRenderer for better WinForms text measurement
+                Size textSize = TextRenderer.MeasureText(message, font, new Size(WideWidth, 0), TextFormatFlags.WordBreak);
+
+                int width = Math.Max(MinWidth, textSize.Width);
+                int height = BaseHeight;
+
+                if (message.Length >= 150)
                 {
-                    width = (int)size.Width;
+                    int lines = (int)Math.Ceiling((double)message.Length / MaxLineLength);
+                    width = WideWidth;
+                    height = BaseHeight + (textSize.Height + LineSpacing) * lines;
                 }
+                else
+                {
+                    height = BaseHeight + textSize.Height;
+                }
+
+                return new Size(width, height);
             }
-            else
-            {
-                string[] groups = (from Match m in Regex.Matches(message, ".{1,180}") select m.Value).ToArray();
-                int lines = groups.Length + 1;
-                width = 700;
-                height += (int)(size.Height + 10) * lines;
-            }
-            return new Size(width, height);
+
         }
 
         protected override CreateParams CreateParams
@@ -543,17 +425,16 @@ public partial class MsgBox : Form
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         protected override void OnPaint(PaintEventArgs e)
         {
-            AppUtils.ThrowArgNull(e);
+            ExceptionUtils.ThrowArgNull(e);
             base.OnPaint(e);
 
-            Graphics g = e.Graphics;
-            Rectangle rect = new Rectangle(new Point(0, 0), new Size(Width - 1, Height - 1));
-            Pen pen = new Pen(Color.FromArgb(0, 0, 0));
-
-            g.DrawRectangle(pen, rect);
+            using (var pen = new Pen(Color.FromArgb(0, 0, 0)))
+            {
+                Rectangle rect = new Rectangle(new Point(0, 0), new Size(Width - 1, Height - 1));
+                e.Graphics.DrawRectangle(pen, rect);
+            }
         }
 
         public enum ButtonType
