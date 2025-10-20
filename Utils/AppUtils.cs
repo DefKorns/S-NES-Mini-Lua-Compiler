@@ -115,7 +115,7 @@ namespace SNESMiniLuaCompiler.Utils
             ExceptionUtils.ThrowArgNull(loaderImage, nameof(loaderImage));
             ExceptionUtils.ThrowArgNull(form, nameof(form));
 
-            form?.Invoke((MethodInvoker)delegate
+            form?.Invoke((System.Windows.Forms.MethodInvoker)delegate
             {
                 if (loaderImage != null)
                     loaderImage.Visible = displayLoader;
