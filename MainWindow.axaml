@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        x:Class="SNESMiniLuaCompiler.MainWindow"
+        Width="590" Height="336"
+        Title="SNES Mini Lua Compiler">
+     <Grid>
+          <Image Source="avares://SNESMiniLuaCompiler/Resources/app_bg.png"
+               Stretch="UniformToFill"
+               IsHitTestVisible="False"/>
+        <StackPanel>
+            <TextBlock Text="Welcome to Avalonia!" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+            <Button Name="HelloButton" Content="Say Hello" Click="HelloButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

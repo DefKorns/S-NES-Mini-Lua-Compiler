@@ -1,9 +1,6 @@
-﻿//using LibGit2Sharp;
+﻿using Avalonia;
 using System;
-//using System.IO;
 using System.Threading;
-using System.Windows.Forms;
-using static SNESMiniLuaCompiler.Utils.AppUtils;
 
 namespace SNESMiniLuaCompiler
 {
@@ -13,51 +10,44 @@ namespace SNESMiniLuaCompiler
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             try
             {
-                EnsureAllModuleDirectories();
+                Utils.AppUtils.EnsureAllModuleDirectories();
 
                 using (var mutex = new Mutex(true, "SNESMiniLuaCompiler", out bool singleExecution))
                 {
                     if (singleExecution)
                     {
-                        ExtractAllResources();
-
-                        // Initialize and run the application
-                        Application.EnableVisualStyles();
-                        Application.SetCompatibleTextRenderingDefault(false);
-                        using (var mainWindow = new MainForm())
-                        {
-                            Application.Run(mainWindow);
-                        }
+                        Utils.AppUtils.ExtractAllResources();
+                        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                     }
                     else
                     {
-                        ShowAlreadyRunningMessage();
+                        MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
                     }
                 }
             }
             catch (InvalidOperationException ex)
             {
                 // Log or display the error message
-                MessageBox.Show($"An application error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // You may want to use Avalonia dialogs here in the future
+                Console.Error.WriteLine($"An application error occurred: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Log or display unexpected errors
-                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw; // Rethrow to ensure the application doesn't continue in an unstable state
+                Console.Error.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw;
             }
         }
 
         /// <summary>
-        /// Displays a message indicating the application is already running.
+        /// Builds the Avalonia application.
         /// </summary>
-        private static void ShowAlreadyRunningMessage()
-        {
-            MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
-        }
+        public static AppBuilder BuildAvaloniaApp()
+            => AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .LogToTrace();
     }
 }
