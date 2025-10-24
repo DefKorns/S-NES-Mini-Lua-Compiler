@@ -1,0 +1,2552 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <StartupObject>SNESMiniLuaCompiler.Program</StartupObject>
+    <RootNamespace>SNESMiniLuaCompiler</RootNamespace>
+    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <PublishAot Condition="'$(Configuration)' != 'Debug'">true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AssemblyName>SNESMiniLuaCompiler</AssemblyName>
+    <PublishTrimmed>True</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+    <!--<Content Include="Assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\builder.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\helpers.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\locals.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\mutator.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\nodes.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\printast.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\slotworks.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\traverse.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\unwarper.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\validator.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\ast\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\constants.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\debuginfo.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\helpers.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\instructions.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\prototype.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\bytecode\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\lua\writer.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\lua\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\pseudoasm\constants.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\pseudoasm\instructions.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\pseudoasm\prototype.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\pseudoasm\writer.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\pseudoasm\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\code.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\constants.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\debuginfo.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\header.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\luajit\v2_0\luajit_opcode.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\luajit\v2_1\luajit_opcode.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\parser.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\prototype.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\rawdump\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\util\binstream.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\util\indentedstream.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\util\log.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\util\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\ljd\__init__.py" />
+    <EmbeddedResource Include="Lib\decompiler\main.py" />
+    <EmbeddedResource Include="Lib\luajit\lua51.dll" />
+    <EmbeddedResource Include="Lib\luajit\luajit.exe" />
+    <EmbeddedResource Include="Lib\luajit\jit\bc.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\bcsave.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_arm.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_mips.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_mipsel.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_ppc.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_x64.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dis_x86.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\dump.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\v.lua" />
+    <EmbeddedResource Include="Lib\luajit\jit\vmdef.lua" />
+<!--teste-->
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\bg.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\character.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\colors_hvc.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\constants.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\pixel_character.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\platform_hvc.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sample_asset.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\savecontenthelper.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_transition.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_wallpaper.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_wallpaper_bg0.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\sys_wallpaper_fg0.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\hvcj\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\bg.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\character.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\colors_hvc.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\pixel_character.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_transition.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_wallpaper.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_wallpaper_bg0.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\sys_wallpaper_fg0.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\hvc\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\bg.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\character.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\colors_nes.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\pixel_character.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_transition.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_wallpaper.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_wallpaper_bg0.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\sys_wallpaper_fg0.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\nes\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_autocancel.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_bg.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_character.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_const.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_elements.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_event.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_layout.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_nodeanim.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_pad.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_scene.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_task.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_transition.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\app\clover_util.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\decorativeframes.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\env\colors_eur.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\env\colors_jpn.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\env\colors_usa.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\env\env_common.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\env\env_jpn.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\manual_lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\node\node_bg.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\platform.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\savecontenthelper.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\store_myplay_data.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_fade.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_popup_unlock.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resumedummy.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_sram_icon.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_coroutine_callback.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\shvc\resources\scripts\tween\tween_wait_condition_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_autocancel.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_bg.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_character.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_const.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_elements.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_event.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_layout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_nodeanim.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_pad.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_scene.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_task.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_transition.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\app\clover_util.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\decorativeframes.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\env\colors_eur.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\env\colors_jpn.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\env\colors_usa.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\env\env_common.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\env\env_eur.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\manual_lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\node\node_bg.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\platform.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\savecontenthelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\store_myplay_data.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_fade.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_popup_unlock.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resumedummy.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_sram_icon.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_coroutine_callback.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-eur\resources\scripts\tween\tween_wait_condition_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\blink.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\fuwafuwa.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\lr_arrow.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\slide_in.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\slide_out_down.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\slide_out_up.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\animation\tweenanimator.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_autocancel.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_bg.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_character.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_const.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_elements.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_event.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_layout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_nodeanim.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_pad.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_scene.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_task.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_transition.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\app\clover_util.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\core\core.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\core\math.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\core\pool.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\core\table.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\core\vector2d.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\cursormanager.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\data_gamelist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\dbg_menu_final.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\decorativeframes.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\dot_number.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\effect_smoke.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\env\colors_eur.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\env\colors_jpn.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\env\colors_usa.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\env\env_common.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\env\env_usa.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_button.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_check.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_element.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_gridlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_hlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_inputs.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_layout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_list.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_popup.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_radiogroup.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_slider.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui\gui_vlayout.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui_container.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\gui_custom.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\helpers\httphelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\helpers\savehelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\helper_index.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\helper_nodes.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\helper_table.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\main.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\manual_lbl_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\mcp_commands.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\node\node_bg.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\platform.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\position_changer.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\position_changer_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\savecontenthelper.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\snd_component.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\store.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\store_myplay_data.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\suspentionpoints.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\system.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_button.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_button_longpress.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_copyright.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_copyright_text.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_dialog.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_fade.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_gametitlelist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_game_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_game_card_show.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_homemenu.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_homemenu_sortorder.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_home_floating_cards.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_hud.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_manual.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_menubaru.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_option.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_option_item.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_option_languages.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_option_setting.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_option_setting_item.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_popup_unlock.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_popup_warning.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resumedatalist.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resumedummy.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resumemenu.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_changemode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_emptymode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_floating_card.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_float_wing.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_resume_lockmode.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_sram_icon.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_thumbnail.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\sys_thumbnail_icon.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\test_program.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_animate_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_callback_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_coroutine_callback.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_coroutine_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_loop_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_manager.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_sequence_node.lua" />
+    <EmbeddedResource Include="Lib\original\snes-usa\resources\scripts\tween\tween_wait_condition_node.lua" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TrimmerRootDescriptor Include="Roots.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.7" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.7" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.7" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.7">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <None Update="Lib\original\hvcj\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\colors_hvc.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\constants.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\pixel_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\platform_hvc.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sample_asset.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\savecontenthelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_wallpaper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_wallpaper_bg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\sys_wallpaper_fg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvcj\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\colors_hvc.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\pixel_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_wallpaper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_wallpaper_bg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\sys_wallpaper_fg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\hvc\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\colors_nes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\pixel_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_wallpaper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_wallpaper_bg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\sys_wallpaper_fg0.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\nes\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_autocancel.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_const.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_elements.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_event.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_nodeanim.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_pad.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_scene.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_task.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\app\clover_util.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\decorativeframes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\env\colors_eur.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\env\colors_jpn.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\env\colors_usa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\env\env_common.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\env\env_jpn.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\manual_lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\node\node_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\platform.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\savecontenthelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\store_myplay_data.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_fade.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_popup_unlock.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resumedummy.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_sram_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_coroutine_callback.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\shvc\resources\scripts\tween\tween_wait_condition_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_autocancel.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_const.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_elements.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_event.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_nodeanim.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_pad.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_scene.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_task.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\app\clover_util.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\decorativeframes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\env\colors_eur.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\env\colors_jpn.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\env\colors_usa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\env\env_common.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\env\env_eur.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\manual_lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\node\node_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\platform.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\savecontenthelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\store_myplay_data.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_fade.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_popup_unlock.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resumedummy.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_sram_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_coroutine_callback.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-eur\resources\scripts\tween\tween_wait_condition_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\blink.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\fuwafuwa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\lr_arrow.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\slide_in.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\slide_out_down.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\slide_out_up.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\animation\tweenanimator.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_autocancel.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_character.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_const.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_elements.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_event.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_nodeanim.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_pad.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_scene.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_task.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_transition.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\app\clover_util.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\core\core.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\core\math.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\core\pool.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\core\table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\core\vector2d.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\cursormanager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\data_gamelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\dbg_menu_final.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\decorativeframes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\dot_number.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\effect_smoke.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\env\colors_eur.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\env\colors_jpn.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\env\colors_usa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\env\env_common.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\env\env_usa.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_check.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_element.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_gridlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_hlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_inputs.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_layout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_list.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_popup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_radiogroup.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_slider.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui\gui_vlayout.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui_container.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\gui_custom.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\helpers\httphelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\helpers\savehelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\helper_index.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\helper_nodes.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\helper_table.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\main.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\manual_lbl_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\mcp_commands.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\node\node_bg.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\platform.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\position_changer.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\position_changer_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\savecontenthelper.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\snd_component.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\store.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\store_myplay_data.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\suspentionpoints.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\system.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_button.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_button_longpress.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_copyright.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_copyright_text.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_dialog.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_fade.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_gametitlelist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_game_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_game_card_show.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_homemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_homemenu_sortorder.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_home_floating_cards.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_hud.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_manual.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_menubaru.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_option.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_option_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_option_languages.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_option_setting.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_option_setting_item.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_popup_unlock.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_popup_warning.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resumedatalist.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resumedummy.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resumemenu.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_changemode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_emptymode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_floating_card.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_float_wing.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_resume_lockmode.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_sram_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_thumbnail.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\sys_thumbnail_icon.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\test_program.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_animate_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_callback_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_coroutine_callback.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_coroutine_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_loop_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_manager.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_sequence_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Lib\original\snes-usa\resources\scripts\tween\tween_wait_condition_node.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>-->
+</Project>

@@ -1,0 +1,188 @@
+<Window x:Class="SNESMiniLuaCompiler.Views.MainWindow"
+		xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:model="using:SNESMiniLuaCompiler.Models"
+		xmlns:view="using:SNESMiniLuaCompiler.Views"
+		xmlns:vm="using:SNESMiniLuaCompiler.ViewModels"
+		Title="(S)NES Mini - Lua Compiler"
+		d:DesignWidth="590"
+		d:DesignHeight="336"
+		x:CompileBindings="true"
+		x:DataType="vm:MainWindowViewModel"
+		CanResize="False"
+		Width="590"
+		Height="336"
+		 ExtendClientAreaToDecorationsHint="True"
+        WindowStartupLocation="CenterScreen"
+		TransparencyLevelHint="AcrylicBlur"
+		Background="#1a1a1e"
+		mc:Ignorable="d">
+
+	<Design.DataContext>
+		<vm:MainWindowViewModel />
+	</Design.DataContext>
+
+	<!--	<Window.Resources>
+	--><!--  Add a DataTemplate for any Consoles  --><!--
+	--><!--  We add this to the Resources section, so we can access it via it's Key explicitly.  --><!--
+	<DataTemplate x:Key="My.DataTemplates.Consoles" DataType="model:Consoles">
+	<Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, Auto, Auto">
+	<TextBlock Grid.Row="0" Text="First Name: " />
+	<TextBlock Grid.Row="0"
+	Grid.Column="1"
+	Text="{Binding Name}" />
+
+	<TextBlock Grid.Row="1" Text="Last Name: " />
+	<TextBlock Grid.Row="1"
+	Grid.Column="1"
+	Text="{Binding Region}" />
+
+	<TextBlock Grid.Row="2" Text="Age: " />
+	<TextBlock Grid.Row="2"
+	Grid.Column="1"
+	Text="{Binding ImagePath }" />
+
+	<TextBlock Grid.Row="3" Text="Sex: " />
+	<TextBlock Grid.Row="3"
+	Grid.Column="1"
+	Text="{Binding SystemModel}" />
+	</Grid>
+	</DataTemplate>
+	</Window.Resources>-->
+	<Window.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontFamily" Value="Default" />
+			<Setter Property="Foreground" Value="#f3f3f3" />
+		</Style>
+		<Style Selector="Button">
+			<Setter Property="Background" Value="Transparent" />
+			<!--<Setter Property="Foreground" Value="#fff" />-->
+			<Setter Property="MaxHeight" Value="90" />
+			<!--<Setter Property="FontSize" Value="12" />
+			<Setter Property="FontFamily" Value="" />-->
+			<!--           <Setter Property="FontWeight" Value="Bold" />-->
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+		</Style>
+		<!--		<Style Selector="Button.btn_decrypt">
+		<Setter Property="BorderBrush" Value="#51ac38"/>
+		<Setter Property="BorderThickness" Value="2"/>
+		<Setter Property="CornerRadius" Value="4"/>
+		</Style>
+		<Style Selector="Button.btn_decrypt:pointerover">
+		<Setter Property="BorderBrush" Value="#51ac38"/>
+		<Setter Property="BorderThickness" Value="3"/>
+		</Style>-->
+	</Window.Styles>
+	<!--	<Window.DataTemplates>
+	--><!--  Add a DataTemplate for a Student  --><!--
+	--><!--  Mind the order of the Templates. Begin with the most specific first.  --><!--
+	<DataTemplate DataType="model:Student">
+	<StackPanel>
+	<TextBlock FontWeight="Bold" Text="{Binding Grade, StringFormat='I am a student in {0}. grade'}" />
+	--><!--  We re-use the ConsolesTemplate here by using DynamicResource  --><!--
+	<ContentControl Content="{Binding}" ContentTemplate="{DynamicResource My.DataTemplates.Consoles}" />
+	</StackPanel>
+	</DataTemplate>
+
+	--><!--  Add a DataTemplate for a Teacher  --><!--
+	--><!--        <DataTemplate DataType="model:Teacher">
+	<StackPanel>
+	<TextBlock FontWeight="Bold" Text="{Binding Subject, StringFormat='I am a teacher for: &quot;{0}&quot;'}" />
+	--><!--  We use a UserControl here to display the data  --><!--
+	<view:PersonView />
+	</StackPanel>
+	</DataTemplate>--><!--
+
+	</Window.DataTemplates>-->
+
+	<!--<ListBox ItemsSource="{Binding People}" />-->
+	<Grid RowDefinitions="60,*,80,Auto">
+		<!-- First row: fixed height -->
+		<StackPanel Grid.Row="0"
+					Orientation="Horizontal"
+					HorizontalAlignment="Center"
+					Margin="0,10"
+					Spacing="20">
+			<!--<TextBlock Text="Row 3 (fixed height)"/>-->
+			<TextBlock Margin="0 10" x:Name="message">Ready...</TextBlock>
+		</StackPanel>
+		<!-- Second row: stretch height -->
+		<StackPanel
+		Grid.Row="1"
+		Orientation="Horizontal"
+		Spacing="20"
+		Name="mainPanel"
+		HorizontalAlignment="Center"
+		VerticalAlignment="Stretch">
+			<ItemsControl x:Name="items" ItemsSource="{Binding ConsoleList}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Button
+						Command="{Binding DataContext.SelectConsoleCommand, ElementName=items}"
+						CommandParameter="{Binding SystemModel}">
+							<Button.Content>
+								<StackPanel Orientation="Vertical" VerticalAlignment="Center">
+									<Image Source="{Binding ImagePath}" />
+									<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" />
+									<TextBlock HorizontalAlignment="Center" Text="{Binding Region}" />
+								</StackPanel>
+							</Button.Content>
+						</Button>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+
+		</StackPanel>
+
+		<!-- Third row: fixed height -->
+		<StackPanel Grid.Row="2"
+					Orientation="Horizontal"
+					HorizontalAlignment="Center"
+					Spacing="100">
+			<Button
+    Name="btn_decrypt"
+    Width="170"
+    Height="45"
+    Content="Decrypt"
+    VerticalContentAlignment="Center"
+    IsEnabled="{Binding IsDecodeButtonEnabled}"
+	Click="DecryptButton_Click"/>
+
+<Button
+    Name="btn_encrypt"
+    Width="170"
+    Height="45"
+    VerticalContentAlignment="Center"
+    IsEnabled="{Binding IsRecodeButtonEnabled}"
+	Click="EncryptButton_Click">
+    Recrypt
+</Button>
+
+		</StackPanel>
+		<!-- Fourth row: fixed to bottom -->
+		<Border
+    Grid.Row="3"
+    BorderBrush="#29292d"
+    BorderThickness="0,1,0,0"
+    VerticalAlignment="Bottom">
+    <Grid Name="footer" Classes="footer" ColumnDefinitions="Auto,Auto,*" VerticalAlignment="Center">
+        <TextBlock Grid.Column="0" Text="Status:" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1" Name="status" Text="..." VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="2"
+                   Text="{Binding AppVersion, StringFormat=' {0}'}"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Margin="0,0,10,0"/>
+    </Grid>
+</Border>
+	</Grid>
+
+</Window>
