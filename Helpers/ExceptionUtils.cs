@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using SNESMiniLuaCompiler.Views;
+using System;
 using System.IO;
 
 namespace SNESMiniLuaCompiler.Helpers
@@ -35,7 +35,7 @@ namespace SNESMiniLuaCompiler.Helpers
         /// <summary>
         /// Throws an exception if the argument is null.
         /// </summary>
-        public static void ThrowArgNull(object arg, string? paramName = null) => 
+        public static void ThrowArgNull(object? arg, string? paramName = null) => 
             _ = arg ?? throw new ArgumentNullException(paramName);
 
         /// <summary>
@@ -52,6 +52,7 @@ namespace SNESMiniLuaCompiler.Helpers
             {
                 string msg = userMessage ?? "An error occurred.";
                 //MsgBox.Show($"{msg}\n\nDetails: {ex.Message}", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Error);
+                MessageBox.ShowError($"{msg}\n\nDetails: {ex.Message}", "Error");
             }
         }
 

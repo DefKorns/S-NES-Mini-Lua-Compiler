@@ -87,7 +87,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void ExtractSelectedResources(SystemModel systemModel)
         {
-            string systemPath = GetSystemPath(systemModel);
+            //string systemPath = GetSystemPath(systemModel);
             string systemName = Path.GetFileName(GetSystemPath(systemModel));
             string resourcePrefix = $"{SystemResourcePrefix}.original.{systemName}.resources.";
             string outputDir = FileUtils.CombinePath(ResourcesPath, systemName);
@@ -99,7 +99,8 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             var assembly = Assembly.GetExecutingAssembly();
             using var resourceStream = assembly?.GetManifestResourceStream(resourceName);
-            if (resourceStream == null)
+
+            if (resourceStream is null)
                 throw new InvalidOperationException($"Resource '{resourceName}' not found.");
             FileUtils.CreatePath(Path.GetDirectoryName(outputPath) ?? string.Empty);
             using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);

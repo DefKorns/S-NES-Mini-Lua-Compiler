@@ -66,6 +66,26 @@
 			<!--           <Setter Property="FontWeight" Value="Bold" />-->
 			<Setter Property="HorizontalContentAlignment" Value="Center" />
 		</Style>
+
+		 <Style Selector="Button.Style1">
+            <Setter Property="Background" Value="MediumPurple" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+
+        <Style Selector="Button.Style1:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="DarkOrchid" />
+        </Style>
+
+        <Style Selector="Button.Style1:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Purple" />
+        </Style>
+
+        <Style Selector="Button.Style1:pointerover AccessText">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Effect">
+                <DropShadowEffect BlurRadius="20" Color="Black" OffsetX="5" OffsetY="5" />
+            </Setter>
+        </Style>
 		<!--		<Style Selector="Button.btn_decrypt">
 		<Setter Property="BorderBrush" Value="#51ac38"/>
 		<Setter Property="BorderThickness" Value="2"/>
@@ -152,6 +172,7 @@
     Width="170"
     Height="45"
     Content="Decrypt"
+	 Classes="Style1"
     VerticalContentAlignment="Center"
     IsEnabled="{Binding IsDecodeButtonEnabled}"
 	Click="DecryptButton_Click"/>
@@ -160,6 +181,7 @@
     Name="btn_encrypt"
     Width="170"
     Height="45"
+	 Classes="Style1"
     VerticalContentAlignment="Center"
     IsEnabled="{Binding IsRecodeButtonEnabled}"
 	Click="EncryptButton_Click">

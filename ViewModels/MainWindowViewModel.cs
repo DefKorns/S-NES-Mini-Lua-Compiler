@@ -1,4 +1,7 @@
 using Avalonia.Controls;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Models;
 using ReactiveUI;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
@@ -91,20 +94,54 @@ namespace SNESMiniLuaCompiler.ViewModels
             },
         ];
 
-        private void OnSelectConsole(SystemModel systemModel)
+        private async void OnSelectConsole(SystemModel systemModel)
         {
             SelectedConsole = systemModel;
 
-            // ViewModels should not directly access UI controls.
-            // Instead, expose a property and bind IsEnabled in the View (XAML) to this property.
-            AppUtils.EnsureDirectoryExists(AppUtils.DecodedPath);
-            IsRecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
-            IsDecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
-            FileUtils.DeletePath(AppUtils.ResourcesPath);
-            AppUtils.ExtractSelectedResources(systemModel);
+            //  var box = MessageBoxManager
+            //.GetMessageBoxStandard("Caption", "Are you sure you would like to delete appender_replace_page_1?",
+            //    ButtonEnum.YesNo);
+    //        var buttons = new List<ButtonDefinition>
+    //{
+    //    new ButtonDefinition { Name = "Yes" },
+    //    new ButtonDefinition { Name = "No" }
+    //};
 
-            //FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
+            //var result = await MessageBoxHelper.ShowCustomAsync(
+            //    "Confirm Action",
+            //    "Are you sure you want to select this console?",
+            //    buttons,
+            //    Icon.Question
+            //);
+
+            //if (result == "Yes")
+            var result = await Views.MessageBox.ShowError(
+    "Are you sure you want to select this console?",
+    "Confirm Action"
+);
+
+            if (result == MessageBoxResult.Ok)
+            {
+                /// ViewModels should not directly access UI controls.
+                // Instead, expose a property and bind IsEnabled in the View (XAML) to this property.
+                AppUtils.EnsureDirectoryExists(AppUtils.DecodedPath);
+                IsRecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
+                IsDecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
+                FileUtils.DeletePath(AppUtils.ResourcesPath);
+                AppUtils.ExtractSelectedResources(systemModel);
+
+                //FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
+            }
+            else
+            {
+                // Optionally handle "No"
+                return;
+            }
+
+            
         }
+
+
 
 
     }

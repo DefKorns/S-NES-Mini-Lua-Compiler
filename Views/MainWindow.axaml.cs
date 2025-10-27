@@ -1,14 +1,14 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 using SNESMiniLuaCompiler.ViewModels;
-using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Tmds.DBus.Protocol;
 
 namespace SNESMiniLuaCompiler.Views
 {
@@ -26,23 +26,43 @@ namespace SNESMiniLuaCompiler.Views
         /// <summary>
         /// Checks if this is the first run and verifies Python installation.
         /// </summary>
-        private static void InitializeFirstRunCheck()
+        private async static void InitializeFirstRunCheck()
         {
             const string PythonRequirementMessage = "Make sure you have python 3.x installed!\n\nPlease download it from python.org";
 
-            ExceptionUtils.GlobalTryCatch(() =>
+            ExceptionUtils.GlobalTryCatch(async () =>
             {
                 // Check if Python 3.x is installed
                 if (!ProcessUtils.PythonVersion())
                 {
-                    //MsgBox.Show(
+                    //// MessageBox.ShowError(
+                    ////    PythonRequirementMessage,
+                    ////    "Requirement"
+                    ////);
+                    ////MsgBox.Show(
+                    ////    PythonRequirementMessage,
+                    ////    "Requirement",
+                    ////    MsgBox.ButtonType.OK,
+                    ////    MsgBox.Ico.Application,
+                    ////    style: MsgBox.AnimateStyle.FadeInHelp
+                    ////);
+                    ////throw new Exception(PythonRequirementMessage);
+                    //ExceptionUtils.HandleException(
+                    //    new Exception("Python 3.x is not installed."),
                     //    PythonRequirementMessage,
-                    //    "Requirement",
-                    //    MsgBox.ButtonType.OK,
-                    //    MsgBox.Ico.Application,
-                    //    style: MsgBox.AnimateStyle.FadeInHelp
+                    //    "MainForm.InitializeFirstRunCheck",
+                    //    showUser: true
                     //);
-                    throw new Exception(PythonRequirementMessage);
+                    await MessageBox.ShowError(
+                        PythonRequirementMessage,
+                        "Requirement"
+                    );
+                    // Close the application after the user clicks OK
+                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    {
+                        desktop.Shutdown();
+                    }
+                    return;
                 }
 
                 // Remove the first-run marker file if it exists
@@ -134,7 +154,8 @@ namespace SNESMiniLuaCompiler.Views
                 FileUtils.CreatePath(AppUtils.RecodedPath);
             });
 
-            await Dispatcher.UIThread.InvokeAsync(() => {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
                 message.Text = "Done!";
             });
 
@@ -216,7 +237,8 @@ namespace SNESMiniLuaCompiler.Views
                 FileUtils.CreatePath(AppUtils.RecodedPath);
             });
 
-            await Dispatcher.UIThread.InvokeAsync(() => {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
                 message.Text = "Done!";
             });
         }

@@ -1,0 +1,36 @@
+
+
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SNESMiniLuaCompiler.Views.MessageBox" SizeToContent="WidthAndHeight" CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        CanMinimize="False"
+		Background="#1a1a1e">
+    <Window.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontFamily" Value="Default" />
+			<Setter Property="Foreground" Value="#f3f3f3" />
+		</Style>
+        </Window.Styles>
+    <StackPanel HorizontalAlignment="Center"
+                Margin="16,45,16,16"
+                Spacing="10">
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" >
+            <Image Name="Icon" Width="32" Height="32" Margin="0,0,10,0"/>
+        <TextBlock HorizontalAlignment="Left" Name="Text" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Name="Buttons">
+            <StackPanel.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Margin" Value="5"/>
+                </Style>
+            </StackPanel.Styles>
+        </StackPanel>
+    </StackPanel>
+</Window>
+

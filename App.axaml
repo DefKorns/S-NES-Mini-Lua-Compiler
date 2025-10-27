@@ -4,5 +4,9 @@
 			 RequestedThemeVariant="Dark">
 	<Application.Styles>
 		<FluentTheme />
+		<StyleInclude Source="avares://MsBox.Avalonia.Markdown/Controls/MarkdownView.axaml" />
+<!--		<Style Selector="Window">
+            <Setter Property="Background" Value="red"/>
+        </Style>-->
 	</Application.Styles>
 </Application>
