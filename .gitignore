@@ -428,3 +428,5 @@ MigrationBackup/
 lib/hashes
 /bin--
 /modules
+/Assets/Lua-Logo.svg
+/Assets/avalonia-logo.ico
