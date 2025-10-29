@@ -4,25 +4,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-
 namespace SNESMiniLuaCompiler.Helpers
 {
     public class AppUtils
     {
         #region Paths and Constants
 
-        //public static readonly string AppPath = Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty;
         public static readonly string AppPath = AppContext.BaseDirectory;
         public static readonly string LibPath = FileUtils.CombinePath(AppPath, "lib");
         public static readonly string DecodedPath = FileUtils.CombinePath(AppPath, "decoded");
         public static readonly string RecodedPath = FileUtils.CombinePath(AppPath, "recoded");
-        public static readonly string OriginalPath = FileUtils.CombinePath("lib", "original");
         public static readonly string LuaJitPath = FileUtils.CombinePath(AppPath, "lib", "luajit");
         public static readonly string DecompilerPath = FileUtils.CombinePath("lib", "decompiler");
         public static readonly string DecompilerScript = FileUtils.CombinePath(DecompilerPath, "main.py");
-        public static readonly string FirstRun = FileUtils.CombinePath("lib", "firstRun");
         public static readonly string ResourcesPath = FileUtils.CombinePath("lib", "resources");
         public static readonly string SystemResourcePrefix = "SNESMiniLuaCompiler.Lib";
+        public static readonly string ConfigFile = Path.Combine(LibPath, "settings.config");
 
         #endregion
 
@@ -49,7 +46,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void EnsureDirectoryExists(string path)
         {
-            if (!Directory.Exists(path))
+            if (!FileUtils.SafeDirectoryExists(path))
                 Directory.CreateDirectory(path);
         }
 
@@ -68,26 +65,8 @@ namespace SNESMiniLuaCompiler.Helpers
                 ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
         }
 
-        //public static void ExtractSelectedResources()
-        //{
-        //    ExtractResourcesWithPrefix("SNESMiniLuaCompiler.Lib.original.hvcj.", ResourcesPath);
-        //    //ExtractResourcesWithPrefix("SNESMiniLuaCompiler.Lib.decompiler.", DecompilerPath);
-        //}
-
-        //public static void ExtractSelectedResources(SystemModel systemModel)
-        //{
-        //    // Use GetSystemPath to determine the correct resource subdirectory
-        //    string systemPath = GetSystemPath(systemModel);
-        //    // Compose the resource prefix for embedded resources
-        //    string resourcePrefix = $"{SystemResourcePrefix}.original.{Path.GetFileName(systemPath)}.resources.";
-        //    // Compose the output directory for extraction
-        //    string outputDir = FileUtils.CombinePath(ResourcesPath, Path.GetFileName(systemPath));
-        //    ExtractResourcesWithPrefix(resourcePrefix, ResourcesPath);
-        //}
-
         public static void ExtractSelectedResources(SystemModel systemModel)
         {
-            //string systemPath = GetSystemPath(systemModel);
             string systemName = Path.GetFileName(GetSystemPath(systemModel));
             string resourcePrefix = $"{SystemResourcePrefix}.original.{systemName}.resources.";
             string outputDir = FileUtils.CombinePath(ResourcesPath, systemName);
@@ -98,11 +77,10 @@ namespace SNESMiniLuaCompiler.Helpers
         public static void ExtractResourceToFile(string resourceName, string outputPath)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using var resourceStream = assembly?.GetManifestResourceStream(resourceName);
+            using var resourceStream = (assembly?.GetManifestResourceStream(resourceName)) ?? throw new InvalidOperationException($"Resource '{resourceName}' not found.");
 
-            if (resourceStream is null)
-                throw new InvalidOperationException($"Resource '{resourceName}' not found.");
             FileUtils.CreatePath(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
             using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
             resourceStream.CopyTo(fileStream);
         }
@@ -112,13 +90,20 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.ThrowArgNull(resourcePrefix, nameof(resourcePrefix));
             ExceptionUtils.ThrowArgNull(targetRoot, nameof(targetRoot));
 
+            // Replace '-' with '_' in the resourcePrefix for matching
+            string normalizedPrefix = resourcePrefix.Replace('-', '_');
             var assembly = Assembly.GetExecutingAssembly();
-            foreach (var resourceName in assembly?.GetManifestResourceNames() ?? [])
+            var resourceNames = assembly?.GetManifestResourceNames();
+
+            if (resourceNames is null || resourceNames.Length == 0)
+                return;
+
+            foreach (var resourceName in resourceNames.AsSpan())
             {
-                if (!resourceName.StartsWith(resourcePrefix, StringComparison.Ordinal))
+                if (!resourceName.StartsWith(normalizedPrefix, StringComparison.Ordinal))
                     continue;
 
-                string relative = resourceName.AsSpan(resourcePrefix.Length).ToString();
+                string relative = resourceName.AsSpan(normalizedPrefix.Length).ToString();
                 string[] parts = relative.Split('.');
                 if (parts.Length < 2)
                     continue;
@@ -138,46 +123,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #endregion
 
-        #region UI Helpers
-
-        ///// <summary>
-        ///// Displays or hides a loading spinner.
-        ///// </summary>
-        //public static void LoadSpinner(bool displayLoader, PictureBox loaderImage, Form form)
-        //{
-        //    ExceptionUtils.ThrowArgNull(loaderImage, nameof(loaderImage));
-        //    ExceptionUtils.ThrowArgNull(form, nameof(form));
-
-        //    form?.Invoke((MethodInvoker)delegate
-        //    {
-        //        if (loaderImage != null)
-        //            loaderImage.Visible = displayLoader;
-        //        if (form != null)
-        //            form.Cursor = displayLoader ? Cursors.WaitCursor : Cursors.Default;
-        //    });
-        //}
-
-        /// <summary>
-        /// Sets the enabled state, border color, border size, and mouse over color for a button.
-        /// </summary>
-        //public static void SetButtonState(
-        //    Button button,
-        //    bool enabled,
-        //    int borderSize = 0,
-        //    Color? borderColor = null,
-        //    Color? mouseOverBackColor = null)
-        //{
-        //    if (button == null) return;
-        //    button.Enabled = enabled;
-        //    button.FlatAppearance.BorderSize = borderSize;
-        //    if (borderColor.HasValue)
-        //        button.FlatAppearance.BorderColor = borderColor.Value;
-        //    if (mouseOverBackColor.HasValue)
-        //        button.FlatAppearance.MouseOverBackColor = mouseOverBackColor.Value;
-        //}
-
-        #endregion
-
         #region System Path and Directory Checks
 
         /// <summary>
@@ -187,15 +132,15 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             var systemPaths = new Dictionary<SystemModel, string>
             {
-                { SystemModel.Famicom, FileUtils.CombinePath(OriginalPath, "hvc") },
-                { SystemModel.Shonen,FileUtils.CombinePath(OriginalPath, "hvcj") },
-                { SystemModel.SuperFamicom, FileUtils.CombinePath(OriginalPath, "shvc") },
-                { SystemModel.Nes, FileUtils.CombinePath(OriginalPath, "nes") },
-                { SystemModel.SnesPal, FileUtils.CombinePath(OriginalPath, "snes-eur") }
+                { SystemModel.Famicom, FileUtils.CombinePath(ResourcesPath, "hvc") },
+                { SystemModel.Shonen,FileUtils.CombinePath(ResourcesPath, "hvcj") },
+                { SystemModel.SuperFamicom, FileUtils.CombinePath(ResourcesPath, "shvc") },
+                { SystemModel.Nes, FileUtils.CombinePath(ResourcesPath, "nes") },
+                { SystemModel.SnesPal, FileUtils.CombinePath(ResourcesPath, "snes-eur") }
             };
             return systemPaths.TryGetValue(systemModel, out var path)
                 ? path
-                : FileUtils.CombinePath(OriginalPath, "snes-usa");
+                : FileUtils.CombinePath(ResourcesPath, "snes-usa");
         }
 
         /// <summary>
@@ -204,6 +149,46 @@ namespace SNESMiniLuaCompiler.Helpers
         public static bool AreDecodedAndRecodedDirsPresent() =>
             FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
 
-        #endregion 
+        #endregion
+
+        
+
+        public static void SaveConfig(string key, string value)
+        {
+            // Read all lines if file exists, else create new list
+            var lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
+            bool found = false;
+
+            // Update the key if it exists
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (lines[i].StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
+                {
+                    lines[i] = $"{key}={value}";
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                lines.Add($"{key}={value}");
+            }
+
+            File.WriteAllLines(ConfigFile, lines);
+        }
+
+        // Optionally, add a method to read config values
+        public static string? LoadConfig(string key)
+        {
+            if (!File.Exists(ConfigFile))
+                return null;
+
+            foreach (var line in File.ReadAllLines(ConfigFile))
+            {
+                if (line.StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
+                return line[(key.Length + 1)..];
+            }
+            return null;
+        }
     }
 }

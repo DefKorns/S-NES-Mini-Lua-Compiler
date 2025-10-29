@@ -13,12 +13,12 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             try
             {
-                Console.WriteLine($"Loading asset: {resourceUri}");
+                ExceptionUtils.LogException($"Loading asset: {resourceUri}");
                 return new Bitmap(AssetLoader.Open(resourceUri));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load asset {resourceUri}: {ex.Message}");
+                ExceptionUtils.LogException($"Failed to load asset {resourceUri}: {ex.Message}");
                 throw;
             }
         }
@@ -35,7 +35,7 @@ namespace SNESMiniLuaCompiler.Helpers
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"An error occurred while downloading image '{url}' : {ex.Message}");
+                ExceptionUtils.LogException($"Failed to load asset {url}: {ex.Message}");
                 return null;
             }
         }

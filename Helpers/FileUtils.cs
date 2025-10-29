@@ -30,7 +30,7 @@ namespace SNESMiniLuaCompiler.Helpers
         #region Path Utilities
 
         public static string CombinePath(params string[] parts) => 
-            Path.Combine(parts ?? Array.Empty<string>());
+            Path.Combine(parts ?? []);
 
         #endregion
 
@@ -48,7 +48,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
                 CreatePath(destFolder);
 
-                foreach (var file in Directory.GetFiles(sourceFolder) ?? Array.Empty<string>())
+                foreach (var file in Directory.GetFiles(sourceFolder) ?? [])
                 {
                     var dest = CombinePath(destFolder, Path.GetFileName(file) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
@@ -58,7 +58,7 @@ namespace SNESMiniLuaCompiler.Helpers
                     );
                 }
 
-                foreach (var folder in Directory.GetDirectories(sourceFolder) ?? Array.Empty<string>())
+                foreach (var folder in Directory.GetDirectories(sourceFolder) ?? [])
                 {
                     var dest = CombinePath(destFolder, Path.GetFileName(folder) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
@@ -96,22 +96,10 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static void DeleteFile(string file)
         {
-            //if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
-            //    return;
             if (!SafeFileExists(file))
                 return;
 
             ExceptionUtils.GlobalTryCatch(() => File.Delete(file), "Error deleting file.", "AppUtils.DeleteFile");
-
-            //try
-            //{
-            //    File.Delete(file);
-            //}
-            //catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException || ex is IOException)
-            //{
-            //    HandleException(ex, "Error deleting file.", "AppUtils.DeleteFile");
-            //    throw;
-            //}
         }
 
         /// <summary>
@@ -119,11 +107,6 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static void DeletePath(string path)
         {
-            //if (string.IsNullOrWhiteSpace(path))
-            //{
-            //    Debug.WriteLine("DeletePath: Provided path is null or whitespace.");
-            //    return;
-            //}
             if (string.IsNullOrWhiteSpace(path))
             {
                 ExceptionUtils.HandleException(
@@ -133,20 +116,10 @@ namespace SNESMiniLuaCompiler.Helpers
                 return;
             }
 
-            if (!Directory.Exists(path))
+            if (!SafeDirectoryExists(path))
                 return;
 
             ExceptionUtils.GlobalTryCatch(() => Directory.Delete(path, true), "Error deleting path.", "AppUtils.DeletePath");
-
-            //try
-            //{
-            //    Directory.Delete(path, true);
-            //}
-            //catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException || ex is IOException)
-            //{
-            //    HandleException(ex, "Error deleting path.", "AppUtils.DeletePath");
-            //    throw;
-            //}
         }
 
         /// <summary>
@@ -154,19 +127,15 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static void DeleteEmptyDirectories(string startLocation)
         {
-            //if (string.IsNullOrWhiteSpace(startLocation) || !Directory.Exists(startLocation))
-            //    return;
             if (!SafeDirectoryExists(startLocation))
                 return;
 
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                foreach (var directory in Directory.GetDirectories(startLocation) ?? Array.Empty<string>())
+                foreach (var directory in Directory.GetDirectories(startLocation) ?? [])
                 {
                     DeleteEmptyDirectories(directory);
 
-                    //bool isEmpty = Directory.GetFiles(directory).Length == 0 &&
-                    //               Directory.GetDirectories(directory).Length == 0;
                     bool isEmpty = (Directory.GetFiles(directory)?.Length ?? 0) == 0 &&
                                    (Directory.GetDirectories(directory)?.Length ?? 0) == 0;
 
@@ -176,33 +145,6 @@ namespace SNESMiniLuaCompiler.Helpers
                     }
                 }
             }, "Error deleting directory.", "AppUtils.DeleteEmptyDirectories");
-
-            //try
-            //{
-            //    //foreach (var directory in Directory.GetDirectories(startLocation))
-            //    foreach (var directory in Directory.GetDirectories(startLocation) ?? Array.Empty<string>())
-            //    {
-            //        DeleteEmptyDirectories(directory);
-
-            //        //bool isEmpty = Directory.GetFiles(directory).Length == 0 &&
-            //        //               Directory.GetDirectories(directory).Length == 0;
-            //        bool isEmpty = (Directory.GetFiles(directory)?.Length ?? 0) == 0 &&
-            //                       (Directory.GetDirectories(directory)?.Length ?? 0) == 0;
-
-            //        if (isEmpty)
-            //        {
-            //            Directory.Delete(directory, false);
-            //        }
-            //    }
-            //}
-            //catch (Exception ex) when (
-            //    ex is IOException ||
-            //    ex is UnauthorizedAccessException ||
-            //    ex is ArgumentException)
-            //{
-            //    HandleException(ex, "Error deleting directory.", "AppUtils.DeleteEmptyDirectories");
-            //    throw;
-            //}
         }
 
         #endregion
@@ -218,72 +160,31 @@ namespace SNESMiniLuaCompiler.Helpers
             if (!SafeFileExists(fileName))
                 return;
 
-            string fileHash = string.Empty;
+            string fileHash = GetSHA256HashFromFile(fileName);
+            if (string.IsNullOrEmpty(fileHash))
+                return;
+
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                fileHash = GetSHA256HashFromFile(fileName);
-                if (!string.IsNullOrEmpty(fileHash))
-                {
-                    using (var writer = File.AppendText(DecodedHashFile))
-                    {
-                        writer.WriteLine(fileHash);
-                    }
-                }
+                using var writer = File.AppendText(DecodedHashFile);
+                writer.WriteLine(fileHash);
             }, $"Error generating file hash for '{fileName}'.", "FileUtils.GenerateFileHash");
         }
-        //public static void GenerateFileHash(string fileName)
-        //{
-        //    var fileHash = GetSHA256HashFromFile(fileName);
-
-        //    ExceptionUtils.GlobalTryCatch(() =>
-        //    {
-        //        using (var writer = File.AppendText(DecodedHashFile))
-        //        {
-        //            writer.WriteLine(fileHash);
-        //        }
-        //    }, "Error generating file hash.", "AppUtils.GenerateFileHash");
-
-        //    //try
-        //    //{
-        //    //    using (var writer = File.AppendText(DecodedHashFile))
-        //    //    {
-        //    //        writer.WriteLine(fileHash);
-        //    //    }
-        //    //}
-        //    //catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
-        //    //{
-        //    //    HandleException(ex, "Error generating file hash.", "AppUtils.GenerateFileHash");
-        //    //    throw;
-        //    //}
-        //}
 
         /// <summary>
         /// Computes the SHA256 hash of a file.
         /// </summary>
         public static string GetSHA256HashFromFile(string fileName)
         {
-            using (var sha256 = SHA256.Create())
-            using (var stream = File.OpenRead(fileName))
-            {
-                var hash = sha256.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
-            }
+            using var sha256 = SHA256.Create();
+            using var stream = File.OpenRead(fileName);
+            var hash = sha256.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
         }
 
         /// <summary>
         /// Checks if a file has been edited based on its hash.
         /// </summary>
-        //public static bool HasEditedFiles(string hash)
-        //{
-        //    foreach (var line in File.ReadAllLines(DecodedHashFile) ?? Array.Empty<string>())
-        //    {
-        //        if (line?.Contains(hash ?? string.Empty) == true)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
         public static bool HasEditedFiles(string hash)
         {
             foreach (var line in SafeReadAllLines(DecodedHashFile))
@@ -312,9 +213,9 @@ namespace SNESMiniLuaCompiler.Helpers
         public static string[] SafeReadAllLines(string filePath)
         {
             if (!SafeFileExists(filePath))
-                return Array.Empty<string>();
+                return [];
 
-            string[] result = Array.Empty<string>();
+            string[] result = [];
             ExceptionUtils.GlobalTryCatch(() =>
             {
                 result = File.ReadAllLines(filePath);
@@ -325,9 +226,9 @@ namespace SNESMiniLuaCompiler.Helpers
         public static byte[] SafeReadBytes(string filePath)
         {
             if (!SafeFileExists(filePath))
-                return Array.Empty<byte>();
+                return [];
 
-            byte[] result = Array.Empty<byte>();
+            byte[] result = [];
             ExceptionUtils.GlobalTryCatch(() =>
             {
                 result = File.ReadAllBytes(filePath);

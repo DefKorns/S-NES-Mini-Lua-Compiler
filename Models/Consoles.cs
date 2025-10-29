@@ -1,33 +1,37 @@
 ﻿using Avalonia.Media.Imaging;
+using ReactiveUI;
 
 namespace SNESMiniLuaCompiler.Models
 {
-    public class Consoles
+    public class Consoles : ReactiveObject
     {
         /// <summary>
         /// Gets the image representing the console. Can only be set during initialization.
         /// </summary>
-        public Bitmap? ImagePath { get; init; }
+        public Bitmap? ImagePath { get; set; }
 
         /// <summary>
         /// Gets the display name of the console. Can only be set during initialization.
         /// </summary>
-        public string? Name { get; init; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Gets the region or edition of the console. Can only be set during initialization.
         /// </summary>
-        public string? Region { get; init; }
+        public string? Region { get; set; }
 
         /// <summary>
         /// Gets the system model type of the console. Can only be set during initialization.
         /// </summary>
-        public SystemModel SystemModel { get; init; }
+        public SystemModel SystemModel { get; set; }
 
-        // The default DataTemplate will show whatever ToString() will provide. So as a first idea let's change what ToString() will provide.
-        public override string ToString()
+        private bool _isChecked;
+        public bool IsChecked
         {
-            return $"{Name} {ImagePath}  (Region: {Region}, System: {SystemModel})";
+            get => _isChecked;
+            set => this.RaiseAndSetIfChanged(ref _isChecked, value);
         }
+
+        public override string ToString() => Name ?? base.ToString()!;
     }
 }

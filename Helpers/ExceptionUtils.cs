@@ -1,33 +1,34 @@
-﻿using SNESMiniLuaCompiler.Views;
+﻿using Serilog;
+using SNESMiniLuaCompiler.Views;
 using System;
 using System.IO;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
-
     public class ExceptionUtils
     {
+        // Serilog logger instance (should be configured in Program.cs)
+        private static ILogger? _logger;
+
+        // Call this once during app startup, e.g. in Program.cs
+        public static void ConfigureLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Represents detailed information about an error or exception for logging and user feedback.
         /// </summary>
-        public class ExceptionInfo
+        public class ExceptionInfo(Exception exception, string? userMessage = null, string? context = null)
         {
-            public Exception Exception { get; }
-            public string? UserMessage { get; }
-            public string? Context { get; }
-            public DateTime Timestamp { get; }
-
-            public ExceptionInfo(Exception exception, string? userMessage = null, string? context = null)
-            {
-                Exception = exception;
-                UserMessage = userMessage;
-                Context = context;
-                Timestamp = DateTime.Now;
-            }
+            public Exception Exception { get; } = exception;
+            public string? UserMessage { get; } = userMessage;
+            public string? Context { get; } = context;
+            public DateTime Timestamp { get; } = DateTime.Now;
 
             public override string ToString()
             {
-                return $"[{Timestamp}] Context: {Context}\r\nUserMessage: {UserMessage}\r\nException: {Exception}\r\n";
+                return $"[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] Context: {Context}\r\nUserMessage: {UserMessage}\r\nException: {Exception}\r\n";
             }
         }
 
@@ -35,7 +36,7 @@ namespace SNESMiniLuaCompiler.Helpers
         /// <summary>
         /// Throws an exception if the argument is null.
         /// </summary>
-        public static void ThrowArgNull(object? arg, string? paramName = null) => 
+        public static void ThrowArgNull(object? arg, string? paramName = null) =>
             _ = arg ?? throw new ArgumentNullException(paramName);
 
         /// <summary>
@@ -51,7 +52,6 @@ namespace SNESMiniLuaCompiler.Helpers
             if (showUser)
             {
                 string msg = userMessage ?? "An error occurred.";
-                //MsgBox.Show($"{msg}\n\nDetails: {ex.Message}", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Error);
                 MessageBox.ShowError($"{msg}\n\nDetails: {ex.Message}", "Error");
             }
         }
@@ -65,30 +65,27 @@ namespace SNESMiniLuaCompiler.Helpers
         /// <param name="showUser">Whether to show a message box to the user (default: true).</param>
         public static void GlobalTryCatch(Action action, string? userMessage = null, string? logContext = null, bool showUser = true)
         {
-            string DefaultLog = logContext ?? "ExceptionUtils.GlobalTryCatch";
+            string defaultLog = logContext ?? "ExceptionUtils.GlobalTryCatch";
             try
             {
-                action.Invoke();
+                action();
             }
-            catch (IOException ex)
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException)
             {
-                HandleException(ex, userMessage ?? "An I/O error occurred.", DefaultLog, showUser);
-                LogException(new ExceptionInfo(ex, userMessage ?? "An I/O error occurred.", DefaultLog));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                HandleException(ex, userMessage ?? "Access denied.", DefaultLog, showUser);
-                LogException(new ExceptionInfo(ex, userMessage ?? "Access denied.", DefaultLog));
-            }
-            catch (ArgumentException ex)
-            {
-                HandleException(ex, userMessage ?? "Invalid argument.", DefaultLog, showUser);
-                LogException(new ExceptionInfo(ex, userMessage ?? "Invalid argument.", DefaultLog));
+                string message = ex switch
+                {
+                    IOException => userMessage ?? "An I/O error occurred.",
+                    UnauthorizedAccessException => userMessage ?? "Access denied.",
+                    ArgumentException => userMessage ?? "Invalid argument.",
+                    _ => userMessage ?? "An unexpected error occurred."
+                };
+                HandleException(ex, message, defaultLog, showUser);
+                LogException(new ExceptionInfo(ex, message, defaultLog));
             }
             catch (Exception ex)
             {
-                HandleException(ex, userMessage ?? "An unexpected error occurred.", DefaultLog, showUser);
-                LogException(new ExceptionInfo(ex, userMessage ?? "An unexpected error occurred.", DefaultLog));
+                HandleException(ex, userMessage ?? "An unexpected error occurred.", defaultLog, showUser);
+                LogException(new ExceptionInfo(ex, userMessage ?? "An unexpected error occurred.", defaultLog));
                 throw;
             }
         }
@@ -98,14 +95,14 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static void LogException(ExceptionInfo info)
         {
-            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log");
-            File.AppendAllText(logPath, info.ToString());
+            _logger?.Error(info.Exception,
+                "Context: {Context} | UserMessage: {UserMessage}",
+                info.Timestamp, info.Context, info.UserMessage);
         }
 
         public static void LogException(string info)
         {
-            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log");
-            File.AppendAllText(logPath, info);
+            _logger?.Error("{Info}", info);
         }
     }
 }
