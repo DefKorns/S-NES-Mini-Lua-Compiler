@@ -1,12 +1,16 @@
 <Application xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:semi="https://irihi.tech/semi"
 			 x:Class="SNESMiniLuaCompiler.App"
 			 RequestedThemeVariant="Dark">
 	<Application.Styles>
-		<FluentTheme />
-		<StyleInclude Source="avares://MsBox.Avalonia.Markdown/Controls/MarkdownView.axaml" />
-<!--		<Style Selector="Window">
-            <Setter Property="Background" Value="red"/>
-        </Style>-->
+		<semi:SemiTheme Locale="en-US" />
 	</Application.Styles>
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="ResourceDictionaries/_index.axaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Application.Resources>
 </Application>

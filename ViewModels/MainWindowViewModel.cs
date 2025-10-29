@@ -1,18 +1,20 @@
-using Avalonia.Controls;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
-using MsBox.Avalonia.Models;
+using Avalonia;
+using Avalonia.Styling;
+using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
+using Semi.Avalonia;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows.Input;
 
 
 namespace SNESMiniLuaCompiler.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public partial class MainWindowViewModel : ViewModelBase
     {
         private const string AssetUriPrefix = "avares://SNESMiniLuaCompiler/Assets";
         public static string AppVersion => AppUtils.GetAppVersion();
@@ -41,9 +43,8 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public MainWindowViewModel()
         {
-            // Initialize other properties...
-
             SelectConsoleCommand = new RelayCommand<SystemModel>(OnSelectConsole);
+            UpdateButtonStates();
         }
 
         /// <summary>
@@ -56,6 +57,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "NES Classic",
                 Region = "Edition",
                 SystemModel = SystemModel.Nes,
+                IsChecked = false
             },
             new Consoles
             {
@@ -63,6 +65,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "SNES Mini",
                 Region = "(USA)",
                 SystemModel = SystemModel.Snes,
+                IsChecked = false
             },
             new Consoles
             {
@@ -70,6 +73,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "SNES Mini",
                 Region = "(Europe)",
                 SystemModel = SystemModel.SnesPal,
+                IsChecked = false
             },
             new Consoles
             {
@@ -77,6 +81,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Famicom",
                 Region = "Mini",
                 SystemModel = SystemModel.Famicom,
+                IsChecked = false
             },
             new Consoles
             {
@@ -84,6 +89,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Super",
                 Region = "Famicom",
                 SystemModel = SystemModel.SuperFamicom,
+                IsChecked = false
             },
             new Consoles
             {
@@ -91,6 +97,7 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Famicom",
                 Region = "Shonen 50th",
                 SystemModel = SystemModel.Shonen,
+                IsChecked = false
             },
         ];
 
@@ -98,51 +105,67 @@ namespace SNESMiniLuaCompiler.ViewModels
         {
             SelectedConsole = systemModel;
 
-            //  var box = MessageBoxManager
-            //.GetMessageBoxStandard("Caption", "Are you sure you would like to delete appender_replace_page_1?",
-            //    ButtonEnum.YesNo);
-    //        var buttons = new List<ButtonDefinition>
-    //{
-    //    new ButtonDefinition { Name = "Yes" },
-    //    new ButtonDefinition { Name = "No" }
-    //};
 
-            //var result = await MessageBoxHelper.ShowCustomAsync(
-            //    "Confirm Action",
-            //    "Are you sure you want to select this console?",
-            //    buttons,
-            //    Icon.Question
-            //);
-
-            //if (result == "Yes")
-            var result = await Views.MessageBox.ShowError(
-    "Are you sure you want to select this console?",
-    "Confirm Action"
-);
-
-            if (result == MessageBoxResult.Ok)
+            foreach (var console in ConsoleList)
             {
-                /// ViewModels should not directly access UI controls.
-                // Instead, expose a property and bind IsEnabled in the View (XAML) to this property.
-                AppUtils.EnsureDirectoryExists(AppUtils.DecodedPath);
-                IsRecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
-                IsDecodeButtonEnabled = FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
-                FileUtils.DeletePath(AppUtils.ResourcesPath);
-                AppUtils.ExtractSelectedResources(systemModel);
-
-                //FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
-            }
-            else
-            {
-                // Optionally handle "No"
-                return;
+                console.IsChecked = console.SystemModel == systemModel;
             }
 
-            
+            if (FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) && Directory.EnumerateFileSystemEntries(AppUtils.DecodedPath).Any())
+            {
+                var result = await Views.MessageBox.ShowWarning(
+                    "This action may overwrite existing files. Do you want to continue?",
+                    "Warning"
+                );
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            AppUtils.SaveConfig("system", Path.GetFileName(AppUtils.GetSystemPath(systemModel)));
+            AppUtils.EnsureDirectoryExists(AppUtils.DecodedPath);
+            UpdateButtonStates();
+            FileUtils.DeletePath(AppUtils.ResourcesPath);
+            AppUtils.ExtractSelectedResources(systemModel);
+        }
+
+        private void UpdateConsoleSelection()
+        {
+            foreach (var console in ConsoleList)
+                console.IsChecked = console.SystemModel == SelectedConsole;
+        }
+
+        public void UpdateButtonStates()
+        {
+            bool hasConsole = SelectedConsole.HasValue;
+            IsDecodeButtonEnabled = hasConsole && FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
+            IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
         }
 
 
+        [RelayCommand]
+        private static void FollowSystemTheme()
+            => Application.Current?.RegisterFollowSystemTheme();
 
+        [RelayCommand]
+        private static void ToggleTheme()
+        {
+            var app = Application.Current;
+            if (app is null) return;
+            var theme = app.ActualThemeVariant;
+            app.RequestedThemeVariant = theme == ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
+            app.UnregisterFollowSystemTheme();
+        }
 
+        [RelayCommand]
+        private static void SelectTheme(object? obj)
+        {
+            var app = Application.Current;
+            if (app is null) return;
+            app.RequestedThemeVariant = obj as ThemeVariant;
+            app.UnregisterFollowSystemTheme();
+        }
     }
 }

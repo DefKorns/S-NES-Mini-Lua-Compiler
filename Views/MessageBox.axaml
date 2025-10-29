@@ -8,8 +8,7 @@
         x:Class="SNESMiniLuaCompiler.Views.MessageBox" SizeToContent="WidthAndHeight" CanResize="False"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
-        CanMinimize="False"
-		Background="#1a1a1e">
+        CanMinimize="False">
     <Window.Styles>
 		<Style Selector="TextBlock">
 			<Setter Property="FontSize" Value="12"/>
@@ -21,7 +20,24 @@
                 Margin="16,45,16,16"
                 Spacing="10">
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" >
-            <Image Name="Icon" Width="32" Height="32" Margin="0,0,10,0"/>
+            <!--<Image Name="Icon" Width="32" Height="32" Margin="0,0,10,0"/>-->
+            <PathIcon
+     Name="NotificationIcon"
+                                    Theme="{DynamicResource InnerPathIcon}"
+                                    Width="{DynamicResource NotificationCardIconWidth}"
+                                    Height="{DynamicResource NotificationCardIconHeight}"
+                                    Margin="{DynamicResource NotificationCardIconMargin}"
+                                    VerticalAlignment="Top"
+                                    IsVisible="false"/>
+            <!--<PathIcon
+                                    Name="NotificationIcon"
+                                    Theme="{DynamicResource InnerPathIcon}"
+                                    Width="{DynamicResource NotificationCardIconWidth}"
+                                    Height="{DynamicResource NotificationCardIconHeight}"
+                                    Margin="{DynamicResource NotificationCardIconMargin}"
+                                    VerticalAlignment="Top"
+                                    IsVisible="true"
+                                    Data="{StaticResource SemiIconMoon}" />-->
         <TextBlock HorizontalAlignment="Left" Name="Text" VerticalAlignment="Center"/>
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Name="Buttons">

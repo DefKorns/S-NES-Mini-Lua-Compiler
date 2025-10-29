@@ -1,24 +1,29 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Notifications;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 using SNESMiniLuaCompiler.ViewModels;
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 
 namespace SNESMiniLuaCompiler.Views
 {
     public partial class MainWindow : Window
     {
         private string? _selectedSystem;
+        //private WindowNotificationManager? _manager;
 
         public MainWindow()
         {
             InitializeComponent();
+            NotificationHelper.Initialize(this);
             InitializeFirstRunCheck();
             InitializeButtonStates();
         }
@@ -26,49 +31,29 @@ namespace SNESMiniLuaCompiler.Views
         /// <summary>
         /// Checks if this is the first run and verifies Python installation.
         /// </summary>
-        private async static void InitializeFirstRunCheck()
+        private static void InitializeFirstRunCheck()
         {
             const string PythonRequirementMessage = "Make sure you have python 3.x installed!\n\nPlease download it from python.org";
 
-            ExceptionUtils.GlobalTryCatch(async () =>
+            ExceptionUtils.GlobalTryCatch(() =>
             {
                 // Check if Python 3.x is installed
                 if (!ProcessUtils.PythonVersion())
                 {
-                    //// MessageBox.ShowError(
-                    ////    PythonRequirementMessage,
-                    ////    "Requirement"
-                    ////);
-                    ////MsgBox.Show(
-                    ////    PythonRequirementMessage,
-                    ////    "Requirement",
-                    ////    MsgBox.ButtonType.OK,
-                    ////    MsgBox.Ico.Application,
-                    ////    style: MsgBox.AnimateStyle.FadeInHelp
-                    ////);
-                    ////throw new Exception(PythonRequirementMessage);
-                    //ExceptionUtils.HandleException(
-                    //    new Exception("Python 3.x is not installed."),
-                    //    PythonRequirementMessage,
-                    //    "MainForm.InitializeFirstRunCheck",
-                    //    showUser: true
-                    //);
-                    await MessageBox.ShowError(
-                        PythonRequirementMessage,
-                        "Requirement"
-                    );
-                    // Close the application after the user clicks OK
-                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    Dispatcher.UIThread.Post(async () =>
                     {
-                        desktop.Shutdown();
-                    }
+                        await MessageBox.ShowError(
+                            PythonRequirementMessage,
+                            "Requirement"
+                        );
+                        // Close the application after the user clicks OK
+                        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                        {
+                            ExceptionUtils.LogException("Python 3.x is not installed. Application will shut down.");
+                            desktop.Shutdown();
+                        }
+                    });
                     return;
-                }
-
-                // Remove the first-run marker file if it exists
-                if (FileUtils.SafeFileExists(AppUtils.FirstRun))
-                {
-                    File.Delete(AppUtils.FirstRun);
                 }
             },
             "An error occurred during the first run check.",
@@ -80,16 +65,8 @@ namespace SNESMiniLuaCompiler.Views
         /// </summary>
         private void InitializeButtonStates()
         {
-            // Use the utility method to check both directories at once
-            bool enable = AppUtils.AreDecodedAndRecodedDirsPresent();
-
-            var decryptButton = this.FindControl<Button>("btn_decrypt");
-            var encryptButton = this.FindControl<Button>("btn_encrypt");
-
-            if (decryptButton != null)
-                decryptButton.IsEnabled = enable;
-            if (encryptButton != null)
-                encryptButton.IsEnabled = enable;
+            var vm = DataContext as MainWindowViewModel;
+            vm?.UpdateButtonStates();
         }
 
         private async void DecryptButton_Click(object? sender, RoutedEventArgs e)
@@ -103,67 +80,47 @@ namespace SNESMiniLuaCompiler.Views
             var decryptButton = this.FindControl<Button>("btn_decrypt");
             var encryptButton = this.FindControl<Button>("btn_encrypt");
 
-            if (decryptButton != null)
-                decryptButton.IsEnabled = false;
-            if (encryptButton != null)
-                encryptButton.IsEnabled = false;
-            if (string.IsNullOrEmpty(ProcessUtils.FindExePath("python.exe")))
+            // Disable buttons and update UI on the UI thread
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                //MsgBox.Show("Python 3.x wasn't found on your system's PATH.\nPlease install it from python.org", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
+                decryptButton?.SetValue(IsEnabledProperty, false);
+                encryptButton?.SetValue(IsEnabledProperty, false);
+                message.Text = "Decrypting files, please wait...";
+            });
+
+            if (string.IsNullOrEmpty(ProcessUtils.FindExePath("python.exe")))
                 return;
-            }
 
             var vm = DataContext as MainWindowViewModel;
             var selectedConsole = vm?.SelectedConsole;
-            message.Text = "Decrypting files, please wait...";
-            switch (selectedConsole)
+
+            _selectedSystem = selectedConsole switch
             {
-                case SystemModel.Nes:
-                    _selectedSystem = AppUtils.GetSystemPath(SystemModel.Nes);
-                    break;
-                case SystemModel.Famicom:
-                    _selectedSystem = AppUtils.GetSystemPath(SystemModel.Famicom);
-                    break;
-                case SystemModel.SnesPal:
-                    _selectedSystem = AppUtils.GetSystemPath(SystemModel.SnesPal);
-                    break;
-                default:
-                    //    //MsgBox.Show("Please select a console first.", "Error", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
-                    //    EnableAllButtons(true);
-                    _selectedSystem = AppUtils.GetSystemPath(SystemModel.Snes);
-                    return;
-            }
+                SystemModel.Nes => AppUtils.GetSystemPath(SystemModel.Nes),
+                SystemModel.Famicom => AppUtils.GetSystemPath(SystemModel.Famicom),
+                SystemModel.SnesPal => AppUtils.GetSystemPath(SystemModel.SnesPal),
+                SystemModel.SuperFamicom => AppUtils.GetSystemPath(SystemModel.SuperFamicom),
+                SystemModel.Shonen => AppUtils.GetSystemPath(SystemModel.Shonen),
+                _ => AppUtils.GetSystemPath(SystemModel.Snes)
+            };
 
             await Task.Run(() =>
             {
                 FileUtils.DeletePath(AppUtils.DecodedPath);
-                FileUtils.CopyAssets(AppUtils.ResourcesPath, AppUtils.DecodedPath);
+                FileUtils.CopyAssets(_selectedSystem, AppUtils.DecodedPath);
                 FileUtils.DeleteFile(FileUtils.DecodedHashFile);
                 Decrypt("decoded");
             }).ConfigureAwait(false);
-            //EnableAllButtons(true);
-            //decode_button.FlatAppearance.BorderSize = 2;
-            //recode_button.FlatAppearance.BorderSize = 2;
-            //AppUtils.LoadSpinner(false, picLoader, this);
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                if (decryptButton != null)
-                    decryptButton.IsEnabled = true;
-                if (encryptButton != null)
-                    encryptButton.IsEnabled = true;
-                FileUtils.CreatePath(AppUtils.RecodedPath);
-            });
 
+            // Re-enable buttons and update UI on the UI thread
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                decryptButton?.SetValue(IsEnabledProperty, true);
+                encryptButton?.SetValue(IsEnabledProperty, true);
+                FileUtils.CreatePath(AppUtils.RecodedPath);
+                NotificationHelper.Success("Decryption complete!", "Light");
                 message.Text = "Done!";
             });
-
-            //Action showDialog = ShowDecryptionFinishedDialog;
-            //if (InvokeRequired)
-            //    Invoke(showDialog);
-            //else
-            //    showDialog();
         }
 
         private static void Decrypt(string sDir)
@@ -183,7 +140,8 @@ namespace SNESMiniLuaCompiler.Views
                 ExceptionUtils.GlobalTryCatch(
                     () =>
                     {
-                        ProcessUtils.RunCmd(ProcessUtils.FindExePath("pythonw.exe"), AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
+                        //ProcessUtils.RunCmd(AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
+                        ProcessUtils.RunDecompiler(file, decFile);
                         File.Delete(file);
                         File.Move(decFile, file);
                         FileUtils.GenerateFileHash(file);
@@ -196,7 +154,6 @@ namespace SNESMiniLuaCompiler.Views
 
         private async void EncryptButton_Click(object? sender, RoutedEventArgs e)
         {
-            // TODO: Add your decryption logic here
             await EncryptFilesAsync().ConfigureAwait(false);
         }
 
@@ -204,9 +161,7 @@ namespace SNESMiniLuaCompiler.Views
         {
             //ResetButtonBackColor();
             FileUtils.DeletePath(AppUtils.RecodedPath);
-            //_activeButton = false;
 
-            //EnableAllButtons(false);
             var decryptButton = this.FindControl<Button>("btn_decrypt");
             var encryptButton = this.FindControl<Button>("btn_encrypt");
 
@@ -223,11 +178,6 @@ namespace SNESMiniLuaCompiler.Views
             // Run Encrypt on a background thread to make the method truly async
             await Task.Run(() => Encrypt("decoded")).ConfigureAwait(false);
 
-            //AppUtils.LoadSpinner(false, picLoader, this);
-
-            //EnableAllButtons(true);
-            //EnableControls(new Control[] { decode_button }, false);
-            //recode_button.FlatAppearance.BorderSize = 2;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (decryptButton != null)
@@ -245,6 +195,8 @@ namespace SNESMiniLuaCompiler.Views
 
         private static void Encrypt(string sDir)
         {
+            string? selectedConsoleStr = AppUtils.LoadConfig("system");
+
             foreach (string d in Directory.GetDirectories(sDir))
             {
                 ExceptionUtils.GlobalTryCatch(
@@ -257,8 +209,7 @@ namespace SNESMiniLuaCompiler.Views
             foreach (string decodedFile in Directory.GetFiles(sDir))
             {
                 string decodedFullPath = Path.GetFullPath(decodedFile);
-                string recodedFullPath = Path.GetFullPath(Regex.Replace(decodedFullPath, "decoded", "recoded"));
-                string recodedFile = Path.GetFullPath(Regex.Replace(decodedFullPath, "decoded", "recoded"));
+                string recodedFullPath = Path.GetFullPath(DecodedPathRegex().Replace(decodedFullPath, $"recoded/{selectedConsoleStr}/resources"));
 
                 ExceptionUtils.GlobalTryCatch(
                     () =>
@@ -271,7 +222,7 @@ namespace SNESMiniLuaCompiler.Views
 
                         if (FileUtils.HasEditedFiles(FileUtils.GetSHA256HashFromFile(decodedFullPath)))
                         {
-                            ProcessUtils.RunLuaJit(decodedFullPath, recodedFile);
+                            ProcessUtils.RunLuaJit(decodedFullPath, recodedFullPath);
                         }
                     },
                     $"Error encrypting file '{decodedFile}'.",
@@ -285,5 +236,9 @@ namespace SNESMiniLuaCompiler.Views
                 "MainForm.Encrypt"
             );
         }
+
+        [GeneratedRegex("decoded")]
+        private static partial Regex DecodedPathRegex();
+
     }
 }
