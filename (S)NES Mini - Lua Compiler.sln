@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(S)NES Mini - Lua Compiler", "(S)NES Mini - Lua Compiler.csproj", "{C38F6CC2-6753-4E91-8F9D-C84ABD17FE2C}"
 EndProject

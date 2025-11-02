@@ -10,6 +10,7 @@ using SNESMiniLuaCompiler.ViewModels;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -26,6 +27,13 @@ namespace SNESMiniLuaCompiler.Views
             NotificationHelper.Initialize(this);
             InitializeFirstRunCheck();
             InitializeButtonStates();
+
+            // Ensure DataContext is set to MainWindowViewModel
+            this.DataContextChanged += (_, e) =>
+            {
+                if (DataContext is MainWindowViewModel vm)
+                    vm.DecryptFilesAsyncDelegate = DecryptFilesAsync;
+            };
         }
 
         /// <summary>
@@ -69,31 +77,32 @@ namespace SNESMiniLuaCompiler.Views
             vm?.UpdateButtonStates();
         }
 
-        private async void DecryptButton_Click(object? sender, RoutedEventArgs e)
+
+        public async Task RunDecryptFilesAsyncFromViewModel()
         {
-            // TODO: Add your decryption logic here
             await DecryptFilesAsync().ConfigureAwait(false);
         }
 
         private async Task DecryptFilesAsync()
         {
-            var decryptButton = this.FindControl<Button>("btn_decrypt");
             var encryptButton = this.FindControl<Button>("btn_encrypt");
+            var vm = DataContext as MainWindowViewModel;
 
-            // Disable buttons and update UI on the UI thread
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                decryptButton?.SetValue(IsEnabledProperty, false);
                 encryptButton?.SetValue(IsEnabledProperty, false);
                 message.Text = "Decrypting files, please wait...";
+                if (vm != null)
+                {
+                    vm.DecryptionProgress = 0;
+                    vm.IsDecryptionInProgress = true;
+                }
             });
 
             if (string.IsNullOrEmpty(ProcessUtils.FindExePath("python.exe")))
                 return;
 
-            var vm = DataContext as MainWindowViewModel;
             var selectedConsole = vm?.SelectedConsole;
-
             _selectedSystem = selectedConsole switch
             {
                 SystemModel.Nes => AppUtils.GetSystemPath(SystemModel.Nes),
@@ -104,57 +113,88 @@ namespace SNESMiniLuaCompiler.Views
                 _ => AppUtils.GetSystemPath(SystemModel.Snes)
             };
 
+            // Prepare assets before counting files
             await Task.Run(() =>
             {
                 FileUtils.DeletePath(AppUtils.DecodedPath);
                 FileUtils.CopyAssets(_selectedSystem, AppUtils.DecodedPath);
                 FileUtils.DeleteFile(FileUtils.DecodedHashFile);
-                Decrypt("decoded");
             }).ConfigureAwait(false);
 
-            // Re-enable buttons and update UI on the UI thread
+            // Count total files after assets are copied
+            int totalFiles = FileUtils.CountFilesRecursive("decoded");
+            if (totalFiles == 0)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    message.Text = "No files to decrypt.";
+                    if (vm != null)
+                    {
+                        vm.DecryptionProgress = 0;
+                        vm.IsDecryptionInProgress = false;
+                    }
+                    encryptButton?.SetValue(IsEnabledProperty, true);
+                });
+                return;
+            }
+
+            int filesDecrypted = 0;
+
+            await Task.Run(() =>
+            {
+                void DecryptWithProgress(string sDir)
+                {
+                    foreach (var d in Directory.GetDirectories(sDir))
+                    {
+                        ExceptionUtils.GlobalTryCatch(
+                            () => DecryptWithProgress(d),
+                            $"Error decrypting directory '{d}'.",
+                            "MainForm.Decrypt"
+                        );
+                    }
+
+                    foreach (var file in Directory.GetFiles(sDir))
+                    {
+                        ExceptionUtils.GlobalTryCatch(
+                            () =>
+                            {
+                                string decFile = file + ".dec";
+                                ProcessUtils.RunDecompiler(file, decFile);
+                                File.Delete(file);
+                                File.Move(decFile, file);
+                                FileUtils.GenerateFileHash(file);
+                            },
+                            $"Error decrypting file '{file}'.",
+                            "MainForm.Decrypt"
+                        );
+                        int done = Interlocked.Increment(ref filesDecrypted);
+                        double progress = (done * 100.0) / totalFiles;
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (vm != null)
+                                vm.DecryptionProgress = progress;
+                        });
+                    }
+                }
+                DecryptWithProgress("decoded");
+            }).ConfigureAwait(false);
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                decryptButton?.SetValue(IsEnabledProperty, true);
                 encryptButton?.SetValue(IsEnabledProperty, true);
                 FileUtils.CreatePath(AppUtils.RecodedPath);
                 NotificationHelper.Success("Decryption complete!", "Light");
                 message.Text = "Done!";
+                if (vm != null)
+                {
+                    vm.DecryptionProgress = 100;
+                    vm.IsDecryptionInProgress = false;
+                }
             });
-        }
-
-        private static void Decrypt(string sDir)
-        {
-            foreach (string d in Directory.GetDirectories(sDir))
-            {
-                ExceptionUtils.GlobalTryCatch(
-                    () => Decrypt(d),
-                    $"Error decrypting directory '{d}'.",
-                    "MainForm.Decrypt"
-                );
-            }
-
-            foreach (string file in Directory.GetFiles(sDir))
-            {
-                string decFile = file + ".dec";
-                ExceptionUtils.GlobalTryCatch(
-                    () =>
-                    {
-                        //ProcessUtils.RunCmd(AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts");
-                        ProcessUtils.RunDecompiler(file, decFile);
-                        File.Delete(file);
-                        File.Move(decFile, file);
-                        FileUtils.GenerateFileHash(file);
-                    },
-                    $"Error decrypting file '{file}'.",
-                    "MainForm.Decrypt"
-                );
-            }
         }
 
         private async void TrashButton_Click(object? sender, RoutedEventArgs e)
         {
-
             FileUtils.DeletePath(AppUtils.DecodedPath);
             FileUtils.DeletePath(AppUtils.RecodedPath);
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -173,36 +213,87 @@ namespace SNESMiniLuaCompiler.Views
 
         private async Task EncryptFilesAsync()
         {
-            //ResetButtonBackColor();
             FileUtils.DeletePath(AppUtils.RecodedPath);
 
-            var decryptButton = this.FindControl<Button>("btn_decrypt");
             var encryptButton = this.FindControl<Button>("btn_encrypt");
+            var vm = DataContext as MainWindowViewModel;
 
-            if (decryptButton != null)
-                decryptButton.IsEnabled = false;
             if (encryptButton != null)
                 encryptButton.IsEnabled = false;
 
-            //AppUtils.LoadSpinner(true, picLoader, this);
-            var vm = DataContext as MainWindowViewModel;
-            var selectedConsole = vm?.SelectedConsole;
             message.Text = "Encrypting files, please wait...";
 
-            // Run Encrypt on a background thread to make the method truly async
-            await Task.Run(() => Encrypt("decoded")).ConfigureAwait(false);
+            // Count total files to encrypt
+            int totalFiles = FileUtils.CountFilesRecursive("decoded");
+            if (vm != null)
+            {
+                vm.EncryptionProgress = 0;
+                vm.IsEncryptionInProgress = totalFiles > 0;
+            }
+            int filesEncrypted = 0;
+
+            await Task.Run(() =>
+            {
+                void EncryptWithProgress(string sDir)
+                {
+                    foreach (string d in Directory.GetDirectories(sDir))
+                    {
+                        ExceptionUtils.GlobalTryCatch(
+                            () => EncryptWithProgress(d),
+                            $"Error encrypting directory '{d}'.",
+                            "MainForm.Encrypt"
+                        );
+                    }
+
+                    foreach (string decodedFile in Directory.GetFiles(sDir))
+                    {
+                        string decodedFullPath = Path.GetFullPath(decodedFile);
+                        string? selectedConsoleStr = AppUtils.LoadConfig("system");
+                        string recodedFullPath = Path.GetFullPath(DecodedPathRegex().Replace(decodedFullPath, $"recoded/{selectedConsoleStr}/resources"));
+
+                        ExceptionUtils.GlobalTryCatch(
+                            () =>
+                            {
+                                var recodedDir = Path.GetDirectoryName(recodedFullPath);
+                                if (!string.IsNullOrEmpty(recodedDir))
+                                {
+                                    FileUtils.CreatePath(recodedDir);
+                                }
+
+                                if (FileUtils.HasEditedFiles(FileUtils.GetSHA256HashFromFile(decodedFullPath)))
+                                {
+                                    ProcessUtils.RunLuaJit(decodedFullPath, recodedFullPath);
+                                }
+                            },
+                            $"Error encrypting file '{decodedFile}'.",
+                            "MainForm.Encrypt"
+                        );
+
+                        int done = Interlocked.Increment(ref filesEncrypted);
+                        double progress = (totalFiles > 0) ? (done * 100.0 / totalFiles) : 100;
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (vm != null)
+                                vm.EncryptionProgress = progress;
+                        });
+                    }
+                }
+
+                EncryptWithProgress("decoded");
+
+                ExceptionUtils.GlobalTryCatch(
+                    () => FileUtils.DeleteEmptyDirectories(AppUtils.RecodedPath),
+                    $"Error deleting empty directories in '{AppUtils.RecodedPath}'.",
+                    "MainForm.Encrypt"
+                );
+            }).ConfigureAwait(false);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (decryptButton != null)
-                    decryptButton.IsEnabled = true;
                 if (encryptButton != null)
                     encryptButton.IsEnabled = true;
                 FileUtils.CreatePath(AppUtils.RecodedPath);
-            });
 
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
                 bool noFiles = (Directory.GetDirectories(AppUtils.RecodedPath)?.Length ?? 0) == 0;
                 if (noFiles)
                 {
@@ -214,51 +305,12 @@ namespace SNESMiniLuaCompiler.Views
                     NotificationHelper.Success("Encryption complete!", "Light");
                     message.Text = "Done!";
                 }
+                if (vm != null)
+                {
+                    vm.EncryptionProgress = 100;
+                    vm.IsEncryptionInProgress = false;
+                }
             });
-        }
-
-        private static void Encrypt(string sDir)
-        {
-            string? selectedConsoleStr = AppUtils.LoadConfig("system");
-
-            foreach (string d in Directory.GetDirectories(sDir))
-            {
-                ExceptionUtils.GlobalTryCatch(
-                    () => Encrypt(d),
-                    $"Error encrypting directory '{d}'.",
-                    "MainForm.Encrypt"
-                );
-            }
-
-            foreach (string decodedFile in Directory.GetFiles(sDir))
-            {
-                string decodedFullPath = Path.GetFullPath(decodedFile);
-                string recodedFullPath = Path.GetFullPath(DecodedPathRegex().Replace(decodedFullPath, $"recoded/{selectedConsoleStr}/resources"));
-
-                ExceptionUtils.GlobalTryCatch(
-                    () =>
-                    {
-                        var recodedDir = Path.GetDirectoryName(recodedFullPath);
-                        if (!string.IsNullOrEmpty(recodedDir))
-                        {
-                            FileUtils.CreatePath(recodedDir);
-                        }
-
-                        if (FileUtils.HasEditedFiles(FileUtils.GetSHA256HashFromFile(decodedFullPath)))
-                        {
-                            ProcessUtils.RunLuaJit(decodedFullPath, recodedFullPath);
-                        }
-                    },
-                    $"Error encrypting file '{decodedFile}'.",
-                    "MainForm.Encrypt"
-                );
-            }
-
-            ExceptionUtils.GlobalTryCatch(
-                () => FileUtils.DeleteEmptyDirectories(AppUtils.RecodedPath),
-                $"Error deleting empty directories in '{AppUtils.RecodedPath}'.",
-                "MainForm.Encrypt"
-            );
         }
 
         [GeneratedRegex("decoded")]

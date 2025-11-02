@@ -22,6 +22,9 @@
 	<Design.DataContext>
 		<vm:MainWindowViewModel />
 	</Design.DataContext>
+	<Window.DataContext>
+		<vm:MainWindowViewModel />
+	</Window.DataContext>
 
 
 	<Window.Styles>
@@ -56,7 +59,7 @@
 			   Stretch="UniformToFill"
 			   IsHitTestVisible="False"/>
 		<!--<ListBox ItemsSource="{Binding People}" />-->
-		<Grid RowDefinitions="90,120,60,40,Auto">
+		<Grid RowDefinitions="90,120,*,Auto">
 			<!-- First row: fixed height -->
 			<StackPanel Grid.Row="0"
 						Orientation="Horizontal"
@@ -118,63 +121,65 @@
 			</StackPanel>
 
 			<!-- Third row: fixed height -->
-			<StackPanel Grid.Row="2"
-						Orientation="Horizontal"
-						HorizontalAlignment="Center"
-						Spacing="100">
-				<Button
-				Name="btn_decrypt"
-				Width="170"
-				Height="45"
-				Content="Decrypt"
-				Theme="{DynamicResource OutlineButton}"
-				Classes="Warning"
-				VerticalContentAlignment="Center"
-				IsEnabled="{Binding IsDecodeButtonEnabled}"
-				Click="DecryptButton_Click"/>
-
+			<Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0">
 				<Button
 				Name="btn_encrypt"
-				Width="170"
+				Width="340"
 				Height="45"
 				Theme="{DynamicResource OutlineButton}"
 				Classes="Warning"
 				VerticalContentAlignment="Center"
 				IsEnabled="{Binding IsRecodeButtonEnabled}"
-				Click="EncryptButton_Click">
+				Click="EncryptButton_Click"
+				HorizontalAlignment="Center"
+				Grid.Column="0"
+				Margin="0">
 					Encode
 				</Button>
-			</StackPanel>
-			<!-- Third row: fixed height -->
-			<StackPanel Grid.Row="3"
-						Orientation="Horizontal"
+				<Button Name="btn_trash"
+						Width="44"
+						Theme="{DynamicResource IconBorderlessButton}"
+						Content="{StaticResource SemiIconDelete}"
+						IsEnabled="{Binding IsTrashButtonEnabled}"
+						ToolTip.Tip="Delete all temporary and output files."
+						ToolTip.Placement="Top"
+						ToolTip.VerticalOffset="-5"
+						ToolTip.HorizontalOffset="-80"
+						Click="TrashButton_Click"
+						Grid.Column="1"
 						HorizontalAlignment="Right"
-						Spacing="100">
-				<StackPanel Grid.Row="0"
-							Orientation="Horizontal"
-							HorizontalAlignment="Right"
-							VerticalAlignment="Bottom"
-							Margin="0,10"
-							Spacing="20">
-					<!--<TextBlock Text="Row 3 (fixed height)"/>-->
-					<Button Name="btn_trash"
-							Width="44"
-							Theme="{DynamicResource IconBorderlessButton}"
-							Content="{StaticResource SemiIconDelete}"
-							IsEnabled="{Binding IsTrashButtonEnabled}"
-							ToolTip.Tip="Delete all temporary and output files."
-							ToolTip.Placement="Top"
-							ToolTip.VerticalOffset="-10"
-							ToolTip.HorizontalOffset="-40"
-							Click="TrashButton_Click">
-						<!--<PathIcon Data="{StaticResource SemiIconDelete}"/>-->
-					</Button>
+						Margin="0,0,5,0"/>
+			</Grid>
+			<!-- Third row: fixed height -->
+			<!--<StackPanel Grid.Row="3"
+			Orientation="Horizontal"
+			HorizontalAlignment="Right"
+			Spacing="100">
+			<StackPanel Grid.Row="0"
+			Orientation="Horizontal"
+			HorizontalAlignment="Right"
+			VerticalAlignment="Bottom"
+			Margin="0,10"
+			Spacing="20">
+			--><!--<TextBlock Text="Row 3 (fixed height)"/>--><!--
+			<Button Name="btn_trash"
+			Width="44"
+			Theme="{DynamicResource IconBorderlessButton}"
+			Content="{StaticResource SemiIconDelete}"
+			IsEnabled="{Binding IsTrashButtonEnabled}"
+			ToolTip.Tip="Delete all temporary and output files."
+			ToolTip.Placement="Top"
+			ToolTip.VerticalOffset="-10"
+			ToolTip.HorizontalOffset="-40"
+			Click="TrashButton_Click">
+			--><!--<PathIcon Data="{StaticResource SemiIconDelete}"/>--><!--
+			</Button>
 
-				</StackPanel>
 			</StackPanel>
+			</StackPanel>-->
 			<!-- Fourth row: fixed to bottom -->
 			<Border
-			Grid.Row="4"
+			Grid.Row="3"
 			BorderBrush="#29292d"
 			BorderThickness="0,1,0,0"
 			VerticalAlignment="Bottom">
@@ -187,6 +192,24 @@
 						<TextBlock Text="Status:" VerticalAlignment="Center"/>
 						<!--<TextBlock Grid.Column="1" Name="status" Text="..." VerticalAlignment="Center"/>-->
 						<TextBlock  Margin="0 5" x:Name="message" VerticalAlignment="Center">Ready...</TextBlock>
+						<ProgressBar
+						Classes="Warning"
+						VerticalAlignment="Center"
+						Width="200"
+						Maximum="100"
+						Minimum="0"
+						ShowProgressText="true"
+						Value="{Binding DecryptionProgress}"
+						IsVisible="{Binding IsDecryptionInProgress}" />
+						<ProgressBar
+						Classes="Warning"
+						VerticalAlignment="Center"
+						Width="200"
+						Maximum="100"
+						Minimum="0"
+						ShowProgressText="true"
+						Value="{Binding EncryptionProgress}"
+						IsVisible="{Binding IsEncryptionInProgress}"/>
 					</StackPanel>
 					<TextBlock Grid.Column="2"
 							   Text="{Binding AppVersion}"

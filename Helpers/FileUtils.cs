@@ -269,5 +269,21 @@ namespace SNESMiniLuaCompiler.Helpers
             }, "Error appending text to file.", "FileUtils.SafeAppendAllText");
         }
         #endregion
+
+        // Helper method to count files recursively
+        public static int CountFilesRecursive(string sDir)
+        {
+            int count = 0;
+            try
+            {
+                count += Directory.GetFiles(sDir).Length;
+                foreach (string d in Directory.GetDirectories(sDir))
+                {
+                    count += CountFilesRecursive(d);
+                }
+            }
+            catch { }
+            return count;
+        }
     }
 }

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 
@@ -34,12 +35,12 @@ namespace SNESMiniLuaCompiler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isRecodeButtonEnabled, value);
         }
 
-        private bool _isDecodeButtonEnabled;
-        public bool IsDecodeButtonEnabled
-        {
-            get => _isDecodeButtonEnabled;
-            set => this.RaiseAndSetIfChanged(ref _isDecodeButtonEnabled, value);
-        }
+        //private bool _isDecodeButtonEnabled;
+        //public bool IsDecodeButtonEnabled
+        //{
+        //    get => _isDecodeButtonEnabled;
+        //    set => this.RaiseAndSetIfChanged(ref _isDecodeButtonEnabled, value);
+        //}
 
         private bool _isTrashButtonEnabled;
         public bool IsTrashButtonEnabled
@@ -47,6 +48,36 @@ namespace SNESMiniLuaCompiler.ViewModels
             get => _isTrashButtonEnabled;
             set => this.RaiseAndSetIfChanged(ref _isTrashButtonEnabled, value);
         }
+
+        private double _decryptionProgress;
+        public double DecryptionProgress
+        {
+            get => _decryptionProgress;
+            set => this.RaiseAndSetIfChanged(ref _decryptionProgress, value);
+        }
+
+        private bool _isDecryptionInProgress;
+        public bool IsDecryptionInProgress
+        {
+            get => _isDecryptionInProgress;
+            set => this.RaiseAndSetIfChanged(ref _isDecryptionInProgress, value);
+        }
+
+        private double _encryptionProgress;
+        public double EncryptionProgress
+        {
+            get => _encryptionProgress;
+            set => this.RaiseAndSetIfChanged(ref _encryptionProgress, value);
+        }
+
+        private bool _isEncryptionInProgress;
+        public bool IsEncryptionInProgress
+        {
+            get => _isEncryptionInProgress;
+            set => this.RaiseAndSetIfChanged(ref _isEncryptionInProgress, value);
+        }
+
+        public Func<Task>? DecryptFilesAsyncDelegate { get; set; }
 
         public MainWindowViewModel()
         {
@@ -112,7 +143,6 @@ namespace SNESMiniLuaCompiler.ViewModels
         {
             SelectedConsole = systemModel;
 
-
             foreach (var console in ConsoleList)
             {
                 console.IsChecked = console.SystemModel == systemModel;
@@ -136,18 +166,16 @@ namespace SNESMiniLuaCompiler.ViewModels
             UpdateButtonStates();
             FileUtils.DeletePath(AppUtils.ResourcesPath);
             AppUtils.ExtractSelectedResources(systemModel);
-        }
 
-        private void UpdateConsoleSelection()
-        {
-            foreach (var console in ConsoleList)
-                console.IsChecked = console.SystemModel == SelectedConsole;
+            // Call the delegate to trigger decryption in the View
+            if (DecryptFilesAsyncDelegate is not null)
+                await DecryptFilesAsyncDelegate.Invoke();
         }
 
         public void UpdateButtonStates()
         {
             bool hasConsole = SelectedConsole.HasValue;
-            IsDecodeButtonEnabled = hasConsole && FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
+            //IsDecodeButtonEnabled = hasConsole && FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
             IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
             IsTrashButtonEnabled = hasConsole && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) || FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
         }

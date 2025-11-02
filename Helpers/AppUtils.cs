@@ -17,7 +17,7 @@ namespace SNESMiniLuaCompiler.Helpers
         public static readonly string LuaJitPath = FileUtils.CombinePath(AppPath, "lib", "luajit");
         public static readonly string DecompilerPath = FileUtils.CombinePath("lib", "decompiler");
         public static readonly string DecompilerScript = FileUtils.CombinePath(DecompilerPath, "main.py");
-        public static readonly string ResourcesPath = FileUtils.CombinePath("lib", "resources");
+        public static readonly string ResourcesPath = FileUtils.CombinePath(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources");
         public static readonly string SystemResourcePrefix = "SNESMiniLuaCompiler.Lib";
         public static readonly string ConfigFile = Path.Combine(LibPath, "settings.config");
 
@@ -67,22 +67,15 @@ namespace SNESMiniLuaCompiler.Helpers
                 foreach (var (suffix, path) in resources)
                     ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);  
             }, "Failed to extract resources.", "AppUtils.ExtractAllResources");
-            //var resources = new (string Suffix, string Path)[]
-            //{
-            //    ("luajit", LuaJitPath),
-            //    ("decompiler", DecompilerPath)
-            //};
-
-            //foreach (var (suffix, path) in resources)
-            //    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
         }
 
         public static void ExtractSelectedResources(SystemModel systemModel)
         {
             string systemName = Path.GetFileName(GetSystemPath(systemModel));
             string resourcePrefix = $"{SystemResourcePrefix}.original.{systemName}.resources.";
-            string outputDir = FileUtils.CombinePath(ResourcesPath, systemName);
-            ExtractResourcesWithPrefix(resourcePrefix, outputDir);
+            //string outputDir = FileUtils.CombinePath(ResourcesPath, systemName);
+            string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
+            ExtractResourcesWithPrefix(resourcePrefix, tempDir);
         }
 
 
@@ -142,6 +135,7 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static string GetSystemPath(SystemModel systemModel)
         {
+            //string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
             var systemPaths = new Dictionary<SystemModel, string>
             {
                 { SystemModel.Famicom, FileUtils.CombinePath(ResourcesPath, "hvc") },
