@@ -6,7 +6,7 @@
                 Content="{StaticResource SemiIconStar}" />
             <Button
                 Theme="{DynamicResource IconBorderlessButton}"
-                Content="{StaticResource SemiIconStar}" />
+                Content="{StaticResource SemiIconSun}" />
         </StackPanel>
     </Design.PreviewWith>
 

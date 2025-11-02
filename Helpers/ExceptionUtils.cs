@@ -80,12 +80,12 @@ namespace SNESMiniLuaCompiler.Helpers
                     _ => userMessage ?? "An unexpected error occurred."
                 };
                 HandleException(ex, message, defaultLog, showUser);
-                LogException(new ExceptionInfo(ex, message, defaultLog));
+                //LogException(new ExceptionInfo(ex, message, defaultLog));
             }
             catch (Exception ex)
             {
                 HandleException(ex, userMessage ?? "An unexpected error occurred.", defaultLog, showUser);
-                LogException(new ExceptionInfo(ex, userMessage ?? "An unexpected error occurred.", defaultLog));
+                //LogException(new ExceptionInfo(ex, userMessage ?? "An unexpected error occurred.", defaultLog));
                 throw;
             }
         }

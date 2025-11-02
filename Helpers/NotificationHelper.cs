@@ -21,17 +21,17 @@ namespace SNESMiniLuaCompiler.Helpers
             _manager?.Show(new Notification(null, message), type: NotificationType.Success, classes: classes);
         }
 
-        public static void Warning(string title, string message, params string[]? classes)
+        public static void Warning(string message, params string[]? classes)
         {
-            _manager?.Show(new Notification(title, message), type: NotificationType.Warning, classes: classes);
+            _manager?.Show(new Notification(null, message), type: NotificationType.Warning, classes: classes);
         }
-        public static void Error(string title, string message, params string[]? classes)
+        public static void Error(string message, params string[]? classes)
         {
-            _manager?.Show(new Notification(title, message), type: NotificationType.Error, classes: classes);
+            _manager?.Show(new Notification(null, message), type: NotificationType.Error, classes: classes);
         }
-        public static void Information(string title, string message, params string[]? classes)
+        public static void Information(string message, params string[]? classes)
         {
-            _manager?.Show(new Notification(title, message), type: NotificationType.Information, classes: classes);
+            _manager?.Show(new Notification(null, message), type: NotificationType.Information, classes: classes);
         }
     }
 }

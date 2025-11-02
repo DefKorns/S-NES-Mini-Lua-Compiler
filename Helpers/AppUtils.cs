@@ -55,14 +55,26 @@ namespace SNESMiniLuaCompiler.Helpers
         /// </summary>
         public static void ExtractAllResources()
         {
-            var resources = new (string Suffix, string Path)[]
+            ExceptionUtils.GlobalTryCatch(() =>
             {
-                ("luajit", LuaJitPath),
-                ("decompiler", DecompilerPath)
-            };
+                // Existing extraction logic here
+                var resources = new (string Suffix, string Path)[]
+                {
+                    ("luajit", LuaJitPath),
+                    ("decompiler", DecompilerPath)
+                };
 
-            foreach (var (suffix, path) in resources)
-                ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
+                foreach (var (suffix, path) in resources)
+                    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);  
+            }, "Failed to extract resources.", "AppUtils.ExtractAllResources");
+            //var resources = new (string Suffix, string Path)[]
+            //{
+            //    ("luajit", LuaJitPath),
+            //    ("decompiler", DecompilerPath)
+            //};
+
+            //foreach (var (suffix, path) in resources)
+            //    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
         }
 
         public static void ExtractSelectedResources(SystemModel systemModel)

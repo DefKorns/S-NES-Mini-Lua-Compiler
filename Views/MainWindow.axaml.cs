@@ -152,6 +152,20 @@ namespace SNESMiniLuaCompiler.Views
             }
         }
 
+        private async void TrashButton_Click(object? sender, RoutedEventArgs e)
+        {
+
+            FileUtils.DeletePath(AppUtils.DecodedPath);
+            FileUtils.DeletePath(AppUtils.RecodedPath);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                var vm = DataContext as MainWindowViewModel;
+                vm?.UpdateButtonStates();
+                NotificationHelper.Information("Temporary files deleted.", "Light");
+                message.Text = "Temporary files deleted.";
+            });
+        }
+
         private async void EncryptButton_Click(object? sender, RoutedEventArgs e)
         {
             await EncryptFilesAsync().ConfigureAwait(false);
@@ -189,7 +203,17 @@ namespace SNESMiniLuaCompiler.Views
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                message.Text = "Done!";
+                bool noFiles = (Directory.GetDirectories(AppUtils.RecodedPath)?.Length ?? 0) == 0;
+                if (noFiles)
+                {
+                    NotificationHelper.Warning("No files were encrypted.", "Light");
+                    message.Text = "No files were encrypted.";
+                }
+                else
+                {
+                    NotificationHelper.Success("Encryption complete!", "Light");
+                    message.Text = "Done!";
+                }
             });
         }
 

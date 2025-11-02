@@ -9,18 +9,38 @@ namespace SNESMiniLuaCompiler.Helpers
 {
     public static class ImageHelper
     {
+        public static Bitmap? LoadImage(string path)
+        {
+            Bitmap? image = null;
+            ExceptionUtils.GlobalTryCatch(() =>
+            {
+                image = new Bitmap(path);
+            }, "Failed to load image.", "ImageHelper.LoadImage");
+            return image;
+        }
+
+        //public static Bitmap LoadFromResource(Uri resourceUri)
+        //{
+        //    try
+        //    {
+        //        ExceptionUtils.LogException($"Loading asset: {resourceUri}");
+        //        return new Bitmap(AssetLoader.Open(resourceUri));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ExceptionUtils.LogException($"Failed to load asset {resourceUri}: {ex.Message}");
+        //        throw;
+        //    }
+        //}
         public static Bitmap LoadFromResource(Uri resourceUri)
         {
-            try
+            Bitmap? image = null;
+            ExceptionUtils.GlobalTryCatch(() =>
             {
                 ExceptionUtils.LogException($"Loading asset: {resourceUri}");
-                return new Bitmap(AssetLoader.Open(resourceUri));
-            }
-            catch (Exception ex)
-            {
-                ExceptionUtils.LogException($"Failed to load asset {resourceUri}: {ex.Message}");
-                throw;
-            }
+                image = new Bitmap(AssetLoader.Open(resourceUri));
+            }, $"Failed to load asset {resourceUri}.", "ImageHelper.LoadFromResource");
+            return image!;
         }
 
         public static async Task<Bitmap?> LoadFromWeb(Uri url)

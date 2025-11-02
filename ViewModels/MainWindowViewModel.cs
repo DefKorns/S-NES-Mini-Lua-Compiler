@@ -41,6 +41,13 @@ namespace SNESMiniLuaCompiler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isDecodeButtonEnabled, value);
         }
 
+        private bool _isTrashButtonEnabled;
+        public bool IsTrashButtonEnabled
+        {
+            get => _isTrashButtonEnabled;
+            set => this.RaiseAndSetIfChanged(ref _isTrashButtonEnabled, value);
+        }
+
         public MainWindowViewModel()
         {
             SelectConsoleCommand = new RelayCommand<SystemModel>(OnSelectConsole);
@@ -142,6 +149,7 @@ namespace SNESMiniLuaCompiler.ViewModels
             bool hasConsole = SelectedConsole.HasValue;
             IsDecodeButtonEnabled = hasConsole && FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
             IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
+            IsTrashButtonEnabled = hasConsole && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) || FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
         }
 
 

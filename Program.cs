@@ -39,7 +39,7 @@ namespace SNESMiniLuaCompiler
                 else
                 {
                     //MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
-                    ExceptionUtils.LogException("The Application Is Already Running\", \"Lua Compiler\",");
+                    ExceptionUtils.LogException("The Application Is Already Running");
                 }
             }
             catch (Exception ex)

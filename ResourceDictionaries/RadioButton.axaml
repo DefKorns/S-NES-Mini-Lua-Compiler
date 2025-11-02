@@ -1,0 +1,73 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <ThemeVariantScope RequestedThemeVariant="Dark">
+            <StackPanel Background="{DynamicResource SemiBackground0Color}">
+                <RadioButton Theme="{DynamicResource ButtonRadioButton}">Hello</RadioButton>
+                <RadioButton>Hello</RadioButton>
+                <RadioButton Theme="{DynamicResource CardRadioButton}">Hello</RadioButton>
+                <RadioButton Theme="{DynamicResource PureCardRadioButton}">Hello</RadioButton>
+            </StackPanel>
+        </ThemeVariantScope>
+    </Design.PreviewWith>
+    <!--  Theme: Default, Button, Card, PureCard  -->
+
+
+    <ControlTheme x:Key="ButtonRadioButton" TargetType="RadioButton">
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="{DynamicResource RadioButtonButtonDefaultPadding}" />
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="FontWeight" Value="{DynamicResource RadioButtonButtonFontWeight}" />
+        <Setter Property="FontSize" Value="{DynamicResource RadioButtonButtonDefaultFontSize}" />
+        <Setter Property="Foreground" Value="{DynamicResource RadioButtonButtonUncheckedForeground}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource RadioButtonButtonCornerRadius}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="RadioButton">
+                <ContentPresenter
+                    Name="PART_ContentPresenter"
+                    Margin="{TemplateBinding Margin}"
+                    Padding="{TemplateBinding Padding}"
+                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Content="{TemplateBinding Content}"
+                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    RecognizesAccessKey="True"
+                    TextElement.FontSize="{TemplateBinding FontSize}"
+                    TextElement.FontWeight="{TemplateBinding FontWeight}"
+                    UseLayoutRounding="False" />
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:unchecked">
+            <Setter Property="Background" Value="Transparent" />
+            <Style Selector="^:pointerover">
+                <!--<Setter Property="Background" Value="{DynamicResource RadioButtonButtonUncheckedPointeroverBackground}" />-->
+                <Setter Property="Background" Value="{DynamicResource NotificationCardLightWarningBackground}" />
+                <Setter Property="Foreground" Value="{DynamicResource NotificationCardWarningIconForeground}" />
+            </Style>
+            <Style Selector="^:disabled">
+                <Setter Property="Foreground" Value="{DynamicResource RadioButtonButtonUncheckedDisabledForeground}" />
+            </Style>
+        </Style>
+        <Style Selector="^:checked">
+            <Setter Property="Background" Value="{DynamicResource NotificationCardLightWarningBackground}" />
+            <!--<Setter Property="Foreground" Value="{DynamicResource NotificationCardWarningIconForeground}" />-->
+            <Style Selector="^:disabled">
+                <Setter Property="Foreground" Value="{DynamicResource RadioButtonButtonCheckedDisabledForeground}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Small">
+            <Setter Property="FontSize" Value="{DynamicResource RadioButtonButtonSmallFontSize}" />
+            <Setter Property="Padding" Value="{DynamicResource RadioButtonButtonSmallPadding}" />
+        </Style>
+        <Style Selector="^.Large">
+            <Setter Property="FontSize" Value="{DynamicResource RadioButtonButtonLargeFontSize}" />
+            <Setter Property="Padding" Value="{DynamicResource RadioButtonButtonLargePadding}" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>
