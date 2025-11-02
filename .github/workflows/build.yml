@@ -1,0 +1,54 @@
+name: Build and Version with GitVersion
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - development/**
+      - feature/**
+      - release/**
+      - hotfix/**
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.11.0
+        with:
+          versionSpec: '5.x'
+
+      - name: Run GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.11.0
+
+      - name: Display GitVersion outputs
+        run: |
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build with GitVersion
+        run: dotnet build --configuration Release /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+
+      # Optional: publish artifacts
+      # - name: Publish
+      #   run: dotnet publish --configuration Release --output ./publish /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app
+      #     path: ./publish

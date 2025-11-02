@@ -1,0 +1,43 @@
+# Default GitVersion configuration file
+# For documentation and advanced options, see https://gitversion.net/docs/reference/configuration/
+
+next-version: 2.0.0
+mode: ContinuousDeployment
+branches:
+  master:
+    regex: ^master$
+    increment: Minor
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    is-release-branch: true
+  develop:
+    regex: ^dev(elop)?(ment)?/?.*$
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: false
+  feature:
+    regex: ^features?[/-]
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: false
+  release:
+    regex: ^releases?[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  hotfix:
+    regex: ^hotfix(es)?[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  support:
+    regex: ^support[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  pull-request:
+    regex: ^(pull|pull-requests|pr)[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: false
+tag-prefix: ''
