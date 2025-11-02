@@ -92,7 +92,6 @@ namespace SNESMiniLuaCompiler.Views
             }
         }
 
-        // --- Static Helper for Quick Use ---
         public static Task<MessageBoxResult> Show(string text, string title, MessageBoxButtons buttons)
         {
             var builder = new Builder().Title(title).Text(text);
@@ -176,7 +175,6 @@ namespace SNESMiniLuaCompiler.Views
             return builder.ShowAsync();
         }
 
-        // --- Button Helper ---
         public class ButtonStyleOptions
         {
             public ControlTheme? SolidTheme { get; set; }
@@ -200,7 +198,6 @@ namespace SNESMiniLuaCompiler.Views
                 if (!string.IsNullOrWhiteSpace(styleClass))
                     btn.Classes.Add(styleClass);
 
-                // Apply custom themes
                 if (isDefault && styleOptions.OutlineTheme != null)
                     btn.Theme = styleOptions.OutlineTheme;
                 else if (styleOptions.SolidTheme != null)

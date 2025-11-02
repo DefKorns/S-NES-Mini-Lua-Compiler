@@ -19,7 +19,6 @@ namespace SNESMiniLuaCompiler.Views
     public partial class MainWindow : Window
     {
         private string? _selectedSystem;
-        //private WindowNotificationManager? _manager;
 
         public MainWindow()
         {
@@ -28,7 +27,6 @@ namespace SNESMiniLuaCompiler.Views
             InitializeFirstRunCheck();
             InitializeButtonStates();
 
-            // Ensure DataContext is set to MainWindowViewModel
             this.DataContextChanged += (_, e) =>
             {
                 if (DataContext is MainWindowViewModel vm)
@@ -36,16 +34,12 @@ namespace SNESMiniLuaCompiler.Views
             };
         }
 
-        /// <summary>
-        /// Checks if this is the first run and verifies Python installation.
-        /// </summary>
         private static void InitializeFirstRunCheck()
         {
             const string PythonRequirementMessage = "Make sure you have python 3.x installed!\n\nPlease download it from python.org";
 
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                // Check if Python 3.x is installed
                 if (!ProcessUtils.PythonVersion())
                 {
                     Dispatcher.UIThread.Post(async () =>
@@ -54,7 +48,6 @@ namespace SNESMiniLuaCompiler.Views
                             PythonRequirementMessage,
                             "Requirement"
                         );
-                        // Close the application after the user clicks OK
                         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                         {
                             ExceptionUtils.LogException("Python 3.x is not installed. Application will shut down.");
@@ -68,9 +61,6 @@ namespace SNESMiniLuaCompiler.Views
             "MainForm.InitializeFirstRunCheck");
         }
 
-        /// <summary>
-        /// Initializes the state of buttons based on directory existence and active button status.
-        /// </summary>
         private void InitializeButtonStates()
         {
             var vm = DataContext as MainWindowViewModel;
@@ -91,7 +81,7 @@ namespace SNESMiniLuaCompiler.Views
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 encryptButton?.SetValue(IsEnabledProperty, false);
-                message.Text = "Decrypting files, please wait...";
+                status.Text = "Decrypting files, please wait...";
                 if (vm != null)
                 {
                     vm.DecryptionProgress = 0;
@@ -113,7 +103,6 @@ namespace SNESMiniLuaCompiler.Views
                 _ => AppUtils.GetSystemPath(SystemModel.Snes)
             };
 
-            // Prepare assets before counting files
             await Task.Run(() =>
             {
                 FileUtils.DeletePath(AppUtils.DecodedPath);
@@ -121,13 +110,12 @@ namespace SNESMiniLuaCompiler.Views
                 FileUtils.DeleteFile(FileUtils.DecodedHashFile);
             }).ConfigureAwait(false);
 
-            // Count total files after assets are copied
             int totalFiles = FileUtils.CountFilesRecursive("decoded");
             if (totalFiles == 0)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    message.Text = "No files to decrypt.";
+                    status.Text = "No files to decrypt.";
                     if (vm != null)
                     {
                         vm.DecryptionProgress = 0;
@@ -184,7 +172,7 @@ namespace SNESMiniLuaCompiler.Views
                 encryptButton?.SetValue(IsEnabledProperty, true);
                 FileUtils.CreatePath(AppUtils.RecodedPath);
                 NotificationHelper.Success("Decryption complete!", "Light");
-                message.Text = "Done!";
+                status.Text = "Done!";
                 if (vm != null)
                 {
                     vm.DecryptionProgress = 100;
@@ -202,7 +190,7 @@ namespace SNESMiniLuaCompiler.Views
                 var vm = DataContext as MainWindowViewModel;
                 vm?.UpdateButtonStates();
                 NotificationHelper.Information("Temporary files deleted.", "Light");
-                message.Text = "Temporary files deleted.";
+                status.Text = "Temporary files deleted.";
             });
         }
 
@@ -221,9 +209,8 @@ namespace SNESMiniLuaCompiler.Views
             if (encryptButton != null)
                 encryptButton.IsEnabled = false;
 
-            message.Text = "Encrypting files, please wait...";
+            status.Text = "Encrypting files, please wait...";
 
-            // Count total files to encrypt
             int totalFiles = FileUtils.CountFilesRecursive("decoded");
             if (vm != null)
             {
@@ -298,12 +285,12 @@ namespace SNESMiniLuaCompiler.Views
                 if (noFiles)
                 {
                     NotificationHelper.Warning("No files were encrypted.", "Light");
-                    message.Text = "No files were encrypted.";
+                    status.Text = "No files were encrypted.";
                 }
                 else
                 {
                     NotificationHelper.Success("Encryption complete!", "Light");
-                    message.Text = "Done!";
+                    status.Text = "Done!";
                 }
                 if (vm != null)
                 {

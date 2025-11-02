@@ -19,19 +19,6 @@ namespace SNESMiniLuaCompiler.Helpers
             return image;
         }
 
-        //public static Bitmap LoadFromResource(Uri resourceUri)
-        //{
-        //    try
-        //    {
-        //        ExceptionUtils.LogException($"Loading asset: {resourceUri}");
-        //        return new Bitmap(AssetLoader.Open(resourceUri));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ExceptionUtils.LogException($"Failed to load asset {resourceUri}: {ex.Message}");
-        //        throw;
-        //    }
-        //}
         public static Bitmap LoadFromResource(Uri resourceUri)
         {
             Bitmap? image = null;

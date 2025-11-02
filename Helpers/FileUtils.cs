@@ -13,15 +13,9 @@ namespace SNESMiniLuaCompiler.Helpers
         #endregion
 
         #region Existence Checks
-        /// <summary>
-        /// Checks if a file exists and the path is not null or whitespace.
-        /// </summary>
         public static bool SafeFileExists(string path) =>
             !string.IsNullOrWhiteSpace(path) && File.Exists(path);
 
-        /// <summary>
-        /// Checks if a directory exists and the path is not null or whitespace.
-        /// </summary>
         public static bool SafeDirectoryExists(string path) =>
             !string.IsNullOrWhiteSpace(path) && Directory.Exists(path);
 
@@ -29,16 +23,13 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Path Utilities
 
-        public static string CombinePath(params string[] parts) => 
+        public static string CombinePath(params string[] parts) =>
             Path.Combine(parts ?? []);
 
         #endregion
 
         #region Directory and File Operations
 
-        /// <summary>
-        /// Copies assets from the source folder to the destination folder.
-        /// </summary>
         public static void CopyAssets(string sourceFolder, string destFolder)
         {
             ExceptionUtils.GlobalTryCatch(() =>
@@ -72,9 +63,6 @@ namespace SNESMiniLuaCompiler.Helpers
             "FileUtils.CopyAssets");
         }
 
-        /// <summary>
-        /// Creates a directory if it does not exist.
-        /// </summary>
         public static void CreatePath(string path)
         {
             ExceptionUtils.GlobalTryCatch(() =>
@@ -91,9 +79,6 @@ namespace SNESMiniLuaCompiler.Helpers
             "AppUtils.CreatePath");
         }
 
-        /// <summary>
-        /// Deletes a file if it exists.
-        /// </summary>
         public static void DeleteFile(string file)
         {
             if (!SafeFileExists(file))
@@ -102,9 +87,6 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.GlobalTryCatch(() => File.Delete(file), "Error deleting file.", "AppUtils.DeleteFile");
         }
 
-        /// <summary>
-        /// Deletes a directory and its contents.
-        /// </summary>
         public static void DeletePath(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -122,9 +104,6 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.GlobalTryCatch(() => Directory.Delete(path, true), "Error deleting path.", "AppUtils.DeletePath");
         }
 
-        /// <summary>
-        /// Deletes empty directories recursively.
-        /// </summary>
         public static void DeleteEmptyDirectories(string startLocation)
         {
             if (!SafeDirectoryExists(startLocation))
@@ -151,10 +130,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region File Hashing
 
-        /// <summary>
-        /// Generates a file hash and appends it to the hash file.
-        /// </summary>
-        /// 
         public static void GenerateFileHash(string fileName)
         {
             if (!SafeFileExists(fileName))
@@ -171,9 +146,6 @@ namespace SNESMiniLuaCompiler.Helpers
             }, $"Error generating file hash for '{fileName}'.", "FileUtils.GenerateFileHash");
         }
 
-        /// <summary>
-        /// Computes the SHA256 hash of a file.
-        /// </summary>
         public static string GetSHA256HashFromFile(string fileName)
         {
             using var sha256 = SHA256.Create();
@@ -182,9 +154,6 @@ namespace SNESMiniLuaCompiler.Helpers
             return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
         }
 
-        /// <summary>
-        /// Checks if a file has been edited based on its hash.
-        /// </summary>
         public static bool HasEditedFiles(string hash)
         {
             foreach (var line in SafeReadAllLines(DecodedHashFile))
@@ -199,41 +168,32 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static string SafeReadAllText(string filePath)
         {
-            if (!SafeFileExists(filePath))
-                return string.Empty;
-
-            string result = string.Empty;
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                result = File.ReadAllText(filePath);
-            }, "Error reading file.", "FileUtils.SafeReadAllText");
-            return result;
+            return ExceptionUtils.SafeFileOperation(
+                    () => File.ReadAllText(filePath),
+                    string.Empty,
+                  filePath,
+                    "FileUtils.SafeReadAllText"
+                );
         }
 
         public static string[] SafeReadAllLines(string filePath)
         {
-            if (!SafeFileExists(filePath))
-                return [];
-
-            string[] result = [];
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                result = File.ReadAllLines(filePath);
-            }, "Error reading lines from file.", "FileUtils.SafeReadAllLines");
-            return result;
+            return ExceptionUtils.SafeFileOperation(
+                () => File.ReadAllLines(filePath),
+             [],
+           filePath,
+             "FileUtils.SafeReadAllLines"
+            );
         }
 
         public static byte[] SafeReadBytes(string filePath)
         {
-            if (!SafeFileExists(filePath))
-                return [];
-
-            byte[] result = [];
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                result = File.ReadAllBytes(filePath);
-            }, "Error reading bytes from file.", "FileUtils.SafeReadBytes");
-            return result;
+            return ExceptionUtils.SafeFileOperation(
+                () => File.ReadAllBytes(filePath),
+                [],
+                filePath,
+                "FileUtils.SafeReadBytes"
+            );
         }
 
         public static void SafeWriteBytes(string filePath, byte[] bytes)
@@ -241,10 +201,12 @@ namespace SNESMiniLuaCompiler.Helpers
             if (string.IsNullOrWhiteSpace(filePath) || bytes == null)
                 return;
 
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                File.WriteAllBytes(filePath, bytes);
-            }, "Error writing bytes to file.", "FileUtils.SafeWriteBytes");
+            ExceptionUtils.SafeFileOperation(() =>
+ { File.WriteAllBytes(filePath, bytes); return true; },
+                false,
+                null, // Don't check file existence for write operations
+                "FileUtils.SafeWriteBytes"
+            );
         }
 
         public static void SafeAppendAllLines(string filePath, string[] lines)
@@ -270,7 +232,6 @@ namespace SNESMiniLuaCompiler.Helpers
         }
         #endregion
 
-        // Helper method to count files recursively
         public static int CountFilesRecursive(string sDir)
         {
             int count = 0;

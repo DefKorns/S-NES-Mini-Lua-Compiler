@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using ReactiveUI.Avalonia;
-using SNESMiniLuaCompiler.Helpers; // Add this to import AppUtils
+using SNESMiniLuaCompiler.Helpers;
 using Serilog;
 using System;
 using System.Threading;
@@ -24,7 +24,6 @@ namespace SNESMiniLuaCompiler
            )
            .CreateLogger();
 
-            // Pass Serilog logger to ExceptionUtils
             ExceptionUtils.ConfigureLogger(Log.Logger);
             try
             {
@@ -38,7 +37,6 @@ namespace SNESMiniLuaCompiler
                 }
                 else
                 {
-                    //MsgBox.Show("The Application Is Already Running", "Lua Compiler", MsgBox.ButtonType.OK, MsgBox.Ico.Warning);
                     ExceptionUtils.LogException("The Application Is Already Running");
                 }
             }
@@ -50,19 +48,6 @@ namespace SNESMiniLuaCompiler
             {
                 Log.CloseAndFlush();
             }
-            //catch (InvalidOperationException ex)
-            //{
-            //    // Log or display the error message
-            //    // You may want to use Avalonia dialogs here in the future
-            //    Console.Error.WriteLine($"An application error occurred: {ex.Message}");
-            //    ExceptionUtils.LogException(new ExceptionUtils.ExceptionInfo(ex, "An application error occurred:", ex.Message));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.Error.WriteLine($"An unexpected error occurred: {ex.Message}");
-            //    ExceptionUtils.LogException(new ExceptionUtils.ExceptionInfo(ex, "An unexpected error occurred:", ex.Message));
-            //    throw;
-            //}
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.

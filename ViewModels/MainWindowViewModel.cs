@@ -35,13 +35,6 @@ namespace SNESMiniLuaCompiler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isRecodeButtonEnabled, value);
         }
 
-        //private bool _isDecodeButtonEnabled;
-        //public bool IsDecodeButtonEnabled
-        //{
-        //    get => _isDecodeButtonEnabled;
-        //    set => this.RaiseAndSetIfChanged(ref _isDecodeButtonEnabled, value);
-        //}
-
         private bool _isTrashButtonEnabled;
         public bool IsTrashButtonEnabled
         {
@@ -85,9 +78,6 @@ namespace SNESMiniLuaCompiler.ViewModels
             UpdateButtonStates();
         }
 
-        /// <summary>
-        /// List of available consoles, including their image, name, region, and system model.
-        /// </summary>
         public List<Consoles> ConsoleList { get; } = [
             new Consoles
             {
@@ -167,7 +157,6 @@ namespace SNESMiniLuaCompiler.ViewModels
             FileUtils.DeletePath(AppUtils.ResourcesPath);
             AppUtils.ExtractSelectedResources(systemModel);
 
-            // Call the delegate to trigger decryption in the View
             if (DecryptFilesAsyncDelegate is not null)
                 await DecryptFilesAsyncDelegate.Invoke();
         }
@@ -175,7 +164,6 @@ namespace SNESMiniLuaCompiler.ViewModels
         public void UpdateButtonStates()
         {
             bool hasConsole = SelectedConsole.HasValue;
-            //IsDecodeButtonEnabled = hasConsole && FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath);
             IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
             IsTrashButtonEnabled = hasConsole && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) || FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
         }

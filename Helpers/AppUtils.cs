@@ -25,9 +25,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Version
 
-        /// <summary>
-        /// Gets the application version as a string.
-        /// </summary>
         public static string GetAppVersion() =>
             Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
 
@@ -35,9 +32,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Directory/Resource Management
 
-        /// <summary>
-        /// Ensures all required module directories exist.
-        /// </summary>
         public static void EnsureAllModuleDirectories()
         {
             EnsureDirectoryExists(LuaJitPath);
@@ -50,14 +44,10 @@ namespace SNESMiniLuaCompiler.Helpers
                 Directory.CreateDirectory(path);
         }
 
-        /// <summary>
-        /// Extracts all required resources in a single call.
-        /// </summary>
         public static void ExtractAllResources()
         {
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                // Existing extraction logic here
                 var resources = new (string Suffix, string Path)[]
                 {
                     ("luajit", LuaJitPath),
@@ -73,11 +63,9 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             string systemName = Path.GetFileName(GetSystemPath(systemModel));
             string resourcePrefix = $"{SystemResourcePrefix}.original.{systemName}.resources.";
-            //string outputDir = FileUtils.CombinePath(ResourcesPath, systemName);
             string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
             ExtractResourcesWithPrefix(resourcePrefix, tempDir);
         }
-
 
         public static void ExtractResourceToFile(string resourceName, string outputPath)
         {
@@ -95,7 +83,6 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.ThrowArgNull(resourcePrefix, nameof(resourcePrefix));
             ExceptionUtils.ThrowArgNull(targetRoot, nameof(targetRoot));
 
-            // Replace '-' with '_' in the resourcePrefix for matching
             string normalizedPrefix = resourcePrefix.Replace('-', '_');
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly?.GetManifestResourceNames();
@@ -130,12 +117,8 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region System Path and Directory Checks
 
-        /// <summary>
-        /// Gets the system path for a given button name.
-        /// </summary>
         public static string GetSystemPath(SystemModel systemModel)
         {
-            //string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
             var systemPaths = new Dictionary<SystemModel, string>
             {
                 { SystemModel.Famicom, FileUtils.CombinePath(ResourcesPath, "hvc") },
@@ -149,23 +132,16 @@ namespace SNESMiniLuaCompiler.Helpers
                 : FileUtils.CombinePath(ResourcesPath, "snes-usa");
         }
 
-        /// <summary>
-        /// Checks if both decoded and recoded directories exist.
-        /// </summary>
         public static bool AreDecodedAndRecodedDirsPresent() =>
             FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
 
         #endregion
 
-        
-
         public static void SaveConfig(string key, string value)
         {
-            // Read all lines if file exists, else create new list
             var lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
             bool found = false;
 
-            // Update the key if it exists
             for (int i = 0; i < lines.Count; i++)
             {
                 if (lines[i].StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
@@ -183,7 +159,6 @@ namespace SNESMiniLuaCompiler.Helpers
             File.WriteAllLines(ConfigFile, lines);
         }
 
-        // Optionally, add a method to read config values
         public static string? LoadConfig(string key)
         {
             if (!File.Exists(ConfigFile))

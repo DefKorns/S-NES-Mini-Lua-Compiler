@@ -1,24 +1,22 @@
 ﻿using Serilog;
 using SNESMiniLuaCompiler.Views;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
     public class ExceptionUtils
     {
-        // Serilog logger instance (should be configured in Program.cs)
         private static ILogger? _logger;
+        private static readonly ConcurrentDictionary<string, (bool exists, DateTime lastCheck)> _fileExistsCache = new();
+        private const int FILE_CACHE_DURATION_MS = 1000; // Cache file existence for 1 second
 
-        // Call this once during app startup, e.g. in Program.cs
         public static void ConfigureLogger(ILogger logger)
         {
             _logger = logger;
         }
 
-        /// <summary>
-        /// Represents detailed information about an error or exception for logging and user feedback.
-        /// </summary>
         public class ExceptionInfo(Exception exception, string? userMessage = null, string? context = null)
         {
             public Exception Exception { get; } = exception;
@@ -33,15 +31,9 @@ namespace SNESMiniLuaCompiler.Helpers
         }
 
 
-        /// <summary>
-        /// Throws an exception if the argument is null.
-        /// </summary>
         public static void ThrowArgNull(object? arg, string? paramName = null) =>
             _ = arg ?? throw new ArgumentNullException(paramName);
 
-        /// <summary>
-        /// Centralized error logger and user notifier.
-        /// </summary>
         public static void HandleException(Exception ex, string? userMessage = null, string? logContext = null, bool showUser = true)
         {
             ThrowArgNull(ex, nameof(ex));
@@ -56,43 +48,41 @@ namespace SNESMiniLuaCompiler.Helpers
             }
         }
 
-        /// <summary>
-        /// Logs and optionally shows user-friendly messages for expected exceptions.
-        /// </summary>
-        /// <param name="action">The action to execute.</param>
-        /// <param name="userMessage">A user-friendly message (optional).</param>
-        /// <param name="logContext">Context for logging (optional).</param>
-        /// <param name="showUser">Whether to show a message box to the user (default: true).</param>
-        public static void GlobalTryCatch(Action action, string? userMessage = null, string? logContext = null, bool showUser = true)
+        public static T SafeFileOperation<T>(Func<T> operation, T defaultValue, string? filePath = null, string? context = null, bool showUser = false)
         {
-            string defaultLog = logContext ?? "ExceptionUtils.GlobalTryCatch";
+            if (filePath != null && !CheckFileExists(filePath))
+            {
+                return defaultValue;
+            }
+
             try
             {
-                action();
+                return operation();
             }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
             {
-                string message = ex switch
-                {
-                    IOException => userMessage ?? "An I/O error occurred.",
-                    UnauthorizedAccessException => userMessage ?? "Access denied.",
-                    ArgumentException => userMessage ?? "Invalid argument.",
-                    _ => userMessage ?? "An unexpected error occurred."
-                };
-                HandleException(ex, message, defaultLog, showUser);
-                //LogException(new ExceptionInfo(ex, message, defaultLog));
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, userMessage ?? "An unexpected error occurred.", defaultLog, showUser);
-                //LogException(new ExceptionInfo(ex, userMessage ?? "An unexpected error occurred.", defaultLog));
-                throw;
+                HandleException(ex, null, context ?? "SafeFileOperation", showUser);
+                return defaultValue;
             }
         }
 
-        /// <summary>
-        /// Logs exception information to a file.
-        /// </summary>
+        private static bool CheckFileExists(string filePath)
+        {
+            if (_fileExistsCache.TryGetValue(filePath, out var cacheEntry))
+            {
+                if ((DateTime.UtcNow - cacheEntry.lastCheck).TotalMilliseconds < FILE_CACHE_DURATION_MS)
+                {
+                    return cacheEntry.exists;
+                }
+            }
+
+            var exists = File.Exists(filePath);
+            _fileExistsCache.AddOrUpdate(filePath,
+                    (exists, DateTime.UtcNow),
+             (_, _) => (exists, DateTime.UtcNow));
+            return exists;
+        }
+
         public static void LogException(ExceptionInfo info)
         {
             _logger?.Error(info.Exception,
@@ -104,5 +94,30 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             _logger?.Error("{Info}", info);
         }
+
+        public static void GlobalTryCatch(Action action, string? userMessage = null, string? logContext = null, bool showUser = true)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                HandleException(ex, userMessage ?? GetDefaultMessage(ex), logContext ?? "GlobalTryCatch", showUser);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, userMessage ?? "An unexpected error occurred.", logContext ?? "GlobalTryCatch", showUser);
+                throw;
+            }
+        }
+
+        private static string GetDefaultMessage(Exception ex) => ex switch
+        {
+            IOException => "An I/O error occurred.",
+            UnauthorizedAccessException => "Access denied.",
+            ArgumentException => "Invalid argument.",
+            _ => "An unexpected error occurred."
+        };
     }
 }

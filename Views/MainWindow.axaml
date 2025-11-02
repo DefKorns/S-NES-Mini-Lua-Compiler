@@ -18,14 +18,12 @@
 		Height="336"
 		WindowStartupLocation="CenterScreen"
 		mc:Ignorable="d">
-
 	<Design.DataContext>
 		<vm:MainWindowViewModel />
 	</Design.DataContext>
 	<Window.DataContext>
 		<vm:MainWindowViewModel />
 	</Window.DataContext>
-
 
 	<Window.Styles>
 		<Style Selector="TextBlock">
@@ -38,14 +36,6 @@
 			<Setter Property="Height" Value="NaN"/>
 			<Setter Property="Background" Value="Transparent" />
 		</Style>
-		<!--		<Style Selector="Button">
-		<Setter Property="Background" Value="Transparent" />
-		<Setter Property="MaxHeight" Value="90" />
-		<Setter Property="HorizontalContentAlignment" Value="Center" />
-		</Style>-->
-		<!--		<Style Selector="RadioButton">
-		<Setter Property="Theme" Value="{DynamicResource PureCardRadioButton}" />
-		</Style>-->
 	</Window.Styles>
 
 	<Grid>
@@ -58,85 +48,72 @@
 		<Image Source="avares://SNESMiniLuaCompiler/Assets/app_bg.png"
 			   Stretch="UniformToFill"
 			   IsHitTestVisible="False"/>
-		<!--<ListBox ItemsSource="{Binding People}" />-->
 		<Grid RowDefinitions="90,120,*,Auto">
-			<!-- First row: fixed height -->
 			<StackPanel Grid.Row="0"
 						Orientation="Horizontal"
 						HorizontalAlignment="Right"
 						VerticalAlignment="Top"
 						Margin="0,10"
 						Spacing="20">
-				<!--<TextBlock Text="Row 3 (fixed height)"/>-->
-
-				<ToggleSwitch
-				Theme="{DynamicResource IconBorderlessToggleSwitch}"
-				Command="{Binding ToggleThemeCommand}"
-				OnContent="{StaticResource SemiIconSun}"
-				OffContent="{StaticResource SemiIconMoon}" />
+				<ToggleSwitch Theme="{DynamicResource IconBorderlessToggleSwitch}"
+							  Command="{Binding ToggleThemeCommand}"
+							  OnContent="{StaticResource SemiIconSun}"
+							  OffContent="{StaticResource SemiIconMoon}" />
 			</StackPanel>
-			<!-- Second row: stretch height -->
-			<StackPanel
-			Grid.Row="1"
-			Orientation="Horizontal"
-			Spacing="20"
-			Name="mainPanel"
-			HorizontalAlignment="Center"
-			VerticalAlignment="Stretch">
+			<StackPanel Grid.Row="1"
+						Orientation="Horizontal"
+						Spacing="20"
+						Name="mainPanel"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Stretch">
 				<ItemsControl x:Name="items" ItemsSource="{Binding ConsoleList}">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
-							<StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+							<StackPanel
+							Orientation="Horizontal"
+							Spacing="5"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Stretch"/>
 						</ItemsPanelTemplate>
 					</ItemsControl.ItemsPanel>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<RadioButton Theme="{DynamicResource ButtonRadioButton}"
 										 Command="{Binding DataContext.SelectConsoleCommand, ElementName=items}"
-										 CommandParameter="{Binding SystemModel}" IsChecked="{Binding IsChecked}">
+										 CommandParameter="{Binding SystemModel}"
+										 IsChecked="{Binding IsChecked}">
 								<RadioButton.Content>
 									<StackPanel>
 										<Image Source="{Binding ImagePath}"
 											   RenderOptions.BitmapInterpolationMode="HighQuality"/>
-										<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" />
-										<TextBlock HorizontalAlignment="Center" Text="{Binding Region}" />
+										<TextBlock HorizontalAlignment="Center"
+												   Text="{Binding Name}" />
+										<TextBlock HorizontalAlignment="Center"
+												   Text="{Binding Region}" />
 									</StackPanel>
 								</RadioButton.Content>
 							</RadioButton>
-							<!--<Button
-							Command="{Binding DataContext.SelectConsoleCommand, ElementName=items}"
-							CommandParameter="{Binding SystemModel}">
-							<Button.Content>
-							<StackPanel Orientation="Vertical" VerticalAlignment="Center">
-							<Image Source="{Binding ImagePath}" />
-							<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" />
-							<TextBlock HorizontalAlignment="Center" Text="{Binding Region}" />
-							</StackPanel>
-							</Button.Content>
-							</Button>-->
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>
-
 			</StackPanel>
 
-			<!-- Third row: fixed height -->
 			<Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0">
-				<Button
-				Name="btn_encrypt"
-				Width="340"
-				Height="45"
-				Theme="{DynamicResource OutlineButton}"
-				Classes="Warning"
-				VerticalContentAlignment="Center"
-				IsEnabled="{Binding IsRecodeButtonEnabled}"
-				Click="EncryptButton_Click"
-				HorizontalAlignment="Center"
-				Grid.Column="0"
-				Margin="0">
+				<Button Grid.Column="0"
+						Name="btn_encrypt"
+						Width="340"
+						Height="45"
+						Theme="{DynamicResource OutlineButton}"
+						Classes="Warning"
+						VerticalContentAlignment="Center"
+						IsEnabled="{Binding IsRecodeButtonEnabled}"
+						Click="EncryptButton_Click"
+						HorizontalAlignment="Center"
+						Margin="0">
 					Encode
 				</Button>
-				<Button Name="btn_trash"
+				<Button Grid.Column="1"
+						Name="btn_trash"
 						Width="44"
 						Theme="{DynamicResource IconBorderlessButton}"
 						Content="{StaticResource SemiIconDelete}"
@@ -146,70 +123,41 @@
 						ToolTip.VerticalOffset="-5"
 						ToolTip.HorizontalOffset="-80"
 						Click="TrashButton_Click"
-						Grid.Column="1"
 						HorizontalAlignment="Right"
 						Margin="0,0,5,0"/>
 			</Grid>
-			<!-- Third row: fixed height -->
-			<!--<StackPanel Grid.Row="3"
-			Orientation="Horizontal"
-			HorizontalAlignment="Right"
-			Spacing="100">
-			<StackPanel Grid.Row="0"
-			Orientation="Horizontal"
-			HorizontalAlignment="Right"
-			VerticalAlignment="Bottom"
-			Margin="0,10"
-			Spacing="20">
-			--><!--<TextBlock Text="Row 3 (fixed height)"/>--><!--
-			<Button Name="btn_trash"
-			Width="44"
-			Theme="{DynamicResource IconBorderlessButton}"
-			Content="{StaticResource SemiIconDelete}"
-			IsEnabled="{Binding IsTrashButtonEnabled}"
-			ToolTip.Tip="Delete all temporary and output files."
-			ToolTip.Placement="Top"
-			ToolTip.VerticalOffset="-10"
-			ToolTip.HorizontalOffset="-40"
-			Click="TrashButton_Click">
-			--><!--<PathIcon Data="{StaticResource SemiIconDelete}"/>--><!--
-			</Button>
 
-			</StackPanel>
-			</StackPanel>-->
-			<!-- Fourth row: fixed to bottom -->
-			<Border
-			Grid.Row="3"
-			BorderBrush="#29292d"
-			BorderThickness="0,1,0,0"
-			VerticalAlignment="Bottom">
-				<Grid Name="footer" Classes="footer" ColumnDefinitions="Auto,*" VerticalAlignment="Center"
+			<Border Grid.Row="3"
+					BorderBrush="#29292d"
+					BorderThickness="0,1,0,0"
+					VerticalAlignment="Bottom">
+				<Grid Name="footer"
+					  Classes="footer"
+					  ColumnDefinitions="Auto,*"
+					  VerticalAlignment="Center"
 					  Margin="10,0,10,0">
 					<StackPanel Grid.Column="0"
 								Orientation="Horizontal"
 								HorizontalAlignment="Center"
 								Spacing="5">
 						<TextBlock Text="Status:" VerticalAlignment="Center"/>
-						<!--<TextBlock Grid.Column="1" Name="status" Text="..." VerticalAlignment="Center"/>-->
-						<TextBlock  Margin="0 5" x:Name="message" VerticalAlignment="Center">Ready...</TextBlock>
-						<ProgressBar
-						Classes="Warning"
-						VerticalAlignment="Center"
-						Width="200"
-						Maximum="100"
-						Minimum="0"
-						ShowProgressText="true"
-						Value="{Binding DecryptionProgress}"
-						IsVisible="{Binding IsDecryptionInProgress}" />
-						<ProgressBar
-						Classes="Warning"
-						VerticalAlignment="Center"
-						Width="200"
-						Maximum="100"
-						Minimum="0"
-						ShowProgressText="true"
-						Value="{Binding EncryptionProgress}"
-						IsVisible="{Binding IsEncryptionInProgress}"/>
+						<TextBlock  Margin="0 5" x:Name="status" VerticalAlignment="Center">Ready...</TextBlock>
+						<ProgressBar Classes="Warning"
+									 VerticalAlignment="Center"
+									 Width="200"
+									 Maximum="100"
+									 Minimum="0"
+									 ShowProgressText="true"
+									 Value="{Binding DecryptionProgress}"
+									 IsVisible="{Binding IsDecryptionInProgress}" />
+						<ProgressBar Classes="Warning"
+									 VerticalAlignment="Center"
+									 Width="200"
+									 Maximum="100"
+									 Minimum="0"
+									 ShowProgressText="true"
+									 Value="{Binding EncryptionProgress}"
+									 IsVisible="{Binding IsEncryptionInProgress}"/>
 					</StackPanel>
 					<TextBlock Grid.Column="2"
 							   Text="{Binding AppVersion}"

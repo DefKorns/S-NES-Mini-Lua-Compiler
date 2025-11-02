@@ -16,9 +16,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Executable Path Utilities
 
-        /// <summary>
-        /// Finds the full path of an executable in the system PATH.
-        /// </summary>
         public static string FindExePath(string exe)
         {
             exe = Environment.ExpandEnvironmentVariables(exe ?? string.Empty);
@@ -41,30 +38,6 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Process Execution
 
-        /// <summary>
-        /// Runs a command-line process with the specified arguments.
-        /// </summary>
-       
-        //public static void RunCmd(string args)
-        //{
-        //    ExceptionUtils.GlobalTryCatch(() =>
-        //    {
-        //        var exePath = FindExePath("pythonw.exe");
-        //        var start = new ProcessStartInfo
-        //        {
-        //            FileName = exePath,
-        //            Arguments = args ?? string.Empty,
-        //            UseShellExecute = false,
-        //            RedirectStandardOutput = true
-        //        };
-
-        //        using var process = Process.Start(start);
-        //        using var reader = process?.StandardOutput;
-        //        var result = reader?.ReadToEnd();
-        //    },
-        //    "Error running command.",
-        //    "ProcessUtils.RunCmd");
-        //}
         public static void RunDecompiler(string file, string decFile)
         {
             ExceptionUtils.GlobalTryCatch(() =>
@@ -86,9 +59,6 @@ namespace SNESMiniLuaCompiler.Helpers
             "ProcessUtils.RunCmd");
         }
 
-        /// <summary>
-        /// Runs the LuaJIT process with separate decode and encode file arguments.
-        /// </summary>
         public static void RunLuaJit(string decodeFile, string encodeFile)
         {
             ExceptionUtils.GlobalTryCatch(() =>
