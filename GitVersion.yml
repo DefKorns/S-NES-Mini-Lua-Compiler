@@ -1,13 +1,15 @@
-# Default GitVersion configuration file
-# For documentation and advanced options, see https://gitversion.net/docs/reference/configuration/
-
 next-version: 2.0.0
 mode: ContinuousDeployment
+assembly-informational-format: '{MajorMinorPatch}{PreReleaseTagWithDash}+{ShortSha}'
 branches:
   master:
     regex: ^master$
     increment: Minor
-    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    is-release-branch: true
+  main:
+    regex: ^main$
+    increment: Minor
     track-merge-target: false
     is-release-branch: true
   develop:

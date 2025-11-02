@@ -25,8 +25,10 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region Version
 
-        public static string GetAppVersion() =>
-            Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+        public static string GetAppVersion()
+            => Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? "Unknown";
 
         #endregion
 
@@ -55,7 +57,7 @@ namespace SNESMiniLuaCompiler.Helpers
                 };
 
                 foreach (var (suffix, path) in resources)
-                    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);  
+                    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
             }, "Failed to extract resources.", "AppUtils.ExtractAllResources");
         }
 
@@ -167,7 +169,7 @@ namespace SNESMiniLuaCompiler.Helpers
             foreach (var line in File.ReadAllLines(ConfigFile))
             {
                 if (line.StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
-                return line[(key.Length + 1)..];
+                    return line[(key.Length + 1)..];
             }
             return null;
         }

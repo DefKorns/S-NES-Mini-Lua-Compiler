@@ -24,7 +24,6 @@ namespace SNESMiniLuaCompiler.Helpers
             Bitmap? image = null;
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                ExceptionUtils.LogException($"Loading asset: {resourceUri}");
                 image = new Bitmap(AssetLoader.Open(resourceUri));
             }, $"Failed to load asset {resourceUri}.", "ImageHelper.LoadFromResource");
             return image!;
