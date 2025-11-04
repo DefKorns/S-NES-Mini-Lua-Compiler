@@ -16,8 +16,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for GitVersion to work properly
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -25,13 +27,14 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.11.0
+        uses: gittools/actions/gitversion/setup@v4.2.0
         with:
-          versionSpec: '5.x'
+          versionSpec: '6.4.x'
+          preferLatestVersion: true
 
       - name: Run GitVersion
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.11.0
+        uses: gittools/actions/gitversion/execute@v4.2.0
 
       - name: Display GitVersion outputs
         run: |
