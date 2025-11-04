@@ -1,6 +1,6 @@
 next-version: 2.0.0
 mode: ContinuousDeployment
-assembly-informational-format: '{MajorMinorPatch}{PreReleaseTagWithDash}+{ShortSha}'
+assembly-informational-format: '{MajorMinorPatch}'
 branches:
   master:
     regex: ^master$
@@ -16,7 +16,7 @@ branches:
     regex: ^dev(elop)?(ment)?/?.*$
     increment: Minor
     track-merge-target: false
-    is-release-branch: false
+    is-release-branch: true
   feature:
     regex: ^features?[/-]
     increment: Minor

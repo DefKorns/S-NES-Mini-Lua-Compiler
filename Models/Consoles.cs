@@ -20,6 +20,13 @@ namespace SNESMiniLuaCompiler.Models
             set => this.RaiseAndSetIfChanged(ref _isChecked, value);
         }
 
+        private bool _isEnabled;
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+        }
+
         public override string ToString() => Name ?? base.ToString()!;
     }
 }

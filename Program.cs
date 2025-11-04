@@ -32,6 +32,7 @@ namespace SNESMiniLuaCompiler
                 using var mutex = new Mutex(true, "SNESMiniLuaCompiler", out bool singleExecution);
                 if (singleExecution)
                 {
+                    AppUtils.SaveGitVersionToConfig();
                     AppUtils.ExtractAllResources();
                     BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                 }

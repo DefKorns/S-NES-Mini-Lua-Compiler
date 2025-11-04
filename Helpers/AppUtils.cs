@@ -29,6 +29,11 @@ namespace SNESMiniLuaCompiler.Helpers
             => Assembly.GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
             ?? "Unknown";
+        public static void SaveGitVersionToConfig()
+        {
+            var version = GetAppVersion();
+            SaveConfig("gitversion", version);
+        }
 
         #endregion
 

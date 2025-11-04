@@ -86,6 +86,12 @@ namespace SNESMiniLuaCompiler.Views
                 {
                     vm.DecryptionProgress = 0;
                     vm.IsDecryptionInProgress = true;
+                    vm.IsTrashButtonEnabled = false;
+
+                    foreach (var console in vm.ConsoleList)
+                    {
+                        console.IsEnabled = false;
+                    }
                 }
             });
 
@@ -120,6 +126,12 @@ namespace SNESMiniLuaCompiler.Views
                     {
                         vm.DecryptionProgress = 0;
                         vm.IsDecryptionInProgress = false;
+                        vm.IsTrashButtonEnabled = true;
+
+                        foreach (var console in vm.ConsoleList)
+                        {
+                            console.IsEnabled = true;
+                        }
                     }
                     encryptButton?.SetValue(IsEnabledProperty, true);
                 });
@@ -177,6 +189,12 @@ namespace SNESMiniLuaCompiler.Views
                 {
                     vm.DecryptionProgress = 100;
                     vm.IsDecryptionInProgress = false;
+                    vm.IsTrashButtonEnabled = true;
+
+                    foreach (var console in vm.ConsoleList)
+                    {
+                        console.IsEnabled = true;
+                    }
                 }
             });
         }
@@ -216,6 +234,11 @@ namespace SNESMiniLuaCompiler.Views
             {
                 vm.EncryptionProgress = 0;
                 vm.IsEncryptionInProgress = totalFiles > 0;
+
+                foreach (var console in vm.ConsoleList)
+                {
+                    console.IsEnabled = false;
+                }
             }
             int filesEncrypted = 0;
 
@@ -296,6 +319,10 @@ namespace SNESMiniLuaCompiler.Views
                 {
                     vm.EncryptionProgress = 100;
                     vm.IsEncryptionInProgress = false;
+                    foreach (var console in vm.ConsoleList)
+                    {
+                        console.IsEnabled = true;
+                    }
                 }
             });
         }

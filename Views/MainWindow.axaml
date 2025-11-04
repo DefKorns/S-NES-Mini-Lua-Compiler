@@ -81,7 +81,8 @@
 							<RadioButton Theme="{DynamicResource ButtonRadioButton}"
 										 Command="{Binding DataContext.SelectConsoleCommand, ElementName=items}"
 										 CommandParameter="{Binding SystemModel}"
-										 IsChecked="{Binding IsChecked}">
+										 IsChecked="{Binding IsChecked}"
+										 IsEnabled="{Binding IsEnabled}">
 								<RadioButton.Content>
 									<StackPanel>
 										<Image Source="{Binding ImagePath}"

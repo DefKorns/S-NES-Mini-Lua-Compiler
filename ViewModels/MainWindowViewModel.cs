@@ -85,7 +85,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "NES Classic",
                 Region = "Edition",
                 SystemModel = SystemModel.Nes,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
             new Consoles
             {
@@ -93,7 +94,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "SNES Mini",
                 Region = "(USA)",
                 SystemModel = SystemModel.Snes,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
             new Consoles
             {
@@ -101,7 +103,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "SNES Mini",
                 Region = "(Europe)",
                 SystemModel = SystemModel.SnesPal,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
             new Consoles
             {
@@ -109,7 +112,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Famicom",
                 Region = "Mini",
                 SystemModel = SystemModel.Famicom,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
             new Consoles
             {
@@ -117,7 +121,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Super",
                 Region = "Famicom",
                 SystemModel = SystemModel.SuperFamicom,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
             new Consoles
             {
@@ -125,7 +130,8 @@ namespace SNESMiniLuaCompiler.ViewModels
                 Name = "Famicom",
                 Region = "Shonen 50th",
                 SystemModel = SystemModel.Shonen,
-                IsChecked = false
+                IsChecked = false,
+                IsEnabled = true
             },
         ];
 
