@@ -85,9 +85,12 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void LogException(ExceptionInfo info)
         {
+            //_logger?.Error(info.Exception,
+            //    "Context: {Context} | UserMessage: {UserMessage}",
+            //    info.Timestamp, info.Context, info.UserMessage);
             _logger?.Error(info.Exception,
-                "Context: {Context} | UserMessage: {UserMessage}",
-                info.Timestamp, info.Context, info.UserMessage);
+    "[{Timestamp}] Context: {Context} | UserMessage: {UserMessage}",
+    info.Timestamp, info.Context, info.UserMessage);
         }
 
         public static void LogException(string info)

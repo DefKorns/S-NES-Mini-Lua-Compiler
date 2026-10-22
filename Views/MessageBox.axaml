@@ -13,7 +13,7 @@
 		<Style Selector="TextBlock">
 			<Setter Property="FontSize" Value="12"/>
 			<Setter Property="FontFamily" Value="Default" />
-			<Setter Property="Foreground" Value="#f3f3f3" />
+			<!--<Setter Property="Foreground" Value="#f3f3f3" />-->
 		</Style>
         </Window.Styles>
     <StackPanel HorizontalAlignment="Center"

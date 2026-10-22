@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Styling;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ReactiveUI;
 using Semi.Avalonia;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
-
 
 namespace SNESMiniLuaCompiler.ViewModels
 {
@@ -19,142 +17,70 @@ namespace SNESMiniLuaCompiler.ViewModels
     {
         private const string AssetUriPrefix = "avares://SNESMiniLuaCompiler/Assets";
         public static string AppVersion => AppUtils.GetAppVersion();
-        public ICommand SelectConsoleCommand { get; }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private SystemModel? _selectedConsole;
-        public SystemModel? SelectedConsole
-        {
-            get => _selectedConsole;
-            set => this.RaiseAndSetIfChanged(ref _selectedConsole, value);
-        }
 
+        [ObservableProperty]
         private bool _isRecodeButtonEnabled;
-        public bool IsRecodeButtonEnabled
-        {
-            get => _isRecodeButtonEnabled;
-            set => this.RaiseAndSetIfChanged(ref _isRecodeButtonEnabled, value);
-        }
 
+        [ObservableProperty]
         private bool _isTrashButtonEnabled;
-        public bool IsTrashButtonEnabled
-        {
-            get => _isTrashButtonEnabled;
-            set => this.RaiseAndSetIfChanged(ref _isTrashButtonEnabled, value);
-        }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private double _decryptionProgress;
-        public double DecryptionProgress
-        {
-            get => _decryptionProgress;
-            set => this.RaiseAndSetIfChanged(ref _decryptionProgress, value);
-        }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private bool _isDecryptionInProgress;
-        public bool IsDecryptionInProgress
-        {
-            get => _isDecryptionInProgress;
-            set => this.RaiseAndSetIfChanged(ref _isDecryptionInProgress, value);
-        }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private double _encryptionProgress;
-        public double EncryptionProgress
-        {
-            get => _encryptionProgress;
-            set => this.RaiseAndSetIfChanged(ref _encryptionProgress, value);
-        }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private bool _isEncryptionInProgress;
-        public bool IsEncryptionInProgress
-        {
-            get => _isEncryptionInProgress;
-            set => this.RaiseAndSetIfChanged(ref _isEncryptionInProgress, value);
-        }
+
+        public bool ShowSelectConsoleHint =>
+            !SelectedConsole.HasValue && !IsDecryptionInProgress && !IsEncryptionInProgress;
 
         public Func<Task>? DecryptFilesAsyncDelegate { get; set; }
 
         public MainWindowViewModel()
         {
-            SelectConsoleCommand = new RelayCommand<SystemModel>(OnSelectConsole);
             UpdateButtonStates();
         }
 
-        public List<Consoles> ConsoleList { get; } = [
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/nes.png")),
-                Name = "NES Classic",
-                Region = "Edition",
-                SystemModel = SystemModel.Nes,
-                IsChecked = false,
-                IsEnabled = true
-            },
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snes.png")),
-                Name = "SNES Mini",
-                Region = "(USA)",
-                SystemModel = SystemModel.Snes,
-                IsChecked = false,
-                IsEnabled = true
-            },
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snespal.png")),
-                Name = "SNES Mini",
-                Region = "(Europe)",
-                SystemModel = SystemModel.SnesPal,
-                IsChecked = false,
-                IsEnabled = true
-            },
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/famicom.png")),
-                Name = "Famicom",
-                Region = "Mini",
-                SystemModel = SystemModel.Famicom,
-                IsChecked = false,
-                IsEnabled = true
-            },
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/sfamicom.png")),
-                Name = "Super",
-                Region = "Famicom",
-                SystemModel = SystemModel.SuperFamicom,
-                IsChecked = false,
-                IsEnabled = true
-            },
-            new Consoles
-            {
-                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/shonen.png")),
-                Name = "Famicom",
-                Region = "Shonen 50th",
-                SystemModel = SystemModel.Shonen,
-                IsChecked = false,
-                IsEnabled = true
-            },
+        public List<Consoles> ConsoleList { get; } =
+        [
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/nes.png")),      Name = "NES Classic", Region = "Edition",     SystemModel = SystemModel.Nes,          IsEnabled = true },
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snes.png")),     Name = "SNES Mini",   Region = "(USA)",       SystemModel = SystemModel.Snes,         IsEnabled = true },
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snespal.png")),  Name = "SNES Mini",   Region = "(Europe)",    SystemModel = SystemModel.SnesPal,      IsEnabled = true },
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/famicom.png")),  Name = "Famicom",     Region = "Mini",        SystemModel = SystemModel.Famicom,      IsEnabled = true },
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/sfamicom.png")), Name = "Super",       Region = "Famicom",     SystemModel = SystemModel.SuperFamicom, IsEnabled = true },
+            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/shonen.png")),   Name = "Famicom",     Region = "Shonen 50th", SystemModel = SystemModel.Shonen,       IsEnabled = true },
         ];
 
-        private async void OnSelectConsole(SystemModel systemModel)
+        [RelayCommand]
+        private async Task SelectConsole(SystemModel systemModel)
         {
             SelectedConsole = systemModel;
 
             foreach (var console in ConsoleList)
-            {
                 console.IsChecked = console.SystemModel == systemModel;
-            }
 
-            if (FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) && Directory.EnumerateFileSystemEntries(AppUtils.DecodedPath).Any())
+            if (FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) &&
+                Directory.EnumerateFileSystemEntries(AppUtils.DecodedPath).Any())
             {
                 var result = await Views.MessageBox.ShowWarning(
                     "This action may overwrite existing files. Do you want to continue?",
                     "Warning"
                 );
-
                 if (result != MessageBoxResult.Yes)
-                {
                     return;
-                }
             }
 
             AppUtils.SaveConfig("system", Path.GetFileName(AppUtils.GetSystemPath(systemModel)));
@@ -169,11 +95,11 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public void UpdateButtonStates()
         {
-            bool hasConsole = SelectedConsole.HasValue;
-            IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) && FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
-            IsTrashButtonEnabled = hasConsole && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) || FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
+            IsRecodeButtonEnabled = FileUtils.SafeFileExists(AppUtils.ConfigFile) &&
+                                    FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
+            IsTrashButtonEnabled = (SelectedConsole.HasValue && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath)) ||
+                                    FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
         }
-
 
         [RelayCommand]
         private static void FollowSystemTheme()
@@ -184,8 +110,9 @@ namespace SNESMiniLuaCompiler.ViewModels
         {
             var app = Application.Current;
             if (app is null) return;
-            var theme = app.ActualThemeVariant;
-            app.RequestedThemeVariant = theme == ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
+            app.RequestedThemeVariant = app.ActualThemeVariant == ThemeVariant.Dark
+                ? ThemeVariant.Light
+                : ThemeVariant.Dark;
             app.UnregisterFollowSystemTheme();
         }
 

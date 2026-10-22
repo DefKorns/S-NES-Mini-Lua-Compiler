@@ -39,7 +39,8 @@ namespace SNESMiniLuaCompiler.Helpers
 
                 CreatePath(destFolder);
 
-                foreach (var file in Directory.GetFiles(sourceFolder) ?? [])
+                //foreach (var file in Directory.GetFiles(sourceFolder) ?? [])
+                foreach (var file in Directory.GetFiles(sourceFolder))
                 {
                     var dest = CombinePath(destFolder, Path.GetFileName(file) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
@@ -49,7 +50,8 @@ namespace SNESMiniLuaCompiler.Helpers
                     );
                 }
 
-                foreach (var folder in Directory.GetDirectories(sourceFolder) ?? [])
+                //foreach (var folder in Directory.GetDirectories(sourceFolder) ?? [])
+                foreach (var folder in Directory.GetDirectories(sourceFolder))
                 {
                     var dest = CombinePath(destFolder, Path.GetFileName(folder) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
@@ -234,17 +236,23 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static int CountFilesRecursive(string sDir)
         {
-            int count = 0;
-            try
-            {
-                count += Directory.GetFiles(sDir).Length;
-                foreach (string d in Directory.GetDirectories(sDir))
-                {
-                    count += CountFilesRecursive(d);
-                }
-            }
-            catch { }
-            return count;
+            if (!SafeDirectoryExists(sDir)) return 0;
+            return Directory.GetFiles(sDir, "*", SearchOption.AllDirectories).Length;
         }
+
+        //public static int CountFilesRecursive(string sDir)
+        //{
+        //    int count = 0;
+        //    try
+        //    {
+        //        count += Directory.GetFiles(sDir).Length;
+        //        foreach (string d in Directory.GetDirectories(sDir))
+        //        {
+        //            count += CountFilesRecursive(d);
+        //        }
+        //    }
+        //    catch { }
+        //    return count;
+        //}
     }
 }

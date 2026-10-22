@@ -49,4 +49,3 @@ branches:
     increment: Patch
     track-merge-target: false
     is-release-branch: false
-tag-prefix: ''

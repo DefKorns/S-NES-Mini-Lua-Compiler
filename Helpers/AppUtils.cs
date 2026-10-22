@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace SNESMiniLuaCompiler.Helpers
@@ -124,20 +125,30 @@ namespace SNESMiniLuaCompiler.Helpers
 
         #region System Path and Directory Checks
 
-        public static string GetSystemPath(SystemModel systemModel)
-        {
-            var systemPaths = new Dictionary<SystemModel, string>
-            {
-                { SystemModel.Famicom, FileUtils.CombinePath(ResourcesPath, "hvc") },
-                { SystemModel.Shonen,FileUtils.CombinePath(ResourcesPath, "hvcj") },
-                { SystemModel.SuperFamicom, FileUtils.CombinePath(ResourcesPath, "shvc") },
-                { SystemModel.Nes, FileUtils.CombinePath(ResourcesPath, "nes") },
-                { SystemModel.SnesPal, FileUtils.CombinePath(ResourcesPath, "snes-eur") }
-            };
-            return systemPaths.TryGetValue(systemModel, out var path)
-                ? path
-                : FileUtils.CombinePath(ResourcesPath, "snes-usa");
-        }
+        public static string GetSystemPath(SystemModel systemModel) =>
+    systemModel switch
+    {
+        SystemModel.Famicom => FileUtils.CombinePath(ResourcesPath, "hvc"),
+        SystemModel.Shonen => FileUtils.CombinePath(ResourcesPath, "hvcj"),
+        SystemModel.SuperFamicom => FileUtils.CombinePath(ResourcesPath, "shvc"),
+        SystemModel.Nes => FileUtils.CombinePath(ResourcesPath, "nes"),
+        SystemModel.SnesPal => FileUtils.CombinePath(ResourcesPath, "snes-eur"),
+        _ => FileUtils.CombinePath(ResourcesPath, "snes-usa")
+    };
+        //public static string GetSystemPath(SystemModel systemModel)
+        //{
+        //    var systemPaths = new Dictionary<SystemModel, string>
+        //    {
+        //        { SystemModel.Famicom, FileUtils.CombinePath(ResourcesPath, "hvc") },
+        //        { SystemModel.Shonen,FileUtils.CombinePath(ResourcesPath, "hvcj") },
+        //        { SystemModel.SuperFamicom, FileUtils.CombinePath(ResourcesPath, "shvc") },
+        //        { SystemModel.Nes, FileUtils.CombinePath(ResourcesPath, "nes") },
+        //        { SystemModel.SnesPal, FileUtils.CombinePath(ResourcesPath, "snes-eur") }
+        //    };
+        //    return systemPaths.TryGetValue(systemModel, out var path)
+        //        ? path
+        //        : FileUtils.CombinePath(ResourcesPath, "snes-usa");
+        //}
 
         public static bool AreDecodedAndRecodedDirsPresent() =>
             FileUtils.SafeDirectoryExists(DecodedPath) && FileUtils.SafeDirectoryExists(RecodedPath);
@@ -146,25 +157,39 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void SaveConfig(string key, string value)
         {
-            var lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
-            bool found = false;
+            var lines = FileUtils.SafeFileExists(ConfigFile)
+                ? File.ReadAllLines(ConfigFile).ToList()
+                : [];
 
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
-                {
-                    lines[i] = $"{key}={value}";
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                lines.Add($"{key}={value}");
-            }
+            int idx = lines.FindIndex(l => l.StartsWith(key + "="));
+            string entry = $"{key}={value}";
+            if (idx >= 0) lines[idx] = entry;
+            else lines.Add(entry);
 
             File.WriteAllLines(ConfigFile, lines);
         }
+
+        //public static void SaveConfig(string key, string value)
+        //{
+        //    var lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
+        //    bool found = false;
+
+        //    for (int i = 0; i < lines.Count; i++)
+        //    {
+        //        if (lines[i].StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            lines[i] = $"{key}={value}";
+        //            found = true;
+        //            break;
+        //        }
+        //    }
+        //    if (!found)
+        //    {
+        //        lines.Add($"{key}={value}");
+        //    }
+
+        //    File.WriteAllLines(ConfigFile, lines);
+        //}
 
         public static string? LoadConfig(string key)
         {

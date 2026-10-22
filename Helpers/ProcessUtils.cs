@@ -10,7 +10,8 @@ namespace SNESMiniLuaCompiler.Helpers
         #region Fields and Properties
 
         private const ProcessWindowStyle Hidden = ProcessWindowStyle.Hidden;
-        public static string LuaJitPath { get; set; } = Path.Combine(AppUtils.LibPath, "luajit");
+        //public static string LuaJitPath { get; set; } = Path.Combine(AppUtils.LibPath, "luajit");
+        public static string LuaJitPath => AppUtils.LuaJitPath;
 
         #endregion
 
@@ -24,7 +25,9 @@ namespace SNESMiniLuaCompiler.Helpers
 
             if (string.IsNullOrEmpty(Path.GetDirectoryName(exe)))
             {
-                foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';'))
+                //foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';'))
+                foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                     .Split(Path.PathSeparator))
                 {
                     var fullPath = Path.Combine(path.Trim(), exe ?? string.Empty);
                     if (FileUtils.SafeFileExists(fullPath)) return Path.GetFullPath(fullPath);
@@ -46,7 +49,8 @@ namespace SNESMiniLuaCompiler.Helpers
                 var start = new ProcessStartInfo
                 {
                     FileName = exePath,
-                    Arguments = AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts",
+                    //Arguments = AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts",
+                    Arguments = $"\"{AppUtils.DecompilerScript}\" --file \"{file}\" --output \"{decFile}\" --catch_asserts",
                     UseShellExecute = false,
                     RedirectStandardOutput = true
                 };
@@ -117,7 +121,7 @@ namespace SNESMiniLuaCompiler.Helpers
             {
                 string result = "";
 
-                ProcessStartInfo pycheck = new ()
+                ProcessStartInfo pycheck = new()
                 {
                     FileName = @"python.exe",
                     Arguments = "--version",

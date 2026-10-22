@@ -1,31 +1,20 @@
 ﻿using Avalonia.Media.Imaging;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SNESMiniLuaCompiler.Models
 {
-    public class Consoles : ReactiveObject
+    public partial class Consoles : ObservableObject
     {
         public Bitmap? ImagePath { get; set; }
-
         public string? Name { get; set; }
-
         public string? Region { get; set; }
-
         public SystemModel SystemModel { get; set; }
 
+        [ObservableProperty]
         private bool _isChecked;
-        public bool IsChecked
-        {
-            get => _isChecked;
-            set => this.RaiseAndSetIfChanged(ref _isChecked, value);
-        }
 
+        [ObservableProperty]
         private bool _isEnabled;
-        public bool IsEnabled
-        {
-            get => _isEnabled;
-            set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
-        }
 
         public override string ToString() => Name ?? base.ToString()!;
     }
