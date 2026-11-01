@@ -113,7 +113,7 @@ namespace SNESMiniLuaCompiler.Views
                     break;
                 case MessageBoxButtons.YesNo:
                     builder.Button("Yes", MessageBoxResult.Yes, true, "Primary")
-                           .Button("No", MessageBoxResult.No, true, "Tertiary");
+                           .Button("No", MessageBoxResult.No, false, "Tertiary");
                     break;
                 case MessageBoxButtons.YesNoCancel:
                     builder.Button("Yes", MessageBoxResult.Yes, false, "Primary")

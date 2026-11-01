@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -60,6 +61,27 @@ namespace SNESMiniLuaCompiler.Helpers
             },
             "Error running decompiler.",
             "ProcessUtils.RunDecompiler");
+        }
+
+        public static void OpenDirectory(string path)
+        {
+            if (!FileUtils.SafeDirectoryExists(path))
+                return;
+
+            try
+            {
+                using Process? process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = OperatingSystem.IsWindows() ? "explorer.exe" : "xdg-open",
+                    Arguments = $"\"{path}\"",
+                    UseShellExecute = false
+                });
+            }
+            catch (Win32Exception ex)
+            {
+                // no file manager (xdg-open is not installed on every Linux system): tell the user, do not crash
+                ExceptionUtils.HandleException(ex, $"Could not open the folder. Open it yourself:\n{path}", "ProcessUtils.OpenDirectory");
+            }
         }
 
         public static void RunLuaJit(string decodeFile, string encodeFile)

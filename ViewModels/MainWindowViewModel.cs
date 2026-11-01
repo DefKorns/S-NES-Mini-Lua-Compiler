@@ -20,6 +20,7 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        [NotifyPropertyChangedFor(nameof(SelectedConsoleName))]
         private SystemModel? _selectedConsole;
 
         [ObservableProperty]
@@ -27,33 +28,65 @@ namespace SNESMiniLuaCompiler.ViewModels
         private bool _isRecodeButtonEnabled;
 
         [ObservableProperty]
-        private string _statusText = "Ready...";
-
-        [ObservableProperty]
         private bool _isTrashButtonEnabled;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        private string _statusText = "Ready...";
+
+        [ObservableProperty]
         private double _decryptionProgress;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsBusy))]
+        [NotifyPropertyChangedFor(nameof(StatusPillText))]
         [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        [NotifyPropertyChangedFor(nameof(ShowResult))]
+        [NotifyPropertyChangedFor(nameof(CanOpenFolder))]
         [NotifyPropertyChangedFor(nameof(CanEncode))]
         private bool _isDecryptionInProgress;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
         private double _encryptionProgress;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsBusy))]
+        [NotifyPropertyChangedFor(nameof(StatusPillText))]
         [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        [NotifyPropertyChangedFor(nameof(ShowResult))]
+        [NotifyPropertyChangedFor(nameof(CanOpenFolder))]
         [NotifyPropertyChangedFor(nameof(CanEncode))]
         private bool _isEncryptionInProgress;
 
-        public bool ShowSelectConsoleHint =>
-            !SelectedConsole.HasValue && !IsDecryptionInProgress && !IsEncryptionInProgress;
+        // what the last decode/encode did, shown in the panel under the consoles
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowResult))]
+        [NotifyPropertyChangedFor(nameof(CanOpenFolder))]
+        private string? _resultTitle;
 
-        public bool CanEncode => IsRecodeButtonEnabled && !IsDecryptionInProgress && !IsEncryptionInProgress;
+        [ObservableProperty]
+        private string? _resultDetail;
+
+        [ObservableProperty]
+        private bool _resultIsSuccess = true;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanOpenFolder))]
+        private string? _folderToOpen;
+
+        public bool IsBusy => IsDecryptionInProgress || IsEncryptionInProgress;
+
+        public string StatusPillText => IsBusy ? "Working" : "Ready";
+
+        public string SelectedConsoleName =>
+            ConsoleList.FirstOrDefault(c => c.SystemModel == SelectedConsole)?.FullName ?? "None";
+
+        public bool ShowSelectConsoleHint => !SelectedConsole.HasValue && !IsBusy;
+
+        public bool ShowResult => ResultTitle is not null && !IsBusy;
+
+        public bool CanOpenFolder => ShowResult && FolderToOpen is not null;
+
+        public bool CanEncode => IsRecodeButtonEnabled && !IsBusy;
 
         public Func<Task>? DecryptFilesAsyncDelegate { get; set; }
 
@@ -64,13 +97,24 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public List<Consoles> ConsoleList { get; } =
         [
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/nes.png")),      Name = "NES Classic", Region = "Edition",     SystemModel = SystemModel.Nes,          IsEnabled = true },
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snes.png")),     Name = "SNES Mini",   Region = "(USA)",       SystemModel = SystemModel.Snes,         IsEnabled = true },
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/snespal.png")),  Name = "SNES Mini",   Region = "(Europe)",    SystemModel = SystemModel.SnesPal,      IsEnabled = true },
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/famicom.png")),  Name = "Famicom",     Region = "Mini",        SystemModel = SystemModel.Famicom,      IsEnabled = true },
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/sfamicom.png")), Name = "Super",       Region = "Famicom",     SystemModel = SystemModel.SuperFamicom, IsEnabled = true },
-            new Consoles { ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/shonen.png")),   Name = "Famicom",     Region = "Shonen 50th", SystemModel = SystemModel.Shonen,       IsEnabled = true },
+            NewConsole("nes.png",      "NES Classic", "",         "NES Classic Edition",      SystemModel.Nes),
+            NewConsole("snes.png",     "SNES Mini",   "(USA)",    "SNES Mini (USA)",          SystemModel.Snes),
+            NewConsole("snespal.png",  "SNES Mini",   "(Europe)", "SNES Mini (Europe)",       SystemModel.SnesPal),
+            NewConsole("famicom.png",  "Famicom",     "Mini",     "Famicom Mini",             SystemModel.Famicom),
+            NewConsole("sfamicom.png", "Super",       "Famicom",  "Super Famicom",            SystemModel.SuperFamicom),
+            NewConsole("shonen.png",   "Shonen 50th", "",         "Famicom Shonen Jump 50th", SystemModel.Shonen),
         ];
+
+        private static Consoles NewConsole(string image, string name, string region, string fullName, SystemModel systemModel) =>
+            new()
+            {
+                ImagePath = ImageHelper.LoadFromResource(new Uri($"{AssetUriPrefix}/{image}")),
+                Name = name,
+                Region = region,
+                FullName = fullName,
+                SystemModel = systemModel,
+                IsEnabled = true
+            };
 
         [RelayCommand]
         private async Task SelectConsole(SystemModel systemModel)
@@ -112,6 +156,7 @@ namespace SNESMiniLuaCompiler.ViewModels
         // The work itself runs in MainWindow; these only change what the window shows. Call them on the UI thread.
         public void BeginDecryption()
         {
+            ClearResult();
             StatusText = "Decrypting files, please wait...";
             DecryptionProgress = 0;
             IsDecryptionInProgress = true;
@@ -119,36 +164,76 @@ namespace SNESMiniLuaCompiler.ViewModels
             SetConsolesEnabled(false);
         }
 
-        public void EndDecryption(string statusText, double progress)
+        public void EndDecryption(bool hasFiles)
         {
-            StatusText = statusText;
-            DecryptionProgress = progress;
             IsDecryptionInProgress = false;
+            DecryptionProgress = hasFiles ? 100 : 0;
             SetConsolesEnabled(true);
             UpdateButtonStates();
             IsTrashButtonEnabled = true;
+
+            if (hasFiles)
+            {
+                StatusText = "Done!";
+                SetResult("Decode completed!", "Files extracted. Edit them, then press Encode.", true, AppUtils.DecodedPath);
+            }
+            else
+            {
+                StatusText = "No files to decrypt.";
+                SetResult("Nothing to decode", "No files were found for this console.", false, null);
+            }
         }
 
         public void BeginEncryption(bool hasFiles)
         {
+            ClearResult();
             StatusText = "Encrypting files, please wait...";
             EncryptionProgress = 0;
             IsEncryptionInProgress = hasFiles;
             SetConsolesEnabled(false);
         }
 
-        public void EndEncryption(string statusText)
+        public void EndEncryption(int encodedFiles)
         {
-            StatusText = statusText;
             EncryptionProgress = 100;
             IsEncryptionInProgress = false;
             SetConsolesEnabled(true);
+            UpdateButtonStates();
+
+            if (encodedFiles == 0)
+            {
+                StatusText = "No files encoded (nothing was edited).";
+                SetResult("Nothing to encode", "No file was changed since it was decoded.", false, null);
+            }
+            else
+            {
+                string files = encodedFiles == 1 ? "1 file" : $"{encodedFiles} files";
+                StatusText = $"Done! {files} encoded.";
+                SetResult("Encode completed!", $"{files} encoded. Copy them to your theme.", true, AppUtils.RecodedPath);
+            }
+        }
+
+        public void ClearResult() => SetResult(null, null, true, null);
+
+        private void SetResult(string? title, string? detail, bool isSuccess, string? folder)
+        {
+            ResultTitle = title;
+            ResultDetail = detail;
+            ResultIsSuccess = isSuccess;
+            FolderToOpen = folder;
         }
 
         private void SetConsolesEnabled(bool isEnabled)
         {
             foreach (Consoles console in ConsoleList)
                 console.IsEnabled = isEnabled;
+        }
+
+        [RelayCommand]
+        private void OpenFolder()
+        {
+            if (FolderToOpen is not null)
+                ProcessUtils.OpenDirectory(FolderToOpen);
         }
 
         [RelayCommand]

@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<ResourceDictionary.ThemeDictionaries>
 		<ResourceDictionary x:Key="Light">
+			<SolidColorBrush x:Key="AppBackdrop" Color="Transparent"/>
 			<SolidColorBrush x:Key="Lulu1" Color="#54A9FF"/>
 			<SolidColorBrush x:Key="Lulu2" Color="#053170"/>
 
@@ -16,6 +17,7 @@
 			<SolidColorBrush x:Key="SemiOrange9Color" Color="#EFF8FF"/>-->
 		</ResourceDictionary>
 		<ResourceDictionary x:Key="Dark">
+			<SolidColorBrush x:Key="AppBackdrop" Color="#0C1424"/>
 			<SolidColorBrush x:Key="Lulu1" Color="#FFF8EA"/>
 			<SolidColorBrush x:Key="Lulu2" Color="#FFAE43"/>
 			<!--	<SolidColorBrush x:Key="ButtonDefaultPrimaryForeground" Color="#FFF8EA"/>

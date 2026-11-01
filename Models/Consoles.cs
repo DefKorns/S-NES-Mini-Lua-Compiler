@@ -10,6 +10,9 @@ namespace SNESMiniLuaCompiler.Models
         public string? Region { get; set; }
         public SystemModel SystemModel { get; set; }
 
+        // shown in the "Selected console" panel and announced by screen readers
+        public string FullName { get; set; } = "";
+
         [ObservableProperty]
         private bool _isChecked;
 

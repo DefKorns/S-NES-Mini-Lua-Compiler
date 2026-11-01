@@ -1,15 +1,14 @@
-﻿# (S)NES Mini - Lua Compiler
+# (S)NES Mini - Lua Compiler
 Based on the work from [frostyfire03530](https://github.com/frostyfire03530).
 
 ### **What is it?**
 This app decompiles and recompiles the Lua files (LuaJIT bytecode) of the SNES Mini, NES Mini and Famicom Mini, for theme creation.
 
 ### **How to use it**
-- Select your desired system
-- Choose `Decode`
-- Edit all the files you needed (`app location/decoded` folder) with your desired lua/text editor
-- choose `Encode`
-- copy the re-encrypted files to your theme
+- Click the icon of your console: the app decodes its Lua files; use **Open folder** to reach the `decoded` folder
+- Edit the files you need with your favourite Lua/text editor
+- Choose `Encode`: only the files you changed are encoded, and **Open folder** takes you to the output folder
+- Copy the re-encoded files to your theme
 
 Enjoy
 

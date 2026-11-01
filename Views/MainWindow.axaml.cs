@@ -50,7 +50,7 @@ namespace SNESMiniLuaCompiler.Views
             int totalFiles = FileUtils.CountFilesRecursive(AppUtils.DecodedPath);
             if (totalFiles == 0)
             {
-                await Dispatcher.UIThread.InvokeAsync(() => vm.EndDecryption("No files to decrypt.", 0));
+                await Dispatcher.UIThread.InvokeAsync(() => vm.EndDecryption(false));
                 return;
             }
 
@@ -89,8 +89,7 @@ namespace SNESMiniLuaCompiler.Views
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 FileUtils.CreatePath(AppUtils.RecodedPath);
-                NotificationHelper.Success("Decryption complete!", "Light");
-                vm.EndDecryption("Done!", 100);
+                vm.EndDecryption(true);
             });
         }
 
@@ -103,6 +102,7 @@ namespace SNESMiniLuaCompiler.Views
                 NotificationHelper.Information("Temporary files deleted.", "Light");
                 if (Vm is { } vm)
                 {
+                    vm.ClearResult();
                     vm.UpdateButtonStates();
                     vm.StatusText = "Temporary files deleted.";
                 }
@@ -172,17 +172,7 @@ namespace SNESMiniLuaCompiler.Views
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 FileUtils.CreatePath(AppUtils.RecodedPath);
-
-                if (Directory.GetDirectories(AppUtils.RecodedPath).Length == 0)
-                {
-                    NotificationHelper.Warning("No files were encrypted.", "Light");
-                    vm.EndEncryption("No files were encrypted.");
-                }
-                else
-                {
-                    NotificationHelper.Success("Encryption complete!", "Light");
-                    vm.EndEncryption("Done!");
-                }
+                vm.EndEncryption(FileUtils.CountFilesRecursive(AppUtils.RecodedPath));
             });
         }
 

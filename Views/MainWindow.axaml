@@ -4,18 +4,16 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:model="using:SNESMiniLuaCompiler.Models"
-		xmlns:view="using:SNESMiniLuaCompiler.Views"
 		xmlns:vm="using:SNESMiniLuaCompiler.ViewModels"
-		xmlns:res="using:SNESMiniLuaCompiler.Resources"
 		Title="(S)NES Mini - Lua Compiler"
-		d:DesignWidth="590"
-		d:DesignHeight="336"
+		d:DesignWidth="700"
+		d:DesignHeight="448"
 		x:CompileBindings="true"
 		x:DataType="vm:MainWindowViewModel"
 		CanResize="False"
 		CanMinimize="False"
-		Width="590"
-		Height="336"
+		Width="700"
+		Height="448"
 		WindowStartupLocation="CenterScreen"
 		mc:Ignorable="d">
 	<Design.DataContext>
@@ -36,119 +34,187 @@
 			<Setter Property="Height" Value="NaN"/>
 			<Setter Property="Background" Value="Transparent" />
 		</Style>
+
+		<!-- the status pill in the header: green when idle, amber while working -->
+		<Style Selector="Border.pill">
+			<Setter Property="Background" Value="#1F3D2F"/>
+			<Setter Property="BorderBrush" Value="#2E7D52"/>
+		</Style>
+		<Style Selector="Border.pill.busy">
+			<Setter Property="Background" Value="#3D3220"/>
+			<Setter Property="BorderBrush" Value="#B8862B"/>
+		</Style>
 	</Window.Styles>
 
-	<Grid>
+	<Grid Background="{DynamicResource AppBackdrop}">
 		<Image Source="avares://SNESMiniLuaCompiler/Assets/app_bg.png"
 			   Stretch="UniformToFill"
 			   IsHitTestVisible="False"/>
-		<Grid RowDefinitions="90,120,24,66,40">
+		<Grid RowDefinitions="64,30,150,92,76,34">
 
-			<!-- theme toggle -->
-			<StackPanel Grid.Row="0"
-						Orientation="Horizontal"
-						HorizontalAlignment="Right"
-						VerticalAlignment="Top"
-						Margin="0,10,10,0"
-						Spacing="20">
-				<ToggleSwitch Theme="{DynamicResource IconBorderlessToggleSwitch}"
-							  Command="{Binding ToggleThemeCommand}"
-							  OnContent="{StaticResource SemiIconSun}"
-							  OffContent="{StaticResource SemiIconMoon}" />
-			</StackPanel>
-
-			<!-- consolas -->
-			<StackPanel Grid.Row="1"
-						Orientation="Horizontal"
-						Spacing="20"
-						Name="mainPanel"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Stretch">
-				<ItemsControl x:Name="items" ItemsSource="{Binding ConsoleList}">
-					<ItemsControl.ItemsPanel>
-						<ItemsPanelTemplate>
-							<StackPanel Orientation="Horizontal"
-										Spacing="5"
-										HorizontalAlignment="Center"
-										VerticalAlignment="Stretch"/>
-						</ItemsPanelTemplate>
-					</ItemsControl.ItemsPanel>
-					<ItemsControl.ItemTemplate>
-						<DataTemplate x:DataType="model:Consoles">
-							<RadioButton Theme="{DynamicResource ButtonRadioButton}"
-										 Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SelectConsoleCommand}"
-										 CommandParameter="{Binding SystemModel}"
-										 IsChecked="{Binding IsChecked}"
-										 IsEnabled="{Binding IsEnabled}">
-								<RadioButton.Content>
-									<StackPanel>
-										<Image Source="{Binding ImagePath}"
-											   RenderOptions.BitmapInterpolationMode="HighQuality"/>
-										<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" />
-										<TextBlock HorizontalAlignment="Center" Text="{Binding Region}" />
-									</StackPanel>
-								</RadioButton.Content>
-							</RadioButton>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ItemsControl>
-			</StackPanel>
-
-			<!-- Row 2: progress bar -->
-			<Grid Grid.Row="2" Margin="16,0,16,0">
-			 <TextBlock Text="Select a console to begin"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Opacity="0.4"
-               IsVisible="{Binding ShowSelectConsoleHint}" />
-
-				<ProgressBar Classes="Warning"
-							 Height="14"
-							 Maximum="100" Minimum="0"
-							 ShowProgressText="True"
-							 Value="{Binding DecryptionProgress}"
-							 IsVisible="{Binding IsDecryptionInProgress}" />
-				<ProgressBar Classes="Warning"
-							 Height="14"
-							 Maximum="100" Minimum="0"
-							 ShowProgressText="True"
-							 Value="{Binding EncryptionProgress}"
-							 IsVisible="{Binding IsEncryptionInProgress}" />
+			<!-- header -->
+			<Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="22,0,18,0">
+				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+					<!-- game controller silhouette (Material "videogame_asset" icon) -->
+					<PathIcon Width="38" Height="38"
+							  Opacity="0.75"
+							  Data="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+					<TextBlock Text="Lua Compiler" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
+				</StackPanel>
+				<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+					<Border Classes="pill"
+							Classes.busy="{Binding IsBusy}"
+							BorderThickness="1"
+							CornerRadius="14"
+							Padding="10,4">
+						<StackPanel Orientation="Horizontal" Spacing="6">
+							<PathIcon Data="{StaticResource SemiIconTickCircle}" Width="14" Height="14"
+									  Foreground="{DynamicResource SemiColorSuccess}"
+									  IsVisible="{Binding !IsBusy}" />
+							<PathIcon Data="{StaticResource SemiIconClock}" Width="14" Height="14"
+									  Foreground="{DynamicResource SemiColorWarning}"
+									  IsVisible="{Binding IsBusy}" />
+							<TextBlock Text="{Binding StatusPillText}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+						</StackPanel>
+					</Border>
+					<Button Name="btn_trash"
+							Width="36"
+							Theme="{DynamicResource IconBorderlessButton}"
+							Content="{StaticResource SemiIconDelete}"
+							IsEnabled="{Binding IsTrashButtonEnabled}"
+							ToolTip.Tip="Delete all temporary and output files."
+							ToolTip.Placement="Bottom"
+							Click="TrashButton_Click"
+							VerticalContentAlignment="Center" />
+					<ToggleSwitch Theme="{DynamicResource IconBorderlessToggleSwitch}"
+								  Command="{Binding ToggleThemeCommand}"
+								  OnContent="{StaticResource SemiIconSun}"
+								  OffContent="{StaticResource SemiIconMoon}" />
+				</StackPanel>
 			</Grid>
 
-			<!-- Row 3: botões -->
-			<Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0">
-				<Button Grid.Column="0"
-						Name="btn_encrypt"
-						Width="440"
-						Height="45"
-						Theme="{DynamicResource OutlineButton}"
-						Classes="Warning"
-						VerticalContentAlignment="Center"
-						IsEnabled="{Binding CanEncode}"
-						Click="EncryptButton_Click"
-						HorizontalAlignment="Center"
-						Margin="0">
-					Encode
-				</Button>
-				<Button Grid.Column="1"
-						Name="btn_trash"
-						Width="44"
-						Theme="{DynamicResource IconBorderlessButton}"
-						Content="{StaticResource SemiIconDelete}"
-						IsEnabled="{Binding IsTrashButtonEnabled}"
-						ToolTip.Tip="Delete all temporary and output files."
-						ToolTip.Placement="Top"
-						ToolTip.VerticalOffset="-5"
-						ToolTip.HorizontalOffset="-80"
-						Click="TrashButton_Click"
-						HorizontalAlignment="Right"
-						VerticalContentAlignment="Center"
-						Margin="0,0,5,0"/>
-			</Grid>
+			<TextBlock Grid.Row="1"
+					   Text="Select your console"
+					   FontSize="14"
+					   FontWeight="SemiBold"
+					   Margin="22,0,0,0"
+					   VerticalAlignment="Center" />
+
+			<!-- consoles -->
+			<ItemsControl Grid.Row="2" x:Name="items" ItemsSource="{Binding ConsoleList}" Margin="18,0">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate x:DataType="model:Consoles">
+						<RadioButton Theme="{DynamicResource ConsoleCardRadioButton}"
+									 Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SelectConsoleCommand}"
+									 CommandParameter="{Binding SystemModel}"
+									 IsChecked="{Binding IsChecked}"
+									 IsEnabled="{Binding IsEnabled}"
+									 AutomationProperties.Name="{Binding FullName}">
+							<StackPanel Spacing="6">
+								<Image Source="{Binding ImagePath}"
+									   Height="62"
+									   Stretch="Uniform"
+									   RenderOptions.BitmapInterpolationMode="HighQuality"/>
+								<StackPanel>
+									<TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding Name}" />
+									<TextBlock HorizontalAlignment="Center" FontSize="12" MinHeight="16"
+											   Text="{Binding Region}" />
+								</StackPanel>
+							</StackPanel>
+						</RadioButton>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+
+			<!-- selected console and what the last step did -->
+			<Border Grid.Row="3"
+					Margin="22,6,22,6"
+					Padding="18,10"
+					Background="{DynamicResource SemiColorFill0}"
+					BorderBrush="{DynamicResource SemiColorBorder}"
+					BorderThickness="1"
+					CornerRadius="12">
+				<Grid ColumnDefinitions="Auto,Auto,*,Auto">
+					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+						<PathIcon Data="{StaticResource SemiIconInfoCircle}" Width="22" Height="22"
+								  Foreground="{DynamicResource SemiColorPrimary}" />
+						<StackPanel VerticalAlignment="Center">
+							<TextBlock Text="Selected console:" Opacity="0.7" />
+							<TextBlock Text="{Binding SelectedConsoleName}"
+									   FontSize="15"
+									   FontWeight="SemiBold"
+									   Foreground="{DynamicResource SemiColorPrimary}" />
+						</StackPanel>
+					</StackPanel>
+					<Border Grid.Column="1" Width="1" Margin="18,2" Background="{DynamicResource SemiColorBorder}" />
+
+					<Grid Grid.Column="2" VerticalAlignment="Center">
+						<TextBlock Text="Select a console to begin"
+								   Opacity="0.6"
+								   IsVisible="{Binding ShowSelectConsoleHint}" />
+
+						<StackPanel Spacing="4" IsVisible="{Binding IsDecryptionInProgress}">
+							<TextBlock Text="Decoding the console files..." />
+							<ProgressBar Classes="Warning" Height="14" Maximum="100" Minimum="0"
+										 ShowProgressText="True" Value="{Binding DecryptionProgress}" />
+						</StackPanel>
+						<StackPanel Spacing="4" IsVisible="{Binding IsEncryptionInProgress}">
+							<TextBlock Text="Encoding the edited files..." />
+							<ProgressBar Classes="Warning" Height="14" Maximum="100" Minimum="0"
+										 ShowProgressText="True" Value="{Binding EncryptionProgress}" />
+						</StackPanel>
+
+						<StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding ShowResult}">
+							<PathIcon Data="{StaticResource SemiIconTickCircle}" Width="24" Height="24"
+									  Foreground="{DynamicResource SemiColorSuccess}"
+									  IsVisible="{Binding ResultIsSuccess}" />
+							<PathIcon Data="{StaticResource SemiIconAlertTriangle}" Width="24" Height="24"
+									  Foreground="{DynamicResource SemiColorWarning}"
+									  IsVisible="{Binding !ResultIsSuccess}" />
+							<StackPanel VerticalAlignment="Center">
+								<TextBlock Text="{Binding ResultTitle}" FontSize="15" FontWeight="SemiBold" />
+								<TextBlock Text="{Binding ResultDetail}" Opacity="0.75" TextWrapping="Wrap" MaxWidth="270" />
+							</StackPanel>
+						</StackPanel>
+					</Grid>
+
+					<Button Grid.Column="3"
+							Name="btn_open_folder"
+							Content="Open folder"
+							Theme="{DynamicResource OutlineButton}"
+							Classes="Primary"
+							Margin="12,0,0,0"
+							VerticalAlignment="Center"
+							Command="{Binding OpenFolderCommand}"
+							IsVisible="{Binding CanOpenFolder}" />
+				</Grid>
+			</Border>
+
+			<!-- Encode -->
+			<Button Grid.Row="4"
+					Name="btn_encrypt"
+					Margin="22,6,22,6"
+					Height="60"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="Center"
+					Theme="{DynamicResource SolidButton}"
+					Classes="Primary"
+					IsEnabled="{Binding CanEncode}"
+					Click="EncryptButton_Click">
+				<StackPanel>
+					<TextBlock Text="Encode" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" />
+					<TextBlock Text="Recompile the code for your console" Opacity="0.8" HorizontalAlignment="Center" />
+				</StackPanel>
+			</Button>
 
 			<!-- footer -->
-			<Border Grid.Row="4"
+			<Border Grid.Row="5"
 					Height="28"
 					BorderBrush="{DynamicResource SemiColorBorder}"
 					BorderThickness="0,1,0,0">
@@ -156,13 +222,15 @@
 					  Classes="footer"
 					  ColumnDefinitions="Auto,*"
 					  VerticalAlignment="Center"
-					  Margin="10,0,10,0">
+					  Margin="22,0,22,0">
 					<StackPanel Grid.Column="0"
 								Orientation="Horizontal"
 								HorizontalAlignment="Center"
 								Spacing="5">
 						<TextBlock Text="Status:" VerticalAlignment="Center"/>
-						<TextBlock Margin="0,5" Text="{Binding StatusText}" VerticalAlignment="Center"/>
+						<TextBlock Text="{Binding StatusText}"
+								   Foreground="{DynamicResource SemiColorSuccess}"
+								   VerticalAlignment="Center"/>
 					</StackPanel>
 					<TextBlock Grid.Column="1"
 							   Text="{Binding AppVersion}"
