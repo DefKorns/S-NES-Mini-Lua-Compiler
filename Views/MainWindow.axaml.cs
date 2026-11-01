@@ -1,10 +1,12 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using SNESMiniLuaCompiler.Firmware;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 using SNESMiniLuaCompiler.ViewModels;
@@ -26,9 +28,24 @@ namespace SNESMiniLuaCompiler.Views
                 if (Vm is { } vm)
                 {
                     vm.DecryptFilesAsyncDelegate = DecryptFilesAsync;
+                    vm.ImportOriginalsDelegate = ShowImportDialogAsync;
                     vm.UpdateButtonStates();
                 }
             };
+        }
+
+        private async Task<bool> ShowImportDialogAsync(SystemModel system, string consoleName)
+        {
+            var viewModel = new ImportOriginalsViewModel(system, consoleName);
+            if (!await new ImportOriginalsDialog(viewModel).ShowDialog<bool>(this))
+                return false;
+
+            // a firmware file or a folder can hold several consoles: all are kept, none is asked for again
+            if (viewModel.ImportedConsoles.Count > 1)
+                NotificationHelper.Success($"Kept the original files of {viewModel.ImportedConsoles.Count} consoles: " +
+                    string.Join(", ", viewModel.ImportedConsoles.Select(c => ConsoleLayout.For(c.System).DisplayName)), "Light");
+
+            return true;
         }
 
         private async Task DecryptFilesAsync()

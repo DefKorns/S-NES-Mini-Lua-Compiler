@@ -25,7 +25,9 @@ branches:
     track-merge-target: false
     is-release-branch: true
   feature:
-    regex: ^features?[/-]
+    # the named group is what {BranchName} in the label stands for; without it the version is "2.1.0-{BranchName}.1"
+    regex: ^features?[/-](?<BranchName>.+)
+    label: '{BranchName}'
     increment: Minor
     track-merge-target: false
     is-release-branch: false

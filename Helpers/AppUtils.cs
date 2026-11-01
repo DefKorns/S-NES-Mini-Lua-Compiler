@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using SNESMiniLuaCompiler.Firmware;
 using SNESMiniLuaCompiler.Models;
 
 namespace SNESMiniLuaCompiler.Helpers
@@ -80,13 +81,9 @@ namespace SNESMiniLuaCompiler.Helpers
             }, "Failed to extract resources.", "AppUtils.ExtractAllResources");
         }
 
-        public static void ExtractSelectedResources(SystemModel systemModel)
-        {
-            string systemName = Path.GetFileName(GetSystemPath(systemModel));
-            string resourcePrefix = $"{SystemResourcePrefix}original/{systemName}/resources/";
-            string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
-            ExtractResourcesWithPrefix(resourcePrefix, tempDir);
-        }
+        // the originals are the user's own files, imported from their console or firmware (see OriginalsImporter)
+        public static void ExtractSelectedResources(SystemModel systemModel) =>
+            FileUtils.CopyAssets(OriginalsStore.PathOf(systemModel), GetSystemPath(systemModel));
 
         public static void ExtractResourceToFile(string resourceName, string outputPath)
         {
@@ -134,15 +131,7 @@ namespace SNESMiniLuaCompiler.Helpers
         #region System Path and Directory Checks
 
         public static string GetSystemPath(SystemModel systemModel) =>
-    systemModel switch
-    {
-        SystemModel.Famicom => FileUtils.CombinePath(ResourcesPath, "hvc"),
-        SystemModel.Shonen => FileUtils.CombinePath(ResourcesPath, "hvcj"),
-        SystemModel.SuperFamicom => FileUtils.CombinePath(ResourcesPath, "shvc"),
-        SystemModel.Nes => FileUtils.CombinePath(ResourcesPath, "nes"),
-        SystemModel.SnesPal => FileUtils.CombinePath(ResourcesPath, "snes-eur"),
-        _ => FileUtils.CombinePath(ResourcesPath, "snes-usa")
-    };
+            FileUtils.CombinePath(ResourcesPath, ConsoleLayout.For(systemModel).FolderName);
 
         #endregion
 

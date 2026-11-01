@@ -64,8 +64,10 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="LTRData.DiscUtils.SquashFs" Version="1.0.90" />
     <PackageReference Include="Lucide.Avalonia" Version="0.2.28" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
+    <PackageReference Include="SharpCompress" Version="0.50.5" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <!-- Avalonia pulls in 0.21.2 (GHSA-xrw6-gwf8-vvr9); 0.21.3 is the patched release of the same line -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
