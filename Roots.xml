@@ -1,4 +1,0 @@
-﻿<linker>
-  <!-- Can be removed if CompiledBinding and no reflection are used -->
-  <assembly fullname="SNESMiniLuaCompiler" preserve="All" />
-</linker>
