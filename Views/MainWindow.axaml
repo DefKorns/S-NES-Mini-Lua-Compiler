@@ -35,14 +35,39 @@
 			<Setter Property="Background" Value="Transparent" />
 		</Style>
 
+		<!-- main action: the gold-to-orange of the logo's button -->
+		<Style Selector="Button.cta">
+			<Setter Property="Foreground" Value="#1B1400"/>
+			<Setter Property="Background">
+				<LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+					<GradientStop Color="#F8C300" Offset="0"/>
+					<GradientStop Color="#F89500" Offset="1"/>
+				</LinearGradientBrush>
+			</Setter>
+		</Style>
+		<Style Selector="Button.cta /template/ ContentPresenter#PART_ContentPresenter, Button.cta:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.cta:pressed /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background">
+				<LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+					<GradientStop Color="#F8C300" Offset="0"/>
+					<GradientStop Color="#F89500" Offset="1"/>
+				</LinearGradientBrush>
+			</Setter>
+		</Style>
+		<Style Selector="Button.cta:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Opacity" Value="0.92"/>
+		</Style>
+		<Style Selector="Button.cta:disabled /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Opacity" Value="0.35"/>
+		</Style>
+
 		<!-- the status pill in the header: green when idle, amber while working -->
 		<Style Selector="Border.pill">
-			<Setter Property="Background" Value="#1F3D2F"/>
-			<Setter Property="BorderBrush" Value="#2E7D52"/>
+			<Setter Property="Background" Value="{DynamicResource PillSuccessBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource PillSuccessBorder}"/>
 		</Style>
 		<Style Selector="Border.pill.busy">
-			<Setter Property="Background" Value="#3D3220"/>
-			<Setter Property="BorderBrush" Value="#B8862B"/>
+			<Setter Property="Background" Value="{DynamicResource PillWarningBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource PillWarningBorder}"/>
 		</Style>
 	</Window.Styles>
 
@@ -55,10 +80,7 @@
 			<!-- header -->
 			<Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="22,0,18,0">
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-					<!-- game controller silhouette (Material "videogame_asset" icon) -->
-					<PathIcon Width="38" Height="38"
-							  Opacity="0.75"
-							  Data="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+					<LucideIcon Kind="Gamepad2" Size="38" Opacity="0.8" />
 					<TextBlock Text="Lua Compiler" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
 				</StackPanel>
 				<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -68,28 +90,39 @@
 							CornerRadius="14"
 							Padding="10,4">
 						<StackPanel Orientation="Horizontal" Spacing="6">
-							<PathIcon Data="{StaticResource SemiIconTickCircle}" Width="14" Height="14"
-									  Foreground="{DynamicResource SemiColorSuccess}"
-									  IsVisible="{Binding !IsBusy}" />
-							<PathIcon Data="{StaticResource SemiIconClock}" Width="14" Height="14"
-									  Foreground="{DynamicResource SemiColorWarning}"
-									  IsVisible="{Binding IsBusy}" />
+							<LucideIcon Kind="CircleCheck" Size="15"
+										Foreground="{DynamicResource SemiColorSuccess}"
+										IsVisible="{Binding !IsBusy}" />
+							<LucideIcon Kind="Clock" Size="15"
+										Foreground="{DynamicResource SemiColorWarning}"
+										IsVisible="{Binding IsBusy}" />
 							<TextBlock Text="{Binding StatusPillText}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
 						</StackPanel>
 					</Border>
 					<Button Name="btn_trash"
-							Width="36"
-							Theme="{DynamicResource IconBorderlessButton}"
-							Content="{StaticResource SemiIconDelete}"
+							Width="38"
+							Theme="{DynamicResource BorderlessButton}"
+							Classes="Tertiary"
 							IsEnabled="{Binding IsTrashButtonEnabled}"
 							ToolTip.Tip="Delete all temporary and output files."
 							ToolTip.Placement="Bottom"
 							Click="TrashButton_Click"
-							VerticalContentAlignment="Center" />
-					<ToggleSwitch Theme="{DynamicResource IconBorderlessToggleSwitch}"
-								  Command="{Binding ToggleThemeCommand}"
-								  OnContent="{StaticResource SemiIconSun}"
-								  OffContent="{StaticResource SemiIconMoon}" />
+							VerticalContentAlignment="Center">
+						<LucideIcon Kind="Trash" Size="18" />
+					</Button>
+					<Button Name="btn_theme"
+							Width="38"
+							Theme="{DynamicResource BorderlessButton}"
+							Classes="Tertiary"
+							Command="{Binding ToggleThemeCommand}"
+							ToolTip.Tip="Switch between the dark and the light theme"
+							ToolTip.Placement="Bottom"
+							VerticalContentAlignment="Center">
+						<Panel>
+							<LucideIcon Kind="Moon" Size="18" IsVisible="{Binding IsDarkTheme}" />
+							<LucideIcon Kind="Sun" Size="18" IsVisible="{Binding !IsDarkTheme}" />
+						</Panel>
+					</Button>
 				</StackPanel>
 			</Grid>
 
@@ -141,14 +174,14 @@
 					CornerRadius="12">
 				<Grid ColumnDefinitions="Auto,Auto,*,Auto">
 					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-						<PathIcon Data="{StaticResource SemiIconInfoCircle}" Width="22" Height="22"
-								  Foreground="{DynamicResource SemiColorPrimary}" />
+						<LucideIcon Kind="Info" Size="24"
+									Foreground="{DynamicResource BrandAccent}" />
 						<StackPanel VerticalAlignment="Center">
 							<TextBlock Text="Selected console:" Opacity="0.7" />
 							<TextBlock Text="{Binding SelectedConsoleName}"
 									   FontSize="15"
 									   FontWeight="SemiBold"
-									   Foreground="{DynamicResource SemiColorPrimary}" />
+									   Foreground="{DynamicResource BrandAccent}" />
 						</StackPanel>
 					</StackPanel>
 					<Border Grid.Column="1" Width="1" Margin="18,2" Background="{DynamicResource SemiColorBorder}" />
@@ -170,12 +203,12 @@
 						</StackPanel>
 
 						<StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding ShowResult}">
-							<PathIcon Data="{StaticResource SemiIconTickCircle}" Width="24" Height="24"
-									  Foreground="{DynamicResource SemiColorSuccess}"
-									  IsVisible="{Binding ResultIsSuccess}" />
-							<PathIcon Data="{StaticResource SemiIconAlertTriangle}" Width="24" Height="24"
-									  Foreground="{DynamicResource SemiColorWarning}"
-									  IsVisible="{Binding !ResultIsSuccess}" />
+							<LucideIcon Kind="CircleCheck" Size="26"
+										Foreground="{DynamicResource SemiColorSuccess}"
+										IsVisible="{Binding ResultIsSuccess}" />
+							<LucideIcon Kind="TriangleAlert" Size="26"
+										Foreground="{DynamicResource SemiColorWarning}"
+										IsVisible="{Binding !ResultIsSuccess}" />
 							<StackPanel VerticalAlignment="Center">
 								<TextBlock Text="{Binding ResultTitle}" FontSize="15" FontWeight="SemiBold" />
 								<TextBlock Text="{Binding ResultDetail}" Opacity="0.75" TextWrapping="Wrap" MaxWidth="270" />
@@ -185,13 +218,17 @@
 
 					<Button Grid.Column="3"
 							Name="btn_open_folder"
-							Content="Open folder"
 							Theme="{DynamicResource OutlineButton}"
-							Classes="Primary"
+							Classes="Tertiary"
 							Margin="12,0,0,0"
 							VerticalAlignment="Center"
 							Command="{Binding OpenFolderCommand}"
-							IsVisible="{Binding CanOpenFolder}" />
+							IsVisible="{Binding CanOpenFolder}">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<LucideIcon Kind="FolderOpen" Size="16" />
+							<TextBlock Text="Open folder" FontSize="12" VerticalAlignment="Center" />
+						</StackPanel>
+					</Button>
 				</Grid>
 			</Border>
 
@@ -204,11 +241,14 @@
 					HorizontalContentAlignment="Center"
 					VerticalContentAlignment="Center"
 					Theme="{DynamicResource SolidButton}"
-					Classes="Primary"
+					Classes="cta"
 					IsEnabled="{Binding CanEncode}"
 					Click="EncryptButton_Click">
 				<StackPanel>
-					<TextBlock Text="Encode" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" />
+					<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+						<LucideIcon Kind="Package" Size="20" />
+						<TextBlock Text="Encode" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+					</StackPanel>
 					<TextBlock Text="Recompile the code for your console" Opacity="0.8" HorizontalAlignment="Center" />
 				</StackPanel>
 			</Button>

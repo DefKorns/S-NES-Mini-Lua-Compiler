@@ -102,9 +102,9 @@
             <Setter Property="Background" Value="{DynamicResource SemiColorFill1}" />
         </Style>
         <Style Selector="^:checked /template/ Border#PART_Card">
-            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorPrimary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandAccent}" />
             <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="BoxShadow" Value="0 0 14 0 #662990FF" />
+            <Setter Property="BoxShadow" Value="0 0 14 0 #662CB4CF" />
         </Style>
         <Style Selector="^:disabled">
             <Setter Property="Opacity" Value="0.55" />

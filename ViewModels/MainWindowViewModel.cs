@@ -30,6 +30,10 @@ namespace SNESMiniLuaCompiler.ViewModels
         [ObservableProperty]
         private bool _isTrashButtonEnabled;
 
+        // the app starts in the dark theme (App.axaml)
+        [ObservableProperty]
+        private bool _isDarkTheme = true;
+
         [ObservableProperty]
         private string _statusText = "Ready...";
 
@@ -241,15 +245,15 @@ namespace SNESMiniLuaCompiler.ViewModels
             => Application.Current?.RegisterFollowSystemTheme();
 
         [RelayCommand]
-        private static void ToggleTheme()
+        private void ToggleTheme()
         {
             Application? app = Application.Current;
             if (app is null)
                 return;
-            app.RequestedThemeVariant = app.ActualThemeVariant == ThemeVariant.Dark
-                ? ThemeVariant.Light
-                : ThemeVariant.Dark;
+            ThemeVariant next = app.ActualThemeVariant == ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
+            app.RequestedThemeVariant = next;
             app.UnregisterFollowSystemTheme();
+            IsDarkTheme = next == ThemeVariant.Dark;
         }
 
         [RelayCommand]

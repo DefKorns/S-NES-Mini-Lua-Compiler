@@ -2,6 +2,11 @@
 	<ResourceDictionary.ThemeDictionaries>
 		<ResourceDictionary x:Key="Light">
 			<SolidColorBrush x:Key="AppBackdrop" Color="Transparent"/>
+			<SolidColorBrush x:Key="BrandAccent" Color="#038DA8"/>
+			<SolidColorBrush x:Key="PillSuccessBackground" Color="#E3F6EA"/>
+			<SolidColorBrush x:Key="PillSuccessBorder" Color="#7CCB9B"/>
+			<SolidColorBrush x:Key="PillWarningBackground" Color="#FFF3DB"/>
+			<SolidColorBrush x:Key="PillWarningBorder" Color="#E6B24C"/>
 			<SolidColorBrush x:Key="Lulu1" Color="#54A9FF"/>
 			<SolidColorBrush x:Key="Lulu2" Color="#053170"/>
 
@@ -17,7 +22,12 @@
 			<SolidColorBrush x:Key="SemiOrange9Color" Color="#EFF8FF"/>-->
 		</ResourceDictionary>
 		<ResourceDictionary x:Key="Dark">
-			<SolidColorBrush x:Key="AppBackdrop" Color="#0C1424"/>
+			<SolidColorBrush x:Key="AppBackdrop" Color="#0B0B16"/>
+			<SolidColorBrush x:Key="BrandAccent" Color="#2CB4CF"/>
+			<SolidColorBrush x:Key="PillSuccessBackground" Color="#1F3D2F"/>
+			<SolidColorBrush x:Key="PillSuccessBorder" Color="#2E7D52"/>
+			<SolidColorBrush x:Key="PillWarningBackground" Color="#3D3220"/>
+			<SolidColorBrush x:Key="PillWarningBorder" Color="#B8862B"/>
 			<SolidColorBrush x:Key="Lulu1" Color="#FFF8EA"/>
 			<SolidColorBrush x:Key="Lulu2" Color="#FFAE43"/>
 			<!--	<SolidColorBrush x:Key="ButtonDefaultPrimaryForeground" Color="#FFF8EA"/>
