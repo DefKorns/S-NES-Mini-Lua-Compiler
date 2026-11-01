@@ -1,9 +1,8 @@
-# (S)NES Mini - Lua Compiler
+﻿# (S)NES Mini - Lua Compiler
 Based on the work from [frostyfire03530](https://github.com/frostyfire03530).
 
 ### **What is it?**
-This script allows you to decompile SNES Mini lua files.
-This app is a GUI for my previous [script](https://github.com/DefKorns/classic-mini-lua-decompiler). The goal is to decrypt/encrypt (S)NES/Famicom's lua files for theme creation.
+This app decompiles and recompiles the Lua files (LuaJIT bytecode) of the SNES Mini, NES Mini and Famicom Mini, for theme creation.
 
 ### **How to use it**
 - Select your desired system

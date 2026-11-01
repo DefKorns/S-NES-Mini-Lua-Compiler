@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds a static LuaJIT 2.0.x for Linux x86-64 and copies luajit + jit/*.lua to OUT_DIR
+# Builds a static LuaJIT 2.0.x for Linux x86-64 and copies luajit + jit/bcsave.lua to OUT_DIR
 # (default: Lib/luajit-linux). The consoles use LuaJIT 2.0.x (bytecode version 1), so do NOT use the 2.1 branch.
 # Needs: git, make, gcc.
 set -euo pipefail
@@ -18,5 +18,5 @@ make -j"$(nproc)" CC="gcc -static" BUILDMODE=static >/dev/null
 
 mkdir -p "$OUT_DIR/jit"
 cp src/luajit "$OUT_DIR/luajit"
-cp src/jit/*.lua "$OUT_DIR/jit/"
+cp src/jit/bcsave.lua "$OUT_DIR/jit/"   # the only part of jit/ that "luajit -b" needs
 echo "LuaJIT built in $OUT_DIR"

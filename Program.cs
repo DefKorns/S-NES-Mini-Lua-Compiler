@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Threading;
 using Avalonia;
-using ReactiveUI.Avalonia;
 using Serilog;
 using SNESMiniLuaCompiler.Helpers;
 
@@ -61,7 +60,6 @@ namespace SNESMiniLuaCompiler
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI();
+                .LogToTrace();
     }
 }

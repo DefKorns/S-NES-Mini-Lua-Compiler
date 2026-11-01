@@ -67,7 +67,6 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <!-- Avalonia pulls in 0.21.2 (GHSA-xrw6-gwf8-vvr9); 0.21.3 is the patched release of the same line -->

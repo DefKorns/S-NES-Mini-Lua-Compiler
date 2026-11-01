@@ -9,7 +9,6 @@ namespace SNESMiniLuaCompiler.Helpers
     {
         #region Fields and Properties
 
-        private const ProcessWindowStyle Hidden = ProcessWindowStyle.Hidden;
         public static string LuaJitPath => AppUtils.LuaJitPath;
 
         #endregion
@@ -73,25 +72,16 @@ namespace SNESMiniLuaCompiler.Helpers
 
                 var startInfo = new ProcessStartInfo
                 {
-                    WorkingDirectory = LuaJitPath,
                     FileName = exePath,
                     Arguments = $"-b \"{decodeFile}\" \"{encodeFile}\"",
-                    WindowStyle = Hidden,
-                    CreateNoWindow = false,
+                    CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                 };
 
-                string libExtension = OperatingSystem.IsWindows() ? "dll" : "so";
-                startInfo.EnvironmentVariables["LUA_CPATH"] = $"?.{libExtension};" + Path.Combine(LuaJitPath, $"?.{libExtension}");
-                startInfo.EnvironmentVariables["LUA_PATH"] =
-                    "?.lua;" +
-                    Path.Combine(LuaJitPath, "jit", "?.lua") + ";" +
-                    Path.Combine(LuaJitPath, "?.lua");
-
-                string currentPath = startInfo.EnvironmentVariables["PATH"] ?? Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-                startInfo.EnvironmentVariables["PATH"] = LuaJitPath + Path.PathSeparator + currentPath;
+                // "-b" loads jit/bcsave.lua with require, so lib/luajit has to be on the module path
+                startInfo.EnvironmentVariables["LUA_PATH"] = Path.Combine(LuaJitPath, "?.lua");
 
                 using var process = Process.Start(startInfo);
                 string stdOut = process?.StandardOutput?.ReadToEnd() ?? string.Empty;
