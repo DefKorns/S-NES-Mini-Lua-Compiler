@@ -56,8 +56,13 @@
 		<Style Selector="Button.cta:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 			<Setter Property="Opacity" Value="0.92"/>
 		</Style>
+		<!-- disabled: the usual neutral grey, not a faded gold -->
+		<Style Selector="Button.cta:disabled">
+			<Setter Property="Foreground" Value="{DynamicResource SemiColorDisabledText}"/>
+		</Style>
 		<Style Selector="Button.cta:disabled /template/ ContentPresenter#PART_ContentPresenter">
-			<Setter Property="Opacity" Value="0.35"/>
+			<Setter Property="Background" Value="{DynamicResource SemiColorFill0}"/>
+			<Setter Property="Opacity" Value="1"/>
 		</Style>
 
 		<!-- the status pill in the header: green when idle, amber while working -->
