@@ -153,7 +153,7 @@ namespace SNESMiniLuaCompiler.Helpers
             using var sha256 = SHA256.Create();
             using var stream = File.OpenRead(fileName);
             var hash = sha256.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
+            return Convert.ToHexString(hash);
         }
 
         public static bool HasEditedFiles(string hash)
