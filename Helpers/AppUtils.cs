@@ -16,10 +16,13 @@ namespace SNESMiniLuaCompiler.Helpers
         public static readonly string DecodedPath = FileUtils.CombinePath(AppPath, "decoded");
         public static readonly string RecodedPath = FileUtils.CombinePath(AppPath, "recoded");
         public static readonly string LuaJitPath = FileUtils.CombinePath(AppPath, "lib", "luajit");
-        public static readonly string DecompilerPath = FileUtils.CombinePath("lib", "decompiler");
-        public static readonly string DecompilerScript = FileUtils.CombinePath(DecompilerPath, "main.py");
+        public static readonly string DecompilerPath = FileUtils.CombinePath(AppPath, "lib", "decompiler");
+        public static readonly string ExeSuffix = OperatingSystem.IsWindows() ? ".exe" : string.Empty;
+        public static readonly string DecompilerExe = FileUtils.CombinePath(DecompilerPath, "luajit-decompiler-v2" + ExeSuffix);
+        public static readonly string LuaJitExe = FileUtils.CombinePath(LuaJitPath, "luajit" + ExeSuffix);
         public static readonly string ResourcesPath = FileUtils.CombinePath(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources");
-        public static readonly string SystemResourcePrefix = "SNESMiniLuaCompiler.Lib";
+        // Embedded resources are named Lib/<path> (see LogicalName in the .csproj)
+        public static readonly string SystemResourcePrefix = "Lib/";
         public static readonly string ConfigFile = Path.Combine(LibPath, "settings.config");
 
         #endregion
@@ -63,14 +66,24 @@ namespace SNESMiniLuaCompiler.Helpers
                 };
 
                 foreach (var (suffix, path) in resources)
-                    ExtractResourcesWithPrefix($"{SystemResourcePrefix}.{suffix}.", path);
+                    ExtractResourcesWithPrefix($"{SystemResourcePrefix}{suffix}/", path);
+
+                // Extracted files lose the executable bit on Linux
+                if (!OperatingSystem.IsWindows())
+                {
+                    foreach (var exe in new[] { LuaJitExe, DecompilerExe })
+                    {
+                        if (FileUtils.SafeFileExists(exe))
+                            File.SetUnixFileMode(exe, File.GetUnixFileMode(exe) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute);
+                    }
+                }
             }, "Failed to extract resources.", "AppUtils.ExtractAllResources");
         }
 
         public static void ExtractSelectedResources(SystemModel systemModel)
         {
             string systemName = Path.GetFileName(GetSystemPath(systemModel));
-            string resourcePrefix = $"{SystemResourcePrefix}.original.{systemName}.resources.";
+            string resourcePrefix = $"{SystemResourcePrefix}original/{systemName}/resources/";
             string tempDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "resources", systemName);
             ExtractResourcesWithPrefix(resourcePrefix, tempDir);
         }
@@ -91,7 +104,6 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.ThrowArgNull(resourcePrefix, nameof(resourcePrefix));
             ExceptionUtils.ThrowArgNull(targetRoot, nameof(targetRoot));
 
-            string normalizedPrefix = resourcePrefix.Replace('-', '_');
             var assembly = Assembly.GetExecutingAssembly();
             var resourceNames = assembly?.GetManifestResourceNames();
 
@@ -100,20 +112,16 @@ namespace SNESMiniLuaCompiler.Helpers
 
             foreach (var resourceName in resourceNames.AsSpan())
             {
-                if (!resourceName.StartsWith(normalizedPrefix, StringComparison.Ordinal))
+                // MSBuild writes the directory separator of the build machine into the name
+                string normalizedName = resourceName.Replace('\\', '/');
+                if (!normalizedName.StartsWith(resourcePrefix, StringComparison.Ordinal))
                     continue;
 
-                string relative = resourceName.AsSpan(normalizedPrefix.Length).ToString();
-                string[] parts = relative.Split('.');
-                if (parts.Length < 2)
+                string relative = normalizedName[resourcePrefix.Length..];
+                if (relative.Length == 0)
                     continue;
 
-                string fileName = parts[^2] + "." + (parts[^1]?.Replace('_', '.') ?? string.Empty);
-                string dirPath = parts.Length > 2
-                    ? string.Join(Path.DirectorySeparatorChar.ToString(), parts, 0, parts.Length - 2)
-                    : string.Empty;
-
-                string outputPath = FileUtils.CombinePath(targetRoot, dirPath, fileName);
+                string outputPath = FileUtils.CombinePath(targetRoot, relative.Replace('/', Path.DirectorySeparatorChar));
 
                 ExceptionUtils.ThrowArgNull(resourceName, nameof(resourceName));
                 ExceptionUtils.ThrowArgNull(outputPath, nameof(outputPath));
@@ -161,7 +169,7 @@ namespace SNESMiniLuaCompiler.Helpers
                 ? File.ReadAllLines(ConfigFile).ToList()
                 : [];
 
-            int idx = lines.FindIndex(l => l.StartsWith(key + "="));
+            int idx = lines.FindIndex(l => l.StartsWith(key + "=", StringComparison.Ordinal));
             string entry = $"{key}={value}";
             if (idx >= 0) lines[idx] = entry;
             else lines.Add(entry);

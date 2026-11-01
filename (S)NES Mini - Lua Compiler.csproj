@@ -15,6 +15,10 @@
     <AssemblyName>SNESMiniLuaCompiler</AssemblyName>
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion> 
+    <!-- Roslyn analyzers: Microsoft .NET analyzers (CAxxxx) and code style (IDExxxx) enforced at build time -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,8 +29,26 @@
     <None Remove="Assets\Icon.ico" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Which native tools (LuaJIT + decompiler) get embedded. Override with -p:TargetOs=linux|windows. -->
+    <TargetOs Condition="'$(TargetOs)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">windows</TargetOs>
+    <TargetOs Condition="'$(TargetOs)' == ''">linux</TargetOs>
+  </PropertyGroup>
+
+  <!-- Resources are named Lib/<path> (real path, so files without extension work).
+       Lib\luajit-linux and Lib\decompiler-linux are embedded as Lib/luajit and Lib/decompiler on Linux. -->
   <ItemGroup>
-    <EmbeddedResource Include="Lib\**" />
+    <EmbeddedResource Include="Lib\**"
+                      Exclude="Lib\luajit\**;Lib\decompiler\**;Lib\luajit-linux\**;Lib\decompiler-linux\**"
+                      LogicalName="Lib/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\luajit\**" Condition="'$(TargetOs)' == 'windows'"
+                      LogicalName="Lib/luajit/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\decompiler\**" Condition="'$(TargetOs)' == 'windows'"
+                      LogicalName="Lib/decompiler/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\luajit-linux\**" Condition="'$(TargetOs)' == 'linux'"
+                      LogicalName="Lib/luajit/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\decompiler-linux\**" Condition="'$(TargetOs)' == 'linux'"
+                      LogicalName="Lib/decompiler/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

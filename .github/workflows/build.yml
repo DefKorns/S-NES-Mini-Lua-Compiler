@@ -55,3 +55,50 @@ jobs:
       #   with:
       #     name: app
       #     path: ./publish
+  build-linux:
+    runs-on: ubuntu-22.04  # older glibc; the native tools below are linked statically anyway
+    env:
+      # Fork of marsinator358/luajit-decompiler-v2 with Linux support (CMake build)
+      DECOMPILER_REPO: DefKorns/luajit-decompiler-v2
+      DECOMPILER_REF: linux-support
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install build tools (Native AOT needs clang and zlib)
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev cmake
+
+      - name: Build LuaJIT 2.0 (static)
+        run: bash scripts/build-luajit-linux.sh
+
+      - name: Checkout decompiler
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DECOMPILER_REPO }}
+          ref: ${{ env.DECOMPILER_REF }}
+          path: _decompiler
+
+      - name: Build decompiler (static)
+        run: |
+          cmake -S _decompiler -B _decompiler/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS=-static
+          cmake --build _decompiler/build -j"$(nproc)"
+          mkdir -p Lib/decompiler-linux
+          cp _decompiler/build/luajit-decompiler-v2 Lib/decompiler-linux/
+          cp _decompiler/LICENSE Lib/decompiler-linux/LICENSE
+
+      - name: Publish (linux-x64)
+        run: dotnet publish --configuration Release -r linux-x64 -p:TargetOs=linux --output ./publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snes-mini-lua-compiler-linux-x64
+          path: ./publish

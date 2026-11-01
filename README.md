@@ -22,3 +22,5 @@ Enjoy
 - AluCarD (testing)
 - [bobsayshilol](https://github.com/bobsayshilol/)
 - [znixian](https://gitlab.com/znixian)
+
+Decompiling is done with [LuaJIT Decompiler v2](https://github.com/marsinator358/luajit-decompiler-v2) by marsinator358 (MIT). No Python required.

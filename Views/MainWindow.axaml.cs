@@ -25,7 +25,6 @@ namespace SNESMiniLuaCompiler.Views
         {
             InitializeComponent();
             NotificationHelper.Initialize(this);
-            InitializeFirstRunCheck();
 
             this.DataContextChanged += (_, _) =>
             {
@@ -37,29 +36,6 @@ namespace SNESMiniLuaCompiler.Views
             };
         }
 
-        private static void InitializeFirstRunCheck()
-        {
-            const string PythonRequirementMessage =
-                "Make sure you have python 3.x installed!\n\nPlease download it from python.org";
-
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                if (!ProcessUtils.PythonVersion())
-                {
-                    Dispatcher.UIThread.Post(async () =>
-                    {
-                        await MessageBox.ShowError(PythonRequirementMessage, "Requirement");
-                        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                        {
-                            ExceptionUtils.LogException("Python 3.x is not installed. Application will shut down.");
-                            desktop.Shutdown();
-                        }
-                    });
-                }
-            },
-            "An error occurred during the first run check.",
-            "MainForm.InitializeFirstRunCheck");
-        }
 
         private async Task DecryptFilesAsync()
         {
@@ -78,9 +54,6 @@ namespace SNESMiniLuaCompiler.Views
                     foreach (var c in vm.ConsoleList) c.IsEnabled = false;
                 }
             });
-
-            if (string.IsNullOrEmpty(ProcessUtils.FindExePath("python.exe")))
-                return;
 
             _selectedSystem = vm?.SelectedConsole switch
             {

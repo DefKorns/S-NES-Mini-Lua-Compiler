@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
-    public partial class ProcessUtils
+    public class ProcessUtils
     {
         #region Fields and Properties
 
@@ -45,31 +44,56 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                var exePath = FindExePath("pythonw.exe");
-                var start = new ProcessStartInfo
-                {
-                    FileName = exePath,
-                    //Arguments = AppUtils.DecompilerScript + " --file " + file + " --output " + decFile + " --catch_asserts",
-                    Arguments = $"\"{AppUtils.DecompilerScript}\" --file \"{file}\" --output \"{decFile}\" --catch_asserts",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                };
+                if (!FileUtils.SafeFileExists(AppUtils.DecompilerExe))
+                    throw new FileNotFoundException("luajit-decompiler-v2 not found.", AppUtils.DecompilerExe);
 
-                using var process = Process.Start(start);
-                using var reader = process?.StandardOutput;
-                var result = reader?.ReadToEnd();
+                // The decompiler writes <input name>.lua into the output folder, so use a private one per file.
+                // Keep it short: the Windows build uses ANSI file APIs and fails above MAX_PATH (260 characters),
+                // and it skips such files silently (-s) while still exiting with 0.
+                var outDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "dec", Guid.NewGuid().ToString("N")[..8]);
+                Directory.CreateDirectory(outDir);
+                try
+                {
+                    var start = new ProcessStartInfo
+                    {
+                        FileName = AppUtils.DecompilerExe,
+                        Arguments = $"\"{file}\" -o \"{outDir}\" -s -f",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+
+                    using var process = Process.Start(start);
+                    var stdOutTask = process?.StandardOutput.ReadToEndAsync();
+                    var stdErr = process?.StandardError.ReadToEnd();
+                    process?.WaitForExit();
+                    var details = $"exit code {process?.ExitCode}, stdout: {stdOutTask?.Result}, stderr: {stdErr}";
+                    Debug.WriteLine("Decompiler: " + details);
+
+                    // With -s a file that fails to decompile is skipped and the exit code is still 0,
+                    // so an empty output folder is the only failure signal
+                    var produced = Directory.GetFiles(outDir, "*", SearchOption.AllDirectories);
+                    if (produced.Length == 0)
+                        throw new InvalidOperationException($"Failed to decompile '{file}' ({details}).");
+                    File.Move(produced[0], decFile, true);
+                }
+                finally
+                {
+                    Directory.Delete(outDir, true);
+                }
             },
-            "Error running command.",
-            "ProcessUtils.RunCmd");
+            "Error running decompiler.",
+            "ProcessUtils.RunDecompiler");
         }
 
         public static void RunLuaJit(string decodeFile, string encodeFile)
         {
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                var exePath = Path.Combine(LuaJitPath, "luajit.exe");
+                var exePath = AppUtils.LuaJitExe;
                 if (!FileUtils.SafeFileExists(exePath))
-                    throw new FileNotFoundException("luajit.exe not found in LuaJitPath.", exePath);
+                    throw new FileNotFoundException("luajit not found in LuaJitPath.", exePath);
 
                 var startInfo = new ProcessStartInfo
                 {
@@ -83,14 +107,15 @@ namespace SNESMiniLuaCompiler.Helpers
                     RedirectStandardError = true,
                 };
 
-                startInfo.EnvironmentVariables["LUA_CPATH"] = "?.dll;" + Path.Combine(LuaJitPath, "?.dll");
+                var libExtension = OperatingSystem.IsWindows() ? "dll" : "so";
+                startInfo.EnvironmentVariables["LUA_CPATH"] = $"?.{libExtension};" + Path.Combine(LuaJitPath, $"?.{libExtension}");
                 startInfo.EnvironmentVariables["LUA_PATH"] =
                     "?.lua;" +
                     Path.Combine(LuaJitPath, "jit", "?.lua") + ";" +
                     Path.Combine(LuaJitPath, "?.lua");
 
                 string currentPath = startInfo.EnvironmentVariables["PATH"] ?? Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-                startInfo.EnvironmentVariables["PATH"] = LuaJitPath + ";" + currentPath;
+                startInfo.EnvironmentVariables["PATH"] = LuaJitPath + Path.PathSeparator + currentPath;
 
                 using var process = Process.Start(startInfo);
                 string stdOut = process?.StandardOutput?.ReadToEnd() ?? string.Empty;
@@ -110,54 +135,16 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void OpenDirectory(string path)
         {
-            if (FileUtils.SafeDirectoryExists(path))
-                Process.Start("explorer.exe", $"\"{path}\"");
-        }
+            if (!FileUtils.SafeDirectoryExists(path)) return;
 
-        public static bool PythonVersion()
-        {
-            bool resultValue = false;
-            ExceptionUtils.GlobalTryCatch(() =>
+            Process.Start(new ProcessStartInfo
             {
-                string result = "";
-
-                ProcessStartInfo pycheck = new()
-                {
-                    FileName = @"python.exe",
-                    Arguments = "--version",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                using var process = Process.Start(pycheck) ?? throw new InvalidOperationException("Failed to start python.exe process.");
-                using var reader = process.StandardOutput;
-                result = reader.ReadToEnd();
-
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    using StreamReader errorReader = process.StandardError;
-                    result = errorReader.ReadToEnd();
-                }
-
-                var match = PythonRegex().Match(result);
-                if (match.Success && int.TryParse(match.Groups[1].Value, out int majorVersion))
-                {
-                    resultValue = majorVersion == 3;
-                }
-                else
-                {
-                    resultValue = false;
-                }
-            },
-            "Unexpected error while checking Python version.",
-            "MainForm.PythonVersion");
-            return resultValue;
+                FileName = OperatingSystem.IsWindows() ? "explorer.exe" : "xdg-open",
+                Arguments = $"\"{path}\"",
+                UseShellExecute = false
+            });
         }
 
-        [GeneratedRegex(@"Python (\d+)\.")]
-        private static partial Regex PythonRegex();
 
         #endregion
     }
