@@ -24,12 +24,14 @@ The app extracts LuaJIT 2.0 (the version the consoles use, bytecode version 1) a
 `lib` folder next to it on first run.
 
 ### **Building**
-- Windows: `dotnet build` (Native AOT publish: `dotnet publish -c Release`).
-- Linux: the native tools are built by `scripts/build-luajit-linux.sh` (static LuaJIT 2.0.x) and from the
-  [Linux port of the decompiler](https://github.com/DefKorns/luajit-decompiler-v2/tree/linux-support) (CMake, static),
-  copied to `Lib/luajit-linux` and `Lib/decompiler-linux`. Then
-  `dotnet publish -c Release -r linux-x64 -p:TargetOs=linux`. The `build-linux` job of the CI does all of it
-  (see `.github/workflows/build.yml`).
+- Windows: `dotnet build` (Native AOT publish: `dotnet publish -c Release`, needs Visual Studio with the C++ tools).
+- The LuaJIT used for encoding is built from [`third_party/luajit`](third_party/luajit/NINTENDO.md):
+  `scriptsuild-luajit-windows.bat` (Visual Studio, writes `Lib\luajit`) and `scripts/build-luajit-linux.sh`
+  (static, writes `Lib/luajit-linux`). The Windows binary is committed; the Linux one is built by the CI.
+- Linux: the decompiler comes from the
+  [Linux port](https://github.com/DefKorns/luajit-decompiler-v2/tree/linux-support) (CMake, static), copied to
+  `Lib/decompiler-linux`. Then `dotnet publish -c Release -r linux-x64 -p:TargetOs=linux`. The `build-linux` job of
+  the CI does all of it (see `.github/workflows/build.yml`).
 
 ### **Development**
 - Code follows the [.NET coding conventions](https://learn.microsoft.com/dotnet/csharp/fundamentals/coding-style/coding-conventions);
@@ -38,6 +40,22 @@ The app extracts LuaJIT 2.0 (the version the consoles use, bytecode version 1) a
   `pip install pre-commit && pre-commit install`. They check line endings, whitespace, YAML and JSON, and run
   `dotnet format whitespace`. The CI runs the same hooks. `Lib/` is excluded: it holds LuaJIT bytecode
   and binaries that no hook may change.
+
+### **Open source used**
+- **LuaJIT 2.0.4** (by Mike Pall, MIT license) encodes the Lua files. The app builds it from the source that
+  Nintendo publishes for the consoles: the `ext-luajit` folder of the NES Classic Edition and Super NES Classic
+  Edition open source packages, kept in [`third_party/luajit`](third_party/luajit/NINTENDO.md) with its license. It is the
+  same LuaJIT the consoles' scripts are built with, and it produces the same bytecode as the official 2.0.4.
+  Nintendo's open source notices are at <https://support.nintendo.com/jp/oss/index.html>:
+
+  > The Nintendo Classic Mini Family Computer console uses some open-source software (OSS) under an OSS license.
+  > Customers may obtain, copy, modify, and redistribute the source code of this OSS in accordance with the OSS
+  > license. Due to its nature, this OSS is not covered by any warranty or support. Please understand this.
+
+- **[LuaJIT Decompiler v2](https://github.com/marsinator358/luajit-decompiler-v2)** by marsinator358 (MIT) decompiles
+  the files; the Linux build comes from a [port](https://github.com/DefKorns/luajit-decompiler-v2/tree/linux-support).
+- **[Avalonia](https://avaloniaui.net/)**, [Semi.Avalonia](https://github.com/irihitech/Semi.Avalonia),
+  [Lucide](https://lucide.dev/) icons (through Lucide.Avalonia), CommunityToolkit.Mvvm and Serilog.
 
 ### Credits (alphabetically)
 - [DefKorns](https://github.com/DefKorns)

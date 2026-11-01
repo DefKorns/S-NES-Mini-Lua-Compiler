@@ -11,3 +11,6 @@
 *.exe binary
 *.dll binary
 *.sln text eol=crlf
+
+# Vendored third-party source: keep the bytes as published
+third_party/** -text

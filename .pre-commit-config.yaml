@@ -2,8 +2,9 @@
 # Setup: pip install pre-commit && pre-commit install
 
 # Lib/ holds the native tools and the consoles' original files (LuaJIT bytecode with a .lua extension):
-# the hooks must never touch them, a changed byte corrupts the bytecode
-exclude: ^Lib/
+# the hooks must never touch them, a changed byte corrupts the bytecode.
+# third_party/ holds source kept exactly as published
+exclude: ^(Lib|third_party)/
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -11,7 +12,7 @@ repos:
     hooks:
       - id: mixed-line-ending
         args: [--fix=lf]
-        exclude: \.sln$ # Visual Studio solutions keep CRLF (.gitattributes)
+        exclude: \.(sln|bat)$ # Visual Studio solutions and batch files keep CRLF (.gitattributes)
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-json

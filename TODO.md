@@ -10,14 +10,15 @@ in the CI) and the pre-commit hooks.
       the UI (virtual display); the other consoles were only decompiled/recompiled by a test program.
 - [ ] Encode them back without changes and check the consoles still boot to the menu with them.
 - [ ] Do the same with an edited file (for example a colour in `scripts/env/colors_*.lua`).
-- [ ] If the consoles do not boot, suspect first: the files whose table constants are serialized in a different
-      hash order by the Linux LuaJIT build (`pixel_character.lua`, `clover_const.lua`) and the UTF-8 BOM the
-      decompiler writes at the start of every file.
+- [ ] If the consoles do not boot, suspect first the UTF-8 BOM the decompiler writes at the start of every file
+      (LuaJIT skips it, but check) and that the app encodes without `-s` (the originals are stripped).
 
 ## Open
 
 - [ ] Run the Linux package on a real desktop (GNOME/KDE, Wayland) and check "open folder" (`xdg-open`).
 - [ ] Publish the Linux package as a release asset.
+- [ ] Decide whether to encode with `-s` (strip debug info): the 613 original files are stripped (flag `0x02`), the
+      files the app writes carry debug info and the path of the file on the user's machine.
 - [ ] Propose the Linux port to the upstream decompiler (pull request to marsinator358/luajit-decompiler-v2).
 - [ ] The Windows decompiler is the upstream executable (the build skips files with paths over 260 characters
       silently); build the Windows exe from the fork in the CI if the limit ever matters.
