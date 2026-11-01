@@ -1,0 +1,34 @@
+# Fast checks run on every commit; the build (with the analyzers) runs in CI (.github/workflows/build.yml).
+# Setup: pip install pre-commit && pre-commit install
+
+# Lib/ holds the native tools and the consoles' original files (LuaJIT bytecode with a .lua extension):
+# the hooks must never touch them, a changed byte corrupts the bytecode
+exclude: ^Lib/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: \.sln$ # Visual Studio solutions keep CRLF (.gitattributes)
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+
+  - repo: local
+    hooks:
+      # .editorconfig layout of the staged C# files; --folder skips loading the project, so it takes seconds
+      - id: dotnet-format-whitespace
+        name: dotnet format whitespace
+        language: system
+        entry: dotnet format whitespace --folder --verify-no-changes --include
+        types: [c#]
+        # pre-commit splits the files over parallel processes; two dotnet CLIs starting together race on the
+        # shared-memory folder .NET keeps in XDG_RUNTIME_DIR and one of them fails with ENOENT
+        require_serial: true

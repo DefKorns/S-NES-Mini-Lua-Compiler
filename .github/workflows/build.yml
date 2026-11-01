@@ -102,3 +102,39 @@ jobs:
         with:
           name: snes-mini-lua-compiler-linux-x64
           path: ./publish
+
+  pre-commit:
+    # the same hooks as .pre-commit-config.yaml, for commits made without them installed
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Create the runtime folder
+        run: mkdir -m 700 -p "$XDG_RUNTIME_DIR"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # the first dotnet command runs the CLI's first-use setup; doing it once here keeps the hooks,
+      # which start several dotnet processes, from racing to do it
+      - name: Prepare the .NET CLI
+        run: dotnet nuget --help > /dev/null
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run the hooks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure

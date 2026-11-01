@@ -4,6 +4,7 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
 indent_style = space
 indent_size = 4
 insert_final_newline = true
@@ -13,6 +14,8 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 [*.cs]
+# the existing C# files start with a BOM
+charset = utf-8-bom
 
 #### .NET code style ####
 
@@ -149,3 +152,7 @@ dotnet_naming_rule.constants_are_pascal_case.severity = suggestion
 
 # CA2213: Disposable fields should be disposed
 dotnet_diagnostic.CA2213.severity = silent
+
+# var only where the type is apparent (new, casts), as the Microsoft C# conventions say
+dotnet_diagnostic.IDE0008.severity = warning
+dotnet_diagnostic.IDE0005.severity = warning

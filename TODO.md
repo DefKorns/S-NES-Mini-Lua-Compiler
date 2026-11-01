@@ -1,34 +1,25 @@
 # TODO
 
-## Replace the Python decompiler with LuaJIT Decompiler v2
+Done: the Python decompiler was replaced by LuaJIT Decompiler v2, with a Linux x86-64 build (native tools built
+in the CI) and the pre-commit hooks.
 
-The app decompiles the console's Lua files with the old Python LJD (`Lib/decompiler`, run as
-`pythonw main.py --file <in> --output <out> --catch_asserts`). That project is dead, its own README warns
-the output may not match the original, and it makes users install Python.
+## Test before releasing
 
-Replace it with [LuaJIT Decompiler v2](https://github.com/marsinator358/luajit-decompiler-v2)
-(marsinator358, MIT license). It is a single Windows executable from the releases page
-(`luajit-decompiler-v2.exe`, latest `Mar_24_2024`) that, according to its README, fixes the bugs and quirks
-of the Python decompiler and fully supports gotos and stripped bytecode, locals and upvalues included.
-
-Steps:
-
-- [x] Add `luajit-decompiler-v2.exe` under `Lib/decompiler` (or `Lib/decompiler-v2`) and remove the Python
-      sources (`ljd/`, `main.py`), keeping its `LICENSE` next to the exe.
-- [x] `Helpers/ProcessUtils.cs`: run the exe in `RunDecompiler` instead of `pythonw.exe`. Check the
-      arguments with `luajit-decompiler-v2.exe -?`: by default it writes to an `output` folder next to
-      the exe, so pass the output folder explicitly if it has an option for it, or move the files from
-      there.
-- [x] `Helpers/AppUtils.cs`: point `DecompilerPath` at the exe and drop `DecompilerScript`.
-- [x] Remove the Python check (`ProcessUtils.PythonVersion` and the UI that asks for Python).
-- [ ] Check that the build workflow (`.github/workflows/build.yml`) and the published package copy the exe.
-- [x] README: drop the Python requirement and credit LuaJIT Decompiler v2.
-- [ ] Keep the encoder as it is: `Lib/luajit/luajit.exe` must stay the LuaJIT version the consoles use
-      (2.0.x), or the recompiled files will not load.
-
-Test before releasing:
-
-- [ ] Decode the Lua files of each console (NES, Famicom, SNES, Super Famicom, Shonen Jump) and compare
-      a few of them with what the Python decompiler gave.
+- [ ] Decode the Lua files of each console (NES, Famicom, SNES, Super Famicom, Shonen Jump) in the app and
+      compare a few of them with what the Python decompiler gave. Linux: only Famicom Mini was run through
+      the UI (virtual display); the other consoles were only decompiled/recompiled by a test program.
 - [ ] Encode them back without changes and check the consoles still boot to the menu with them.
 - [ ] Do the same with an edited file (for example a colour in `scripts/env/colors_*.lua`).
+- [ ] If the consoles do not boot, suspect first: the files whose table constants are serialized in a different
+      hash order by the Linux LuaJIT build (`pixel_character.lua`, `clover_const.lua`) and the UTF-8 BOM the
+      decompiler writes at the start of every file.
+
+## Open
+
+- [ ] Run the Linux package on a real desktop (GNOME/KDE, Wayland) and check "open folder" (`xdg-open`).
+- [ ] Publish the Linux package as a release asset.
+- [ ] Propose the Linux port to the upstream decompiler (pull request to marsinator358/luajit-decompiler-v2).
+- [ ] The Windows decompiler is the upstream executable (the build skips files with paths over 260 characters
+      silently); build the Windows exe from the fork in the CI if the limit ever matters.
+- [ ] macOS: not done. LuaJIT 2.0 has no ARM64 support (x86-64 under Rosetta 2 would work), signing and
+      notarization are needed, and nobody can test it.

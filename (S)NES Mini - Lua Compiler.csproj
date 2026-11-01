@@ -14,11 +14,14 @@
     <IsAotCompatible>true</IsAotCompatible>
     <AssemblyName>SNESMiniLuaCompiler</AssemblyName>
     <PublishTrimmed>True</PublishTrimmed>
-    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion> 
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- Roslyn analyzers: Microsoft .NET analyzers (CAxxxx) and code style (IDExxxx) enforced at build time -->
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <!-- needed for the unused-using rule (IDE0005) to run in the build; public APIs need no XML docs -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
