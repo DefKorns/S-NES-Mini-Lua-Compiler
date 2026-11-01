@@ -1,0 +1,80 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Version>2.0.0-beta</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <StartupObject>SNESMiniLuaCompiler.Program</StartupObject>
+    <RootNamespace>SNESMiniLuaCompiler</RootNamespace>
+    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <PublishAot Condition="'$(Configuration)' != 'Debug'">true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AssemblyName>SNESMiniLuaCompiler</AssemblyName>
+    <PublishTrimmed>True</PublishTrimmed>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Roslyn analyzers: Microsoft .NET analyzers (CAxxxx) and code style (IDExxxx) enforced at build time -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <!-- needed for the unused-using rule (IDE0005) to run in the build; public APIs need no XML docs -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Icon.ico" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Which native tools (LuaJIT + decompiler) get embedded. Override with -p:TargetOs=linux|windows. -->
+    <TargetOs Condition="'$(TargetOs)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">windows</TargetOs>
+    <TargetOs Condition="'$(TargetOs)' == ''">linux</TargetOs>
+  </PropertyGroup>
+
+  <!-- Resources are named Lib/<path> (real path, so files without extension work).
+       Lib\luajit-linux and Lib\decompiler-linux are embedded as Lib/luajit and Lib/decompiler on Linux. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Lib\**"
+                      Exclude="Lib\luajit\**;Lib\decompiler\**;Lib\luajit-linux\**;Lib\decompiler-linux\**"
+                      LogicalName="Lib/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\luajit\**" Condition="'$(TargetOs)' == 'windows'"
+                      LogicalName="Lib/luajit/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\decompiler\**" Condition="'$(TargetOs)' == 'windows'"
+                      LogicalName="Lib/decompiler/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\luajit-linux\**" Condition="'$(TargetOs)' == 'linux'"
+                      LogicalName="Lib/luajit/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Lib\decompiler-linux\**" Condition="'$(TargetOs)' == 'linux'"
+                      LogicalName="Lib/decompiler/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.22">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Lucide.Avalonia" Version="0.2.28" />
+    <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <!-- Avalonia pulls in 0.21.2 (GHSA-xrw6-gwf8-vvr9); 0.21.3 is the patched release of the same line -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\MessageBox.axaml.cs">
+      <DependentUpon>MessageBox.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

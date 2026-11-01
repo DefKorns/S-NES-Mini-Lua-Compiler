@@ -1,0 +1,51 @@
+next-version: 2.0.0
+mode: ContinuousDeployment
+tag-prefix: '[vV]?'
+assembly-informational-format: '{Major}.{Minor}.{Patch}'
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+commit-message-incrementing: Enabled
+update-build-number: true
+branches:
+  master:
+    regex: ^master$
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: true
+  main:
+    regex: ^main$
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: true
+  develop:
+    regex: ^dev(elop)?(ment)?/?.*$
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: true
+  feature:
+    regex: ^features?[/-]
+    increment: Minor
+    track-merge-target: false
+    is-release-branch: false
+  release:
+    regex: ^releases?[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  hotfix:
+    regex: ^hotfix(es)?[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  support:
+    regex: ^support[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: true
+  pull-request:
+    regex: ^(pull|pull-requests|pr)[/-]
+    increment: Patch
+    track-merge-target: false
+    is-release-branch: false
