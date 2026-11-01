@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -101,12 +102,16 @@ namespace SNESMiniLuaCompiler.Firmware
 
         /// <summary>
         /// Reads the Lua files of a folder the user picked: the console's resources folder, the folder that
-        /// contains it, or anything above that.
+        /// contains it, or anything above that (a folder with several consoles: the one named like this console).
         /// </summary>
-        public static void CopyFromFolder(string folder, string destination, ImportResult result, CancellationToken cancellationToken)
+        public static void CopyFromFolder(
+            string folder,
+            ConsoleLayout layout,
+            string destination,
+            ImportResult result,
+            CancellationToken cancellationToken)
         {
-            string root = FindResourcesRoot(folder)
-                ?? throw new InvalidDataException("No folder with a 'scripts' folder inside was found there. Pick the console's UI folder (the one that has 'resources').");
+            string root = FindResourcesRoot(folder, layout);
 
             foreach (string file in Directory.EnumerateFiles(root, "*.lua", SearchOption.AllDirectories))
             {
@@ -116,17 +121,45 @@ namespace SNESMiniLuaCompiler.Firmware
             }
         }
 
-        private static string? FindResourcesRoot(string folder)
+        private static string FindResourcesRoot(string folder, ConsoleLayout layout)
         {
+            // the folder itself, or its own resources folder, is the answer: whatever else is inside is not looked at
             if (Directory.Exists(Path.Combine(folder, "scripts")))
                 return folder;
 
-            string resources = Path.Combine(folder, "resources");
-            if (Directory.Exists(Path.Combine(resources, "scripts")))
-                return resources;
+            string ownResources = Path.Combine(folder, "resources");
+            if (Directory.Exists(Path.Combine(ownResources, "scripts")))
+                return ownResources;
 
-            return Directory.EnumerateDirectories(folder, "resources", SearchOption.AllDirectories)
-                .FirstOrDefault(directory => Directory.Exists(Path.Combine(directory, "scripts")));
+            // otherwise every resources folder with scripts below it
+            var roots = new List<string>();
+            roots.AddRange(Directory.EnumerateDirectories(folder, "resources", SearchOption.AllDirectories)
+                    .Where(directory => Directory.Exists(Path.Combine(directory, "scripts"))));
+
+            if (roots.Count == 0)
+                throw new InvalidDataException("No folder with a 'scripts' folder inside was found there. Pick the console's UI folder (the one that has 'resources').");
+
+            if (roots.Count == 1)
+                return roots[0];
+
+            // several consoles in one folder (a "base UI" folder): the one that is named like this console
+            string[] named = [.. roots.Where(root => layout.MatchesFolderName(ConsoleFolderName(root)))];
+            if (named.Length == 1)
+                return named[0];
+
+            string consoles = string.Join(", ", roots.Select(ConsoleFolderName).Order());
+            throw new InvalidDataException(named.Length == 0
+                ? $"That folder has several consoles ({consoles}) and none is named like this one. Pick the folder of your console."
+                : $"That folder has more than one folder named like this console ({consoles}). Pick the folder of your console.");
+        }
+
+        // .../snesusa/resources -> snesusa;  .../snesusa (the resources are its scripts) -> snesusa
+        private static string ConsoleFolderName(string root)
+        {
+            string name = Path.GetFileName(Path.TrimEndingDirectorySeparator(root));
+            return name.Equals("resources", StringComparison.OrdinalIgnoreCase)
+                ? Path.GetFileName(Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(root)) ?? string.Empty)
+                : name;
         }
 
         private static void ExtractFromSquashFs(

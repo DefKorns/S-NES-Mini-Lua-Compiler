@@ -15,7 +15,7 @@ namespace SNESMiniLuaCompiler.Firmware
         public static Task<ImportResult> FromFolderAsync(SystemModel system, string folder, CancellationToken cancellationToken = default) =>
             ImportAsync(
                 system,
-                (staging, result) => Task.Run(() => LuaSourceReader.CopyFromFolder(folder, staging, result, cancellationToken), cancellationToken));
+                (staging, result) => Task.Run(() => LuaSourceReader.CopyFromFolder(folder, ConsoleLayout.For(system), staging, result, cancellationToken), cancellationToken));
 
         public static Task<ImportResult> FromFirmwareFileAsync(SystemModel system, string file, CancellationToken cancellationToken = default) =>
             ImportAsync(
@@ -42,6 +42,8 @@ namespace SNESMiniLuaCompiler.Firmware
                 if (!File.Exists(Path.Combine(staging, "scripts", "main.lua")))
                     throw new InvalidDataException(Describe(result));
 
+                CheckIsThisConsole(ConsoleLayout.For(system), staging);
+
                 OriginalsStore.Replace(system, staging);
                 return result;
             }
@@ -49,6 +51,16 @@ namespace SNESMiniLuaCompiler.Firmware
             {
                 OriginalsStore.CleanUp(staging);
             }
+        }
+
+        // the files of a NES are not those of a SNES: a file only one family has tells them apart
+        private static void CheckIsThisConsole(ConsoleLayout layout, string staging)
+        {
+            if (!File.Exists(Path.Combine(staging, layout.RequiredFile)))
+                throw new InvalidDataException($"These are not the files of this console ({layout.RequiredFile} is missing): they are from another console.");
+
+            if (layout.ForbiddenFile is not null && File.Exists(Path.Combine(staging, layout.ForbiddenFile)))
+                throw new InvalidDataException($"These are not the files of this console ({layout.ForbiddenFile} belongs to the Shonen Jump edition).");
         }
 
         private static string Describe(ImportResult result) => result.NotBytecode > 0
