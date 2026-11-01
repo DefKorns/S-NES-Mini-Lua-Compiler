@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.IO;
 using Serilog;
 using SNESMiniLuaCompiler.Views;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
-    public class ExceptionUtils
+    public static class ExceptionUtils
     {
         private static ILogger? _logger;
-        private static readonly ConcurrentDictionary<string, (bool exists, DateTime lastCheck)> _fileExistsCache = new();
-        private const int FILE_CACHE_DURATION_MS = 1000; // Cache file existence for 1 second
 
         public static void ConfigureLogger(ILogger logger)
         {
@@ -29,7 +26,6 @@ namespace SNESMiniLuaCompiler.Helpers
                 return $"[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] Context: {Context}\r\nUserMessage: {UserMessage}\r\nException: {Exception}\r\n";
             }
         }
-
 
         public static void ThrowArgNull(object? arg, string? paramName = null) =>
             _ = arg ?? throw new ArgumentNullException(paramName);
@@ -50,7 +46,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static T SafeFileOperation<T>(Func<T> operation, T defaultValue, string? filePath = null, string? context = null, bool showUser = false)
         {
-            if (filePath != null && !CheckFileExists(filePath))
+            if (filePath != null && !File.Exists(filePath))
             {
                 return defaultValue;
             }
@@ -66,31 +62,11 @@ namespace SNESMiniLuaCompiler.Helpers
             }
         }
 
-        private static bool CheckFileExists(string filePath)
-        {
-            if (_fileExistsCache.TryGetValue(filePath, out (bool exists, DateTime lastCheck) cacheEntry))
-            {
-                if ((DateTime.UtcNow - cacheEntry.lastCheck).TotalMilliseconds < FILE_CACHE_DURATION_MS)
-                {
-                    return cacheEntry.exists;
-                }
-            }
-
-            bool exists = File.Exists(filePath);
-            _fileExistsCache.AddOrUpdate(filePath,
-                    (exists, DateTime.UtcNow),
-             (_, _) => (exists, DateTime.UtcNow));
-            return exists;
-        }
-
         public static void LogException(ExceptionInfo info)
         {
-            //_logger?.Error(info.Exception,
-            //    "Context: {Context} | UserMessage: {UserMessage}",
-            //    info.Timestamp, info.Context, info.UserMessage);
             _logger?.Error(info.Exception,
-    "[{Timestamp}] Context: {Context} | UserMessage: {UserMessage}",
-    info.Timestamp, info.Context, info.UserMessage);
+                "[{Timestamp}] Context: {Context} | UserMessage: {UserMessage}",
+                info.Timestamp, info.Context, info.UserMessage);
         }
 
         public static void LogException(string info)

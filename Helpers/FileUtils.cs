@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
-    public class FileUtils
+    public static class FileUtils
     {
         #region Fields
 
@@ -39,10 +40,9 @@ namespace SNESMiniLuaCompiler.Helpers
 
                 CreatePath(destFolder);
 
-                //foreach (var file in Directory.GetFiles(sourceFolder) ?? [])
                 foreach (string file in Directory.GetFiles(sourceFolder))
                 {
-                    string dest = CombinePath(destFolder, Path.GetFileName(file) ?? string.Empty);
+                    string dest = CombinePath(destFolder, Path.GetFileName(file));
                     ExceptionUtils.GlobalTryCatch(
                         () => File.Copy(file, dest, true),
                         $"Error copying file '{file}' to '{dest}'.",
@@ -50,10 +50,9 @@ namespace SNESMiniLuaCompiler.Helpers
                     );
                 }
 
-                //foreach (var folder in Directory.GetDirectories(sourceFolder) ?? [])
                 foreach (string folder in Directory.GetDirectories(sourceFolder))
                 {
-                    string dest = CombinePath(destFolder, Path.GetFileName(folder) ?? string.Empty);
+                    string dest = CombinePath(destFolder, Path.GetFileName(folder));
                     ExceptionUtils.GlobalTryCatch(
                         () => CopyAssets(folder, dest),
                         $"Error copying directory '{folder}' to '{dest}'.",
@@ -113,17 +112,12 @@ namespace SNESMiniLuaCompiler.Helpers
 
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                foreach (string directory in Directory.GetDirectories(startLocation) ?? [])
+                foreach (string directory in Directory.GetDirectories(startLocation))
                 {
                     DeleteEmptyDirectories(directory);
 
-                    bool isEmpty = (Directory.GetFiles(directory)?.Length ?? 0) == 0 &&
-                                   (Directory.GetDirectories(directory)?.Length ?? 0) == 0;
-
-                    if (isEmpty)
-                    {
+                    if (!Directory.EnumerateFileSystemEntries(directory).Any())
                         Directory.Delete(directory, false);
-                    }
                 }
             }, "Error deleting directory.", "AppUtils.DeleteEmptyDirectories");
         }
@@ -150,32 +144,13 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static string GetSHA256HashFromFile(string fileName)
         {
-            using var sha256 = SHA256.Create();
             using FileStream stream = File.OpenRead(fileName);
-            byte[] hash = sha256.ComputeHash(stream);
-            return Convert.ToHexString(hash);
+            return Convert.ToHexString(SHA256.HashData(stream));
         }
 
         public static bool HasEditedFiles(string hash)
         {
-            foreach (string line in SafeReadAllLines(DecodedHashFile))
-            {
-                if (line?.Contains(hash ?? string.Empty) == true)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public static string SafeReadAllText(string filePath)
-        {
-            return ExceptionUtils.SafeFileOperation(
-                    () => File.ReadAllText(filePath),
-                    string.Empty,
-                  filePath,
-                    "FileUtils.SafeReadAllText"
-                );
+            return !SafeReadAllLines(DecodedHashFile).Any(line => line.Contains(hash, StringComparison.Ordinal));
         }
 
         public static string[] SafeReadAllLines(string filePath)
@@ -187,51 +162,6 @@ namespace SNESMiniLuaCompiler.Helpers
              "FileUtils.SafeReadAllLines"
             );
         }
-
-        public static byte[] SafeReadBytes(string filePath)
-        {
-            return ExceptionUtils.SafeFileOperation(
-                () => File.ReadAllBytes(filePath),
-                [],
-                filePath,
-                "FileUtils.SafeReadBytes"
-            );
-        }
-
-        public static void SafeWriteBytes(string filePath, byte[] bytes)
-        {
-            if (string.IsNullOrWhiteSpace(filePath) || bytes == null)
-                return;
-
-            ExceptionUtils.SafeFileOperation(() =>
- { File.WriteAllBytes(filePath, bytes); return true; },
-                false,
-                null, // Don't check file existence for write operations
-                "FileUtils.SafeWriteBytes"
-            );
-        }
-
-        public static void SafeAppendAllLines(string filePath, string[] lines)
-        {
-            if (string.IsNullOrWhiteSpace(filePath) || lines == null)
-                return;
-
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                File.AppendAllLines(filePath, lines);
-            }, "Error appending lines to file.", "FileUtils.SafeAppendAllLines");
-        }
-
-        public static void SafeAppendAllText(string filePath, string content)
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
-                return;
-
-            ExceptionUtils.GlobalTryCatch(() =>
-            {
-                File.AppendAllText(filePath, content ?? string.Empty);
-            }, "Error appending text to file.", "FileUtils.SafeAppendAllText");
-        }
         #endregion
 
         public static int CountFilesRecursive(string sDir)
@@ -240,20 +170,5 @@ namespace SNESMiniLuaCompiler.Helpers
                 return 0;
             return Directory.GetFiles(sDir, "*", SearchOption.AllDirectories).Length;
         }
-
-        //public static int CountFilesRecursive(string sDir)
-        //{
-        //    int count = 0;
-        //    try
-        //    {
-        //        count += Directory.GetFiles(sDir).Length;
-        //        foreach (string d in Directory.GetDirectories(sDir))
-        //        {
-        //            count += CountFilesRecursive(d);
-        //        }
-        //    }
-        //    catch { }
-        //    return count;
-        //}
     }
 }

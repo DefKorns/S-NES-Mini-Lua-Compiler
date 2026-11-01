@@ -5,39 +5,12 @@ using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
-    public class ProcessUtils
+    public static class ProcessUtils
     {
         #region Fields and Properties
 
         private const ProcessWindowStyle Hidden = ProcessWindowStyle.Hidden;
-        //public static string LuaJitPath { get; set; } = Path.Combine(AppUtils.LibPath, "luajit");
         public static string LuaJitPath => AppUtils.LuaJitPath;
-
-        #endregion
-
-        #region Executable Path Utilities
-
-        public static string FindExePath(string exe)
-        {
-            exe = Environment.ExpandEnvironmentVariables(exe ?? string.Empty);
-
-            if (FileUtils.SafeFileExists(exe))
-                return exe;
-
-            if (string.IsNullOrEmpty(Path.GetDirectoryName(exe)))
-            {
-                //foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';'))
-                foreach (string path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
-                     .Split(Path.PathSeparator))
-                {
-                    string fullPath = Path.Combine(path.Trim(), exe ?? string.Empty);
-                    if (FileUtils.SafeFileExists(fullPath))
-                        return Path.GetFullPath(fullPath);
-                }
-            }
-
-            return string.Empty;
-        }
 
         #endregion
 
@@ -131,24 +104,6 @@ namespace SNESMiniLuaCompiler.Helpers
             "Error running LuaJIT.",
             "ProcessUtils.RunLuaJit");
         }
-
-        #endregion
-
-        #region Utility Methods
-
-        public static void OpenDirectory(string path)
-        {
-            if (!FileUtils.SafeDirectoryExists(path))
-                return;
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = OperatingSystem.IsWindows() ? "explorer.exe" : "xdg-open",
-                Arguments = $"\"{path}\"",
-                UseShellExecute = false
-            });
-        }
-
 
         #endregion
     }

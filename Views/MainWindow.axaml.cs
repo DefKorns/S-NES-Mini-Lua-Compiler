@@ -13,8 +13,6 @@ namespace SNESMiniLuaCompiler.Views
 {
     public partial class MainWindow : Window
     {
-        private string? _selectedSystem;
-
         // propriedade cached em vez de repetir "DataContext as MainWindowViewModel"
         private MainWindowViewModel? Vm => DataContext as MainWindowViewModel;
 
@@ -33,7 +31,6 @@ namespace SNESMiniLuaCompiler.Views
             };
         }
 
-
         private async Task DecryptFilesAsync()
         {
             Button? encryptButton = this.FindControl<Button>("btn_encrypt");
@@ -49,29 +46,20 @@ namespace SNESMiniLuaCompiler.Views
                     vm.DecryptionProgress = 0;
                     vm.IsDecryptionInProgress = true;
                     vm.IsTrashButtonEnabled = false;
-                    foreach (Consoles c in vm.ConsoleList)
-                        c.IsEnabled = false;
+                    SetConsolesEnabled(vm, false);
                 }
             });
 
-            _selectedSystem = vm?.SelectedConsole switch
-            {
-                SystemModel.Nes => AppUtils.GetSystemPath(SystemModel.Nes),
-                SystemModel.Famicom => AppUtils.GetSystemPath(SystemModel.Famicom),
-                SystemModel.SnesPal => AppUtils.GetSystemPath(SystemModel.SnesPal),
-                SystemModel.SuperFamicom => AppUtils.GetSystemPath(SystemModel.SuperFamicom),
-                SystemModel.Shonen => AppUtils.GetSystemPath(SystemModel.Shonen),
-                _ => AppUtils.GetSystemPath(SystemModel.Snes)
-            };
+            string selectedSystem = AppUtils.GetSystemPath(vm?.SelectedConsole ?? SystemModel.Snes);
 
             await Task.Run(() =>
             {
                 FileUtils.DeletePath(AppUtils.DecodedPath);
-                FileUtils.CopyAssets(_selectedSystem, AppUtils.DecodedPath);
+                FileUtils.CopyAssets(selectedSystem, AppUtils.DecodedPath);
                 FileUtils.DeleteFile(FileUtils.DecodedHashFile);
             }).ConfigureAwait(false);
 
-            int totalFiles = FileUtils.CountFilesRecursive("decoded");
+            int totalFiles = FileUtils.CountFilesRecursive(AppUtils.DecodedPath);
             if (totalFiles == 0)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
@@ -82,8 +70,7 @@ namespace SNESMiniLuaCompiler.Views
                         vm.DecryptionProgress = 0;
                         vm.IsDecryptionInProgress = false;
                         vm.IsTrashButtonEnabled = true;
-                        foreach (Consoles c in vm.ConsoleList)
-                            c.IsEnabled = true;
+                        SetConsolesEnabled(vm, true);
                     }
                     if (encryptButton != null)
                         encryptButton.IsEnabled = true;
@@ -120,7 +107,7 @@ namespace SNESMiniLuaCompiler.Views
                         Dispatcher.UIThread.Post(() => { if (vm != null) vm.DecryptionProgress = progress; });
                     }
                 }
-                DecryptWithProgress("decoded");
+                DecryptWithProgress(AppUtils.DecodedPath);
             }).ConfigureAwait(false);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -135,8 +122,7 @@ namespace SNESMiniLuaCompiler.Views
                     vm.DecryptionProgress = 100;
                     vm.IsDecryptionInProgress = false;
                     vm.IsTrashButtonEnabled = true;
-                    foreach (Consoles c in vm.ConsoleList)
-                        c.IsEnabled = true;
+                    SetConsolesEnabled(vm, true);
                 }
             });
         }
@@ -163,7 +149,7 @@ namespace SNESMiniLuaCompiler.Views
             Button? encryptButton = this.FindControl<Button>("btn_encrypt");
             MainWindowViewModel? vm = Vm;
 
-            // l� o sistema uma vez antes do loop � ponto 5
+            // read the system once before the loop
             string? selectedConsoleStr = AppUtils.LoadConfig("system");
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -173,13 +159,12 @@ namespace SNESMiniLuaCompiler.Views
                 status.Text = "Encrypting files, please wait...";
             });
 
-            int totalFiles = FileUtils.CountFilesRecursive("decoded");
+            int totalFiles = FileUtils.CountFilesRecursive(AppUtils.DecodedPath);
             if (vm != null)
             {
                 vm.EncryptionProgress = 0;
                 vm.IsEncryptionInProgress = totalFiles > 0;
-                foreach (Consoles c in vm.ConsoleList)
-                    c.IsEnabled = false;
+                SetConsolesEnabled(vm, false);
             }
 
             int filesEncrypted = 0;
@@ -219,7 +204,7 @@ namespace SNESMiniLuaCompiler.Views
                     }
                 }
 
-                EncryptWithProgress("decoded");
+                EncryptWithProgress(AppUtils.DecodedPath);
                 ExceptionUtils.GlobalTryCatch(
                     () => FileUtils.DeleteEmptyDirectories(AppUtils.RecodedPath),
                     $"Error deleting empty directories in '{AppUtils.RecodedPath}'.",
@@ -232,7 +217,7 @@ namespace SNESMiniLuaCompiler.Views
                     encryptButton.IsEnabled = true;
                 FileUtils.CreatePath(AppUtils.RecodedPath);
 
-                bool noFiles = (Directory.GetDirectories(AppUtils.RecodedPath)?.Length ?? 0) == 0;
+                bool noFiles = Directory.GetDirectories(AppUtils.RecodedPath).Length == 0;
                 if (noFiles)
                 {
                     NotificationHelper.Warning("No files were encrypted.", "Light");
@@ -248,10 +233,18 @@ namespace SNESMiniLuaCompiler.Views
                 {
                     vm.EncryptionProgress = 100;
                     vm.IsEncryptionInProgress = false;
-                    foreach (Consoles c in vm.ConsoleList)
-                        c.IsEnabled = true;
+                    SetConsolesEnabled(vm, true);
                 }
             });
+        }
+
+        private static void SetConsolesEnabled(MainWindowViewModel? vm, bool isEnabled)
+        {
+            if (vm == null)
+                return;
+
+            foreach (Consoles console in vm.ConsoleList)
+                console.IsEnabled = isEnabled;
         }
 
         [GeneratedRegex("decoded")]
