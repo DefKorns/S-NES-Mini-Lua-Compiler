@@ -1,3 +1,8 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -5,11 +10,6 @@ using CommunityToolkit.Mvvm.Input;
 using Semi.Avalonia;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler.ViewModels
 {
@@ -69,13 +69,13 @@ namespace SNESMiniLuaCompiler.ViewModels
         {
             SelectedConsole = systemModel;
 
-            foreach (var console in ConsoleList)
+            foreach (Consoles console in ConsoleList)
                 console.IsChecked = console.SystemModel == systemModel;
 
             if (FileUtils.SafeDirectoryExists(AppUtils.DecodedPath) &&
                 Directory.EnumerateFileSystemEntries(AppUtils.DecodedPath).Any())
             {
-                var result = await Views.MessageBox.ShowWarning(
+                MessageBoxResult result = await Views.MessageBox.ShowWarning(
                     "This action may overwrite existing files. Do you want to continue?",
                     "Warning"
                 );
@@ -108,8 +108,9 @@ namespace SNESMiniLuaCompiler.ViewModels
         [RelayCommand]
         private static void ToggleTheme()
         {
-            var app = Application.Current;
-            if (app is null) return;
+            Application? app = Application.Current;
+            if (app is null)
+                return;
             app.RequestedThemeVariant = app.ActualThemeVariant == ThemeVariant.Dark
                 ? ThemeVariant.Light
                 : ThemeVariant.Dark;
@@ -119,8 +120,9 @@ namespace SNESMiniLuaCompiler.ViewModels
         [RelayCommand]
         private static void SelectTheme(object? obj)
         {
-            var app = Application.Current;
-            if (app is null) return;
+            Application? app = Application.Current;
+            if (app is null)
+                return;
             app.RequestedThemeVariant = obj as ThemeVariant;
             app.UnregisterFollowSystemTheme();
         }

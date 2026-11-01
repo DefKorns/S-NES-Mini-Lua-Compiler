@@ -1,10 +1,10 @@
-﻿using Avalonia;
-using ReactiveUI.Avalonia;
-using SNESMiniLuaCompiler.Helpers;
-using Serilog;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Threading;
+using Avalonia;
+using ReactiveUI.Avalonia;
+using Serilog;
+using SNESMiniLuaCompiler.Helpers;
 
 namespace SNESMiniLuaCompiler
 {
@@ -65,4 +65,3 @@ namespace SNESMiniLuaCompiler
                 .UseReactiveUI();
     }
 }
-

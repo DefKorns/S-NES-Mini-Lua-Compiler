@@ -1,9 +1,9 @@
-﻿using SNESMiniLuaCompiler.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using SNESMiniLuaCompiler.Models;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
@@ -35,7 +35,7 @@ namespace SNESMiniLuaCompiler.Helpers
             ?? "Unknown";
         public static void SaveGitVersionToConfig()
         {
-            var version = GetAppVersion();
+            string version = GetAppVersion();
             SaveConfig("gitversion", version);
         }
 
@@ -65,13 +65,13 @@ namespace SNESMiniLuaCompiler.Helpers
                     ("decompiler", DecompilerPath)
                 };
 
-                foreach (var (suffix, path) in resources)
+                foreach ((string suffix, string path) in resources)
                     ExtractResourcesWithPrefix($"{SystemResourcePrefix}{suffix}/", path);
 
                 // Extracted files lose the executable bit on Linux
                 if (!OperatingSystem.IsWindows())
                 {
-                    foreach (var exe in new[] { LuaJitExe, DecompilerExe })
+                    foreach (string? exe in new[] { LuaJitExe, DecompilerExe })
                     {
                         if (FileUtils.SafeFileExists(exe))
                             File.SetUnixFileMode(exe, File.GetUnixFileMode(exe) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute);
@@ -91,7 +91,7 @@ namespace SNESMiniLuaCompiler.Helpers
         public static void ExtractResourceToFile(string resourceName, string outputPath)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using var resourceStream = (assembly?.GetManifestResourceStream(resourceName)) ?? throw new InvalidOperationException($"Resource '{resourceName}' not found.");
+            using Stream resourceStream = (assembly?.GetManifestResourceStream(resourceName)) ?? throw new InvalidOperationException($"Resource '{resourceName}' not found.");
 
             FileUtils.CreatePath(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
@@ -105,12 +105,12 @@ namespace SNESMiniLuaCompiler.Helpers
             ExceptionUtils.ThrowArgNull(targetRoot, nameof(targetRoot));
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly?.GetManifestResourceNames();
+            string[]? resourceNames = assembly?.GetManifestResourceNames();
 
             if (resourceNames is null || resourceNames.Length == 0)
                 return;
 
-            foreach (var resourceName in resourceNames.AsSpan())
+            foreach (string? resourceName in resourceNames.AsSpan())
             {
                 // MSBuild writes the directory separator of the build machine into the name
                 string normalizedName = resourceName.Replace('\\', '/');
@@ -165,21 +165,23 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void SaveConfig(string key, string value)
         {
-            var lines = FileUtils.SafeFileExists(ConfigFile)
+            List<string> lines = FileUtils.SafeFileExists(ConfigFile)
                 ? File.ReadAllLines(ConfigFile).ToList()
                 : [];
 
             int idx = lines.FindIndex(l => l.StartsWith(key + "=", StringComparison.Ordinal));
             string entry = $"{key}={value}";
-            if (idx >= 0) lines[idx] = entry;
-            else lines.Add(entry);
+            if (idx >= 0)
+                lines[idx] = entry;
+            else
+                lines.Add(entry);
 
             File.WriteAllLines(ConfigFile, lines);
         }
 
         //public static void SaveConfig(string key, string value)
         //{
-        //    var lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
+        //    List<string> lines = FileUtils.SafeFileExists(ConfigFile) ? [.. File.ReadAllLines(ConfigFile)] : new List<string>();
         //    bool found = false;
 
         //    for (int i = 0; i < lines.Count; i++)
@@ -204,7 +206,7 @@ namespace SNESMiniLuaCompiler.Helpers
             if (!File.Exists(ConfigFile))
                 return null;
 
-            foreach (var line in File.ReadAllLines(ConfigFile))
+            foreach (string line in File.ReadAllLines(ConfigFile))
             {
                 if (line.StartsWith(key + "=", StringComparison.OrdinalIgnoreCase))
                     return line[(key.Length + 1)..];

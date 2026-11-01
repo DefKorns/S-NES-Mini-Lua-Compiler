@@ -1,3 +1,7 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -5,10 +9,6 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
 using SNESMiniLuaCompiler.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler.Views
 {
@@ -52,7 +52,7 @@ namespace SNESMiniLuaCompiler.Views
                 var msgbox = new MessageBox { Title = _title };
                 msgbox.FindControl<TextBlock>("Text")!.Text = _text;
 
-                var pathIcon = msgbox.FindControl<PathIcon>("NotificationIcon");
+                PathIcon? pathIcon = msgbox.FindControl<PathIcon>("NotificationIcon");
                 if (pathIcon != null && _iconGeometry != null)
                 {
                     pathIcon.Data = _iconGeometry;
@@ -61,8 +61,8 @@ namespace SNESMiniLuaCompiler.Views
                         pathIcon.Foreground = _iconForeground;
                 }
 
-                var buttonPanel = msgbox.FindControl<StackPanel>("Buttons")!;
-                var res = _buttons.FirstOrDefault(b => b.IsDefault).Result;
+                StackPanel buttonPanel = msgbox.FindControl<StackPanel>("Buttons")!;
+                MessageBoxResult res = _buttons.FirstOrDefault(b => b.IsDefault).Result;
 
                 void SetResult(MessageBoxResult r) => res = r;
 
@@ -72,13 +72,14 @@ namespace SNESMiniLuaCompiler.Views
                     OutlineTheme = Application.Current?.FindResource("OutlineButton") as ControlTheme,
                 };
 
-                foreach (var (caption, result, isDefault, styleClass) in _buttons)
+                foreach ((string caption, MessageBoxResult result, bool isDefault, string? styleClass) in _buttons)
                 {
                     AddButton(buttonPanel, msgbox, caption, result, SetResult, isDefault, styleClass, styleOptions);
                 }
 
                 var tcs = new TaskCompletionSource<MessageBoxResult>();
-                msgbox.Closed += delegate { tcs.TrySetResult(res); };
+                msgbox.Closed += delegate
+                { tcs.TrySetResult(res); };
 
                 if (parent == null && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow is Window mainWindow)
                     parent = mainWindow;
@@ -94,7 +95,7 @@ namespace SNESMiniLuaCompiler.Views
 
         public static Task<MessageBoxResult> Show(string text, string title, MessageBoxButtons buttons)
         {
-            var builder = new Builder().Title(title).Text(text);
+            Builder builder = new Builder().Title(title).Text(text);
             var solidButtonTheme = Application.Current?.FindResource("SolidButton") as ControlTheme;
 
             switch (buttons)
@@ -123,7 +124,7 @@ namespace SNESMiniLuaCompiler.Views
 
         public static Task<MessageBoxResult> ShowError(string text, string title = "Error")
         {
-            var builder = new Builder()
+            Builder builder = new Builder()
                 .Title(title)
                 .Text(text)
                 .Icon(Application.Current?.FindResource("SemiIconAlertCircle") as Geometry,
@@ -136,7 +137,7 @@ namespace SNESMiniLuaCompiler.Views
 
         public static Task<MessageBoxResult> ShowWarning(string text, string title = "Warning")
         {
-            var builder = new Builder()
+            Builder builder = new Builder()
                 .Title(title)
                 .Text(text)
                 .Icon(Application.Current?.FindResource("SemiIconAlertTriangle") as Geometry,
@@ -151,7 +152,7 @@ namespace SNESMiniLuaCompiler.Views
 
         public static Task<MessageBoxResult> ShowSuccess(string text, string title = "Success")
         {
-            var builder = new Builder()
+            Builder builder = new Builder()
                 .Title(title)
                 .Text(text)
                 .Icon(Application.Current?.FindResource("SemiIconTickCircle") as Geometry,
@@ -164,7 +165,7 @@ namespace SNESMiniLuaCompiler.Views
 
         public static Task<MessageBoxResult> ShowInformation(string text, string title = "Information")
         {
-            var builder = new Builder()
+            Builder builder = new Builder()
                 .Title(title)
                 .Text(text)
                 .Icon(Application.Current?.FindResource("SemiIconInfoCircle") as Geometry,

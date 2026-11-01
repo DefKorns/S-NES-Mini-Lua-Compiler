@@ -1,4 +1,4 @@
-namespace SNESMiniLuaCompiler.Models
+﻿namespace SNESMiniLuaCompiler.Models
 {
     public class ConsoleItem
     {

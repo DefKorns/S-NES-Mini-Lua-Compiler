@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 
 namespace SNESMiniLuaCompiler.Helpers

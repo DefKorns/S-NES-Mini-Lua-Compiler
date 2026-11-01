@@ -1,8 +1,8 @@
-﻿using Serilog;
-using SNESMiniLuaCompiler.Views;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using Serilog;
+using SNESMiniLuaCompiler.Views;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
@@ -68,7 +68,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
         private static bool CheckFileExists(string filePath)
         {
-            if (_fileExistsCache.TryGetValue(filePath, out var cacheEntry))
+            if (_fileExistsCache.TryGetValue(filePath, out (bool exists, DateTime lastCheck) cacheEntry))
             {
                 if ((DateTime.UtcNow - cacheEntry.lastCheck).TotalMilliseconds < FILE_CACHE_DURATION_MS)
                 {
@@ -76,7 +76,7 @@ namespace SNESMiniLuaCompiler.Helpers
                 }
             }
 
-            var exists = File.Exists(filePath);
+            bool exists = File.Exists(filePath);
             _fileExistsCache.AddOrUpdate(filePath,
                     (exists, DateTime.UtcNow),
              (_, _) => (exists, DateTime.UtcNow));

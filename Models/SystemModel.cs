@@ -2,7 +2,7 @@
 {
     public enum SystemModel
     {
-        Nes, 
+        Nes,
         Snes,
         SnesPal,
         Famicom,

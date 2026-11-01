@@ -1,16 +1,13 @@
-using Avalonia;
+ï»¿using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 using SNESMiniLuaCompiler.ViewModels;
-using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler.Views
 {
@@ -39,19 +36,21 @@ namespace SNESMiniLuaCompiler.Views
 
         private async Task DecryptFilesAsync()
         {
-            var encryptButton = this.FindControl<Button>("btn_encrypt");
-            var vm = Vm;
+            Button? encryptButton = this.FindControl<Button>("btn_encrypt");
+            MainWindowViewModel? vm = Vm;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (encryptButton != null) encryptButton.IsEnabled = false;
+                if (encryptButton != null)
+                    encryptButton.IsEnabled = false;
                 status.Text = "Decrypting files, please wait...";
                 if (vm != null)
                 {
                     vm.DecryptionProgress = 0;
                     vm.IsDecryptionInProgress = true;
                     vm.IsTrashButtonEnabled = false;
-                    foreach (var c in vm.ConsoleList) c.IsEnabled = false;
+                    foreach (Consoles c in vm.ConsoleList)
+                        c.IsEnabled = false;
                 }
             });
 
@@ -83,9 +82,11 @@ namespace SNESMiniLuaCompiler.Views
                         vm.DecryptionProgress = 0;
                         vm.IsDecryptionInProgress = false;
                         vm.IsTrashButtonEnabled = true;
-                        foreach (var c in vm.ConsoleList) c.IsEnabled = true;
+                        foreach (Consoles c in vm.ConsoleList)
+                            c.IsEnabled = true;
                     }
-                    if (encryptButton != null) encryptButton.IsEnabled = true;
+                    if (encryptButton != null)
+                        encryptButton.IsEnabled = true;
                 });
                 return;
             }
@@ -96,13 +97,13 @@ namespace SNESMiniLuaCompiler.Views
             {
                 void DecryptWithProgress(string sDir)
                 {
-                    foreach (var d in Directory.GetDirectories(sDir))
+                    foreach (string d in Directory.GetDirectories(sDir))
                         ExceptionUtils.GlobalTryCatch(
                             () => DecryptWithProgress(d),
                             $"Error decrypting directory '{d}'.",
                             "MainForm.Decrypt");
 
-                    foreach (var file in Directory.GetFiles(sDir))
+                    foreach (string file in Directory.GetFiles(sDir))
                     {
                         ExceptionUtils.GlobalTryCatch(() =>
                         {
@@ -124,7 +125,8 @@ namespace SNESMiniLuaCompiler.Views
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (encryptButton != null) encryptButton.IsEnabled = true;
+                if (encryptButton != null)
+                    encryptButton.IsEnabled = true;
                 FileUtils.CreatePath(AppUtils.RecodedPath);
                 NotificationHelper.Success("Decryption complete!", "Light");
                 status.Text = "Done!";
@@ -133,7 +135,8 @@ namespace SNESMiniLuaCompiler.Views
                     vm.DecryptionProgress = 100;
                     vm.IsDecryptionInProgress = false;
                     vm.IsTrashButtonEnabled = true;
-                    foreach (var c in vm.ConsoleList) c.IsEnabled = true;
+                    foreach (Consoles c in vm.ConsoleList)
+                        c.IsEnabled = true;
                 }
             });
         }
@@ -157,15 +160,16 @@ namespace SNESMiniLuaCompiler.Views
         {
             FileUtils.DeletePath(AppUtils.RecodedPath);
 
-            var encryptButton = this.FindControl<Button>("btn_encrypt");
-            var vm = Vm;
+            Button? encryptButton = this.FindControl<Button>("btn_encrypt");
+            MainWindowViewModel? vm = Vm;
 
-            // lê o sistema uma vez antes do loop — ponto 5
+            // lï¿½ o sistema uma vez antes do loop ï¿½ ponto 5
             string? selectedConsoleStr = AppUtils.LoadConfig("system");
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (encryptButton != null) encryptButton.IsEnabled = false;
+                if (encryptButton != null)
+                    encryptButton.IsEnabled = false;
                 status.Text = "Encrypting files, please wait...";
             });
 
@@ -174,7 +178,8 @@ namespace SNESMiniLuaCompiler.Views
             {
                 vm.EncryptionProgress = 0;
                 vm.IsEncryptionInProgress = totalFiles > 0;
-                foreach (var c in vm.ConsoleList) c.IsEnabled = false;
+                foreach (Consoles c in vm.ConsoleList)
+                    c.IsEnabled = false;
             }
 
             int filesEncrypted = 0;
@@ -197,7 +202,7 @@ namespace SNESMiniLuaCompiler.Views
 
                         ExceptionUtils.GlobalTryCatch(() =>
                         {
-                            var recodedDir = Path.GetDirectoryName(recodedFullPath);
+                            string? recodedDir = Path.GetDirectoryName(recodedFullPath);
                             if (!string.IsNullOrEmpty(recodedDir))
                                 FileUtils.CreatePath(recodedDir);
 
@@ -223,7 +228,8 @@ namespace SNESMiniLuaCompiler.Views
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (encryptButton != null) encryptButton.IsEnabled = true;
+                if (encryptButton != null)
+                    encryptButton.IsEnabled = true;
                 FileUtils.CreatePath(AppUtils.RecodedPath);
 
                 bool noFiles = (Directory.GetDirectories(AppUtils.RecodedPath)?.Length ?? 0) == 0;
@@ -242,7 +248,8 @@ namespace SNESMiniLuaCompiler.Views
                 {
                     vm.EncryptionProgress = 100;
                     vm.IsEncryptionInProgress = false;
-                    foreach (var c in vm.ConsoleList) c.IsEnabled = true;
+                    foreach (Consoles c in vm.ConsoleList)
+                        c.IsEnabled = true;
                 }
             });
         }

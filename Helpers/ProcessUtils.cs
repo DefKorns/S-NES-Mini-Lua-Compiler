@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SNESMiniLuaCompiler.Helpers
 {
@@ -20,16 +21,18 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             exe = Environment.ExpandEnvironmentVariables(exe ?? string.Empty);
 
-            if (FileUtils.SafeFileExists(exe)) return exe;
+            if (FileUtils.SafeFileExists(exe))
+                return exe;
 
             if (string.IsNullOrEmpty(Path.GetDirectoryName(exe)))
             {
                 //foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';'))
-                foreach (var path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                foreach (string path in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
                      .Split(Path.PathSeparator))
                 {
-                    var fullPath = Path.Combine(path.Trim(), exe ?? string.Empty);
-                    if (FileUtils.SafeFileExists(fullPath)) return Path.GetFullPath(fullPath);
+                    string fullPath = Path.Combine(path.Trim(), exe ?? string.Empty);
+                    if (FileUtils.SafeFileExists(fullPath))
+                        return Path.GetFullPath(fullPath);
                 }
             }
 
@@ -50,7 +53,7 @@ namespace SNESMiniLuaCompiler.Helpers
                 // The decompiler writes <input name>.lua into the output folder, so use a private one per file.
                 // Keep it short: the Windows build uses ANSI file APIs and fails above MAX_PATH (260 characters),
                 // and it skips such files silently (-s) while still exiting with 0.
-                var outDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "dec", Guid.NewGuid().ToString("N")[..8]);
+                string outDir = Path.Combine(Path.GetTempPath(), "SNESMiniLuaCompiler", "dec", Guid.NewGuid().ToString("N")[..8]);
                 Directory.CreateDirectory(outDir);
                 try
                 {
@@ -65,15 +68,15 @@ namespace SNESMiniLuaCompiler.Helpers
                     };
 
                     using var process = Process.Start(start);
-                    var stdOutTask = process?.StandardOutput.ReadToEndAsync();
-                    var stdErr = process?.StandardError.ReadToEnd();
+                    Task<string>? stdOutTask = process?.StandardOutput.ReadToEndAsync();
+                    string? stdErr = process?.StandardError.ReadToEnd();
                     process?.WaitForExit();
-                    var details = $"exit code {process?.ExitCode}, stdout: {stdOutTask?.Result}, stderr: {stdErr}";
+                    string details = $"exit code {process?.ExitCode}, stdout: {stdOutTask?.Result}, stderr: {stdErr}";
                     Debug.WriteLine("Decompiler: " + details);
 
                     // With -s a file that fails to decompile is skipped and the exit code is still 0,
                     // so an empty output folder is the only failure signal
-                    var produced = Directory.GetFiles(outDir, "*", SearchOption.AllDirectories);
+                    string[] produced = Directory.GetFiles(outDir, "*", SearchOption.AllDirectories);
                     if (produced.Length == 0)
                         throw new InvalidOperationException($"Failed to decompile '{file}' ({details}).");
                     File.Move(produced[0], decFile, true);
@@ -91,7 +94,7 @@ namespace SNESMiniLuaCompiler.Helpers
         {
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                var exePath = AppUtils.LuaJitExe;
+                string exePath = AppUtils.LuaJitExe;
                 if (!FileUtils.SafeFileExists(exePath))
                     throw new FileNotFoundException("luajit not found in LuaJitPath.", exePath);
 
@@ -107,7 +110,7 @@ namespace SNESMiniLuaCompiler.Helpers
                     RedirectStandardError = true,
                 };
 
-                var libExtension = OperatingSystem.IsWindows() ? "dll" : "so";
+                string libExtension = OperatingSystem.IsWindows() ? "dll" : "so";
                 startInfo.EnvironmentVariables["LUA_CPATH"] = $"?.{libExtension};" + Path.Combine(LuaJitPath, $"?.{libExtension}");
                 startInfo.EnvironmentVariables["LUA_PATH"] =
                     "?.lua;" +
@@ -135,7 +138,8 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static void OpenDirectory(string path)
         {
-            if (!FileUtils.SafeDirectoryExists(path)) return;
+            if (!FileUtils.SafeDirectoryExists(path))
+                return;
 
             Process.Start(new ProcessStartInfo
             {
@@ -149,4 +153,3 @@ namespace SNESMiniLuaCompiler.Helpers
         #endregion
     }
 }
-

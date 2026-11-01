@@ -40,9 +40,9 @@ namespace SNESMiniLuaCompiler.Helpers
                 CreatePath(destFolder);
 
                 //foreach (var file in Directory.GetFiles(sourceFolder) ?? [])
-                foreach (var file in Directory.GetFiles(sourceFolder))
+                foreach (string file in Directory.GetFiles(sourceFolder))
                 {
-                    var dest = CombinePath(destFolder, Path.GetFileName(file) ?? string.Empty);
+                    string dest = CombinePath(destFolder, Path.GetFileName(file) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
                         () => File.Copy(file, dest, true),
                         $"Error copying file '{file}' to '{dest}'.",
@@ -51,9 +51,9 @@ namespace SNESMiniLuaCompiler.Helpers
                 }
 
                 //foreach (var folder in Directory.GetDirectories(sourceFolder) ?? [])
-                foreach (var folder in Directory.GetDirectories(sourceFolder))
+                foreach (string folder in Directory.GetDirectories(sourceFolder))
                 {
-                    var dest = CombinePath(destFolder, Path.GetFileName(folder) ?? string.Empty);
+                    string dest = CombinePath(destFolder, Path.GetFileName(folder) ?? string.Empty);
                     ExceptionUtils.GlobalTryCatch(
                         () => CopyAssets(folder, dest),
                         $"Error copying directory '{folder}' to '{dest}'.",
@@ -113,7 +113,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                foreach (var directory in Directory.GetDirectories(startLocation) ?? [])
+                foreach (string directory in Directory.GetDirectories(startLocation) ?? [])
                 {
                     DeleteEmptyDirectories(directory);
 
@@ -143,7 +143,7 @@ namespace SNESMiniLuaCompiler.Helpers
 
             ExceptionUtils.GlobalTryCatch(() =>
             {
-                using var writer = File.AppendText(DecodedHashFile);
+                using StreamWriter writer = File.AppendText(DecodedHashFile);
                 writer.WriteLine(fileHash);
             }, $"Error generating file hash for '{fileName}'.", "FileUtils.GenerateFileHash");
         }
@@ -151,14 +151,14 @@ namespace SNESMiniLuaCompiler.Helpers
         public static string GetSHA256HashFromFile(string fileName)
         {
             using var sha256 = SHA256.Create();
-            using var stream = File.OpenRead(fileName);
-            var hash = sha256.ComputeHash(stream);
+            using FileStream stream = File.OpenRead(fileName);
+            byte[] hash = sha256.ComputeHash(stream);
             return Convert.ToHexString(hash);
         }
 
         public static bool HasEditedFiles(string hash)
         {
-            foreach (var line in SafeReadAllLines(DecodedHashFile))
+            foreach (string line in SafeReadAllLines(DecodedHashFile))
             {
                 if (line?.Contains(hash ?? string.Empty) == true)
                 {
@@ -236,7 +236,8 @@ namespace SNESMiniLuaCompiler.Helpers
 
         public static int CountFilesRecursive(string sDir)
         {
-            if (!SafeDirectoryExists(sDir)) return 0;
+            if (!SafeDirectoryExists(sDir))
+                return 0;
             return Directory.GetFiles(sDir, "*", SearchOption.AllDirectories).Length;
         }
 

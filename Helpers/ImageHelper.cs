@@ -34,9 +34,9 @@ namespace SNESMiniLuaCompiler.Helpers
             using var httpClient = new HttpClient();
             try
             {
-                var response = await httpClient.GetAsync(url);
+                HttpResponseMessage response = await httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
-                var data = await response.Content.ReadAsByteArrayAsync();
+                byte[] data = await response.Content.ReadAsByteArrayAsync();
                 return new Bitmap(new MemoryStream(data));
             }
             catch (HttpRequestException ex)
