@@ -1,56 +1,93 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SNESMiniLuaCompiler.Models;
 
 namespace SNESMiniLuaCompiler.Firmware
 {
+    /// <summary>A console whose original files were imported, and how many Lua files that was.</summary>
+    internal sealed record ImportedConsole(SystemModel System, ImportResult Result);
+
     /// <summary>
-    /// Imports the original Lua files of a console: from the console over SSH, from a firmware file
+    /// Imports the original Lua files of the consoles: from a console over SSH, from a firmware file
     /// (squashfs / .hsqs, tar, tar.gz) or from a folder. Only the Lua files are read.
+    /// A firmware file or a folder can hold several consoles: every one the source has is imported and kept,
+    /// so the app does not ask for it again; the console the user asked for has to be one of them.
     /// </summary>
     internal static class OriginalsImporter
     {
-        public static Task<ImportResult> FromFolderAsync(SystemModel system, string folder, CancellationToken cancellationToken = default) =>
+        public static Task<IReadOnlyList<ImportedConsole>> FromFolderAsync(SystemModel requested, string folder, CancellationToken cancellationToken = default) =>
             ImportAsync(
-                system,
-                (staging, result) => Task.Run(() => LuaSourceReader.CopyFromFolder(folder, ConsoleLayout.For(system), staging, result, cancellationToken), cancellationToken));
-
-        public static Task<ImportResult> FromFirmwareFileAsync(SystemModel system, string file, CancellationToken cancellationToken = default) =>
-            ImportAsync(
-                system,
-                (staging, result) => Task.Run(
-                    () => LuaSourceReader.ExtractFromFirmwareFile(file, ConsoleLayout.For(system).UiPath, staging, result, cancellationToken),
+                requested,
+                ConsoleLayout.All,
+                targets => Task.Run(
+                    () => LuaSourceReader.CopyFromFolder(LuaSourceReader.FindResourcesRoots(folder), targets, requested, cancellationToken),
                     cancellationToken));
 
-        public static Task<ImportResult> FromConsoleAsync(SystemModel system, string host, CancellationToken cancellationToken = default) =>
+        public static Task<IReadOnlyList<ImportedConsole>> FromFirmwareFileAsync(SystemModel requested, string file, CancellationToken cancellationToken = default) =>
             ImportAsync(
-                system,
-                (staging, result) => ConsoleSsh.DownloadLuaAsync(host, ConsoleLayout.For(system), staging, result, cancellationToken));
+                requested,
+                ConsoleLayout.All,
+                targets => Task.Run(() => LuaSourceReader.ExtractFromFirmwareFile(file, targets, cancellationToken), cancellationToken));
 
-        // everything is read into a staging folder first: a failed import never touches the originals already there
-        private static async Task<ImportResult> ImportAsync(SystemModel system, Func<string, ImportResult, Task> read)
+        public static Task<IReadOnlyList<ImportedConsole>> FromConsoleAsync(SystemModel requested, string host, CancellationToken cancellationToken = default) =>
+            ImportAsync(
+                requested,
+                [requested],
+                targets => ConsoleSsh.DownloadLuaAsync(host, targets[0], cancellationToken));
+
+        // everything is read into staging folders first: a failed import never touches the originals already there
+        private static async Task<IReadOnlyList<ImportedConsole>> ImportAsync(
+            SystemModel requested,
+            IReadOnlyList<SystemModel> consoles,
+            Func<IReadOnlyList<ConsoleTarget>, Task> read)
         {
-            string staging = OriginalsStore.NewStagingPath();
-            var result = new ImportResult();
+            List<ConsoleTarget> targets = [.. consoles.Select(console => new ConsoleTarget(console))];
             try
             {
-                Directory.CreateDirectory(staging);
-                await read(staging, result).ConfigureAwait(false);
+                foreach (ConsoleTarget target in targets)
+                    Directory.CreateDirectory(target.Staging);
 
-                if (!File.Exists(Path.Combine(staging, "scripts", "main.lua")))
-                    throw new InvalidDataException(Describe(result));
+                await read(targets).ConfigureAwait(false);
 
-                CheckIsThisConsole(ConsoleLayout.For(system), staging);
+                var good = new List<ConsoleTarget>();
+                foreach (ConsoleTarget target in targets)
+                {
+                    try
+                    {
+                        Validate(target);
+                        good.Add(target);
+                    }
+                    catch (InvalidDataException) when (target.System != requested)
+                    {
+                        // the source has nothing (valid) for this console: only the one the user asked for has to be there
+                    }
+                }
 
-                OriginalsStore.Replace(system, staging);
-                return result;
+                foreach (ConsoleTarget target in good)
+                    OriginalsStore.Replace(target.System, target.Staging);
+
+                return [.. good.Select(target => new ImportedConsole(target.System, target.Result))];
             }
             finally
             {
-                OriginalsStore.CleanUp(staging);
+                foreach (ConsoleTarget target in targets)
+                    OriginalsStore.CleanUp(target.Staging);
             }
+        }
+
+        private static void Validate(ConsoleTarget target)
+        {
+            if (!target.Found)
+                throw new InvalidDataException(target.NotFoundMessage ?? "No Lua files of a console were found there.");
+
+            if (!File.Exists(Path.Combine(target.Staging, "scripts", "main.lua")))
+                throw new InvalidDataException(Describe(target.Result));
+
+            CheckIsThisConsole(target.Layout, target.Staging);
         }
 
         // the files of a NES are not those of a SNES: a file only one family has tells them apart

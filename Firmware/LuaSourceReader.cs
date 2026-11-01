@@ -8,6 +8,7 @@ using System.Threading;
 using DiscUtils.SquashFs;
 using DiscUtils.Streams;
 using SharpCompress.Compressors.Xz;
+using SNESMiniLuaCompiler.Models;
 
 namespace SNESMiniLuaCompiler.Firmware
 {
@@ -20,7 +21,7 @@ namespace SNESMiniLuaCompiler.Firmware
     }
 
     /// <summary>
-    /// Reads the console's Lua files (only those: no images, fonts or sounds) from a firmware file
+    /// Reads the consoles' Lua files (only those: no images, fonts or sounds) from a firmware file
     /// (squashfs / .hsqs, tar, tar.gz), a folder, or the tar stream of a console.
     /// </summary>
     internal static class LuaSourceReader
@@ -49,108 +50,98 @@ namespace SNESMiniLuaCompiler.Firmware
             };
         }
 
-        /// <summary>Reads the Lua files of <paramref name="uiPath"/> (a folder of the firmware) into <paramref name="destination"/>.</summary>
-        public static void ExtractFromFirmwareFile(
-            string sourcePath,
-            string uiPath,
-            string destination,
-            ImportResult result,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// Reads the Lua files of every target's UI folder out of a firmware file, in one pass (a firmware can
+        /// hold the UI of several consoles; a tar.gz is read once, not once per console).
+        /// </summary>
+        public static void ExtractFromFirmwareFile(string sourcePath, IReadOnlyList<ConsoleTarget> targets, CancellationToken cancellationToken)
         {
-            string prefix = uiPath.Trim('/') + "/";
+            foreach (ConsoleTarget target in targets)
+                target.NotFoundMessage = $"The firmware has no '{target.Layout.UiPath}' folder: it is not the firmware of this console.";
+
             switch (Detect(sourcePath))
             {
                 case FirmwareSourceFormat.SquashFs:
-                    ExtractFromSquashFs(sourcePath, prefix, destination, result, cancellationToken);
+                    ExtractFromSquashFs(sourcePath, targets, cancellationToken);
                     break;
                 case FirmwareSourceFormat.Tar:
                     using (FileStream tar = File.OpenRead(sourcePath))
-                        ExtractFromTar(tar, prefix, destination, result, cancellationToken);
+                        ExtractFromTar(tar, targets, uiPathOverride: null, cancellationToken);
                     break;
                 case FirmwareSourceFormat.TarGz:
                     using (FileStream gz = File.OpenRead(sourcePath))
                     using (var tar = new GZipStream(gz, CompressionMode.Decompress))
-                        ExtractFromTar(tar, prefix, destination, result, cancellationToken);
+                        ExtractFromTar(tar, targets, uiPathOverride: null, cancellationToken);
                     break;
                 default:
                     throw new InvalidDataException("This is not a firmware file the app can read (a squashfs / .hsqs image, a .tar or a .tar.gz).");
             }
         }
 
-        /// <summary>Reads a tar stream; <paramref name="pathPrefix"/> is the UI folder in it ("" when entries are relative to it).</summary>
-        public static void ExtractFromTar(
-            Stream tarStream,
-            string pathPrefix,
-            string destination,
-            ImportResult result,
-            CancellationToken cancellationToken)
+        /// <summary>Reads a tar stream whose entries are relative to the UI folder (what the SSH import receives).</summary>
+        public static void ExtractFromTar(Stream tarStream, ConsoleTarget target, CancellationToken cancellationToken) =>
+            ExtractFromTar(tarStream, [target], uiPathOverride: string.Empty, cancellationToken);
+
+        /// <summary>
+        /// The resources folders of a folder the user picked. The folder itself, or its own resources folder, is the
+        /// only one when it has scripts in it; otherwise every resources folder with scripts below it (a "base UI"
+        /// folder with the consoles side by side).
+        /// </summary>
+        public static IReadOnlyList<string> FindResourcesRoots(string folder)
         {
-            using var reader = new TarReader(tarStream, leaveOpen: true);
-            while (reader.GetNextEntry() is { } entry)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile) || entry.DataStream is null)
-                    continue;
+            if (Directory.Exists(Path.Combine(folder, "scripts")))
+                return [folder];
 
-                string name = entry.Name.Replace('\\', '/').TrimStart('.', '/');
-                if (!name.StartsWith(pathPrefix, StringComparison.Ordinal))
-                    continue;
+            string ownResources = Path.Combine(folder, "resources");
+            if (Directory.Exists(Path.Combine(ownResources, "scripts")))
+                return [ownResources];
 
-                WriteLua(destination, name[pathPrefix.Length..], entry.DataStream, result);
-            }
+            return [.. Directory.EnumerateDirectories(folder, "resources", SearchOption.AllDirectories)
+                .Where(directory => Directory.Exists(Path.Combine(directory, "scripts")))];
         }
 
         /// <summary>
-        /// Reads the Lua files of a folder the user picked: the console's resources folder, the folder that
-        /// contains it, or anything above that (a folder with several consoles: the one named like this console).
+        /// Reads the Lua files each target has in <paramref name="roots"/>. A single folder is the console the user
+        /// asked for, whatever it is called; with several, each console takes the folder named like it.
         /// </summary>
-        public static void CopyFromFolder(
-            string folder,
-            ConsoleLayout layout,
-            string destination,
-            ImportResult result,
-            CancellationToken cancellationToken)
+        public static void CopyFromFolder(IReadOnlyList<string> roots, IReadOnlyList<ConsoleTarget> targets, SystemModel requested, CancellationToken cancellationToken)
         {
-            string root = FindResourcesRoot(folder, layout);
+            string consoles = string.Join(", ", roots.Select(ConsoleFolderName).Order());
+            foreach (ConsoleTarget target in targets)
+            {
+                if (roots.Count == 0)
+                {
+                    target.NotFoundMessage = "No folder with a 'scripts' folder inside was found there. Pick the console's UI folder (the one that has 'resources').";
+                    continue;
+                }
 
+                if (roots.Count == 1)
+                {
+                    if (target.System == requested)
+                        CopyFromRoot(roots[0], target, cancellationToken);
+
+                    continue;
+                }
+
+                string[] named = [.. roots.Where(root => target.Layout.MatchesFolderName(ConsoleFolderName(root)))];
+                if (named.Length == 1)
+                    CopyFromRoot(named[0], target, cancellationToken);
+                else
+                    target.NotFoundMessage = named.Length == 0
+                        ? $"That folder has several consoles ({consoles}) and none is named like this one. Pick the folder of your console."
+                        : $"That folder has more than one folder named like this console ({consoles}). Pick the folder of your console.";
+            }
+        }
+
+        private static void CopyFromRoot(string root, ConsoleTarget target, CancellationToken cancellationToken)
+        {
+            target.Found = true;
             foreach (string file in Directory.EnumerateFiles(root, "*.lua", SearchOption.AllDirectories))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 using FileStream input = File.OpenRead(file);
-                WriteLuaRelativeToResources(destination, Path.GetRelativePath(root, file).Replace('\\', '/'), input, result);
+                WriteLuaRelativeToResources(target, Path.GetRelativePath(root, file).Replace('\\', '/'), input);
             }
-        }
-
-        private static string FindResourcesRoot(string folder, ConsoleLayout layout)
-        {
-            // the folder itself, or its own resources folder, is the answer: whatever else is inside is not looked at
-            if (Directory.Exists(Path.Combine(folder, "scripts")))
-                return folder;
-
-            string ownResources = Path.Combine(folder, "resources");
-            if (Directory.Exists(Path.Combine(ownResources, "scripts")))
-                return ownResources;
-
-            // otherwise every resources folder with scripts below it
-            var roots = new List<string>();
-            roots.AddRange(Directory.EnumerateDirectories(folder, "resources", SearchOption.AllDirectories)
-                    .Where(directory => Directory.Exists(Path.Combine(directory, "scripts"))));
-
-            if (roots.Count == 0)
-                throw new InvalidDataException("No folder with a 'scripts' folder inside was found there. Pick the console's UI folder (the one that has 'resources').");
-
-            if (roots.Count == 1)
-                return roots[0];
-
-            // several consoles in one folder (a "base UI" folder): the one that is named like this console
-            string[] named = [.. roots.Where(root => layout.MatchesFolderName(ConsoleFolderName(root)))];
-            if (named.Length == 1)
-                return named[0];
-
-            string consoles = string.Join(", ", roots.Select(ConsoleFolderName).Order());
-            throw new InvalidDataException(named.Length == 0
-                ? $"That folder has several consoles ({consoles}) and none is named like this one. Pick the folder of your console."
-                : $"That folder has more than one folder named like this console ({consoles}). Pick the folder of your console.");
         }
 
         // .../snesusa/resources -> snesusa;  .../snesusa (the resources are its scripts) -> snesusa
@@ -162,42 +153,81 @@ namespace SNESMiniLuaCompiler.Firmware
                 : name;
         }
 
-        private static void ExtractFromSquashFs(
-            string sourcePath,
-            string prefix,
-            string destination,
-            ImportResult result,
-            CancellationToken cancellationToken)
+        private static void ExtractFromSquashFs(string sourcePath, IReadOnlyList<ConsoleTarget> targets, CancellationToken cancellationToken)
         {
             using FileStream stream = File.OpenRead(sourcePath);
             using var fileSystem = new SquashFileSystemReader(stream, SquashFsOptions);
-            string root = prefix.TrimEnd('/').Replace('/', Path.DirectorySeparatorChar);
-            if (!fileSystem.DirectoryExists(root))
-                throw new InvalidDataException($"The firmware has no '{prefix.TrimEnd('/')}' folder: it is not the firmware of this console.");
 
-            foreach (string file in fileSystem.GetFiles(root, "*.*", SearchOption.AllDirectories))
+            foreach (ConsoleTarget target in targets)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                string relative = file.Replace('\\', '/').TrimStart('/');
-                if (!relative.StartsWith(prefix, StringComparison.Ordinal))
+                string prefix = UiPrefix(target, null);
+                string root = prefix.TrimEnd('/').Replace('/', Path.DirectorySeparatorChar);
+                if (!fileSystem.DirectoryExists(root))
                     continue;
 
-                using SparseStream input = fileSystem.OpenFile(file, FileMode.Open);
-                WriteLua(destination, relative[prefix.Length..], input, result);
+                target.Found = true;
+                foreach (string file in fileSystem.GetFiles(root, "*.*", SearchOption.AllDirectories))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string relative = file.Replace('\\', '/').TrimStart('/');
+                    if (!relative.StartsWith(prefix, StringComparison.Ordinal))
+                        continue;
+
+                    using SparseStream input = fileSystem.OpenFile(file, FileMode.Open);
+                    WriteLua(target, relative[prefix.Length..], input);
+                }
             }
         }
 
+        // uiPathOverride: the UI folder of every target when it is the same (the SSH import sends entries relative to it)
+        private static void ExtractFromTar(Stream tarStream, IReadOnlyList<ConsoleTarget> targets, string? uiPathOverride, CancellationToken cancellationToken)
+        {
+            using var reader = new TarReader(tarStream, leaveOpen: true);
+            while (reader.GetNextEntry() is { } entry)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile) || entry.DataStream is null)
+                    continue;
+
+                string name = entry.Name.Replace('\\', '/').TrimStart('.', '/');
+                ConsoleTarget[] matching = [.. targets.Where(target => name.StartsWith(UiPrefix(target, uiPathOverride), StringComparison.Ordinal))];
+                if (matching.Length == 0)
+                    continue;
+
+                foreach (ConsoleTarget target in matching)
+                    target.Found = true;
+
+                if (matching.Length == 1)
+                {
+                    WriteLua(matching[0], name[UiPrefix(matching[0], uiPathOverride).Length..], entry.DataStream);
+                    continue;
+                }
+
+                // two consoles can share a UI folder: the entry is read once and given to both
+                using var copy = new MemoryStream();
+                entry.DataStream.CopyTo(copy);
+                foreach (ConsoleTarget target in matching)
+                {
+                    copy.Position = 0;
+                    WriteLua(target, name[UiPrefix(target, uiPathOverride).Length..], copy);
+                }
+            }
+        }
+
+        private static string UiPrefix(ConsoleTarget target, string? uiPathOverride) =>
+            uiPathOverride is null ? target.Layout.UiPath.Trim('/') + "/" : uiPathOverride;
+
         // pathInUi is relative to the UI folder: resources/scripts/main.lua
-        private static void WriteLua(string destination, string pathInUi, Stream content, ImportResult result)
+        private static void WriteLua(ConsoleTarget target, string pathInUi, Stream content)
         {
             if (!pathInUi.StartsWith(ResourcesPrefix, StringComparison.Ordinal))
                 return;
 
-            WriteLuaRelativeToResources(destination, pathInUi[ResourcesPrefix.Length..], content, result);
+            WriteLuaRelativeToResources(target, pathInUi[ResourcesPrefix.Length..], content);
         }
 
         // pathInResources: scripts/main.lua
-        private static void WriteLuaRelativeToResources(string destination, string pathInResources, Stream content, ImportResult result)
+        private static void WriteLuaRelativeToResources(ConsoleTarget target, string pathInResources, Stream content)
         {
             if (!pathInResources.EndsWith(".lua", StringComparison.OrdinalIgnoreCase)
                 || pathInResources.Split('/').Any(segment => segment.StartsWith('.')))
@@ -209,18 +239,18 @@ namespace SNESMiniLuaCompiler.Firmware
             byte[] bytes = buffer.ToArray();
             if (bytes.Length < 3 || bytes[0] != 0x1B || bytes[1] != (byte)'L' || bytes[2] != (byte)'J')
             {
-                result.NotBytecode++;
+                target.Result.NotBytecode++;
                 return;
             }
 
-            string fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination)) + Path.DirectorySeparatorChar;
-            string target = Path.GetFullPath(Path.Combine(fullRoot, pathInResources));
-            if (!target.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
+            string fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(target.Staging)) + Path.DirectorySeparatorChar;
+            string path = Path.GetFullPath(Path.Combine(fullRoot, pathInResources));
+            if (!path.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsafe path in the source: {pathInResources}");
 
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            File.WriteAllBytes(target, bytes);
-            result.Files++;
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllBytes(path, bytes);
+            target.Result.Files++;
         }
     }
 }

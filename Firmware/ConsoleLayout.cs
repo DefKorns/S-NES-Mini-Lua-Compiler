@@ -10,12 +10,14 @@ namespace SNESMiniLuaCompiler.Firmware
     /// to recognise its files. The firmware paths are the ones of the original firmware images (the same registry
     /// the MiniThemeStudio uses).
     /// </summary>
+    /// <param name="DisplayName">The name of the console.</param>
     /// <param name="FolderName">The folder of the console in the app.</param>
     /// <param name="UiPath">The UI folder in the firmware.</param>
     /// <param name="FolderAliases">Names a folder of this console is known by (normalised: lower case, no - _ or space).</param>
     /// <param name="RequiredFile">A file only this family of consoles has, relative to the resources folder.</param>
     /// <param name="ForbiddenFile">A file that shows the files are of a sister console, relative to the resources folder.</param>
     internal sealed record ConsoleLayout(
+        string DisplayName,
         string FolderName,
         string UiPath,
         IReadOnlyList<string> FolderAliases,
@@ -24,14 +26,16 @@ namespace SNESMiniLuaCompiler.Firmware
     {
         private const string SnesPalette = "scripts/env/colors_usa.lua";
 
+        public static IReadOnlyList<SystemModel> All { get; } = Enum.GetValues<SystemModel>();
+
         public static ConsoleLayout For(SystemModel system) => system switch
         {
-            SystemModel.Nes => new("nes", "usr/share/clover-ui", ["nes"], "scripts/colors_nes.lua"),
-            SystemModel.Famicom => new("hvc", "usr/share/clover-ui", ["hvc", "famicom"], "scripts/colors_hvc.lua", "scripts/constants.lua"),
-            SystemModel.Shonen => new("hvcj", "usr/share/ui/hvc", ["hvcj", "hvcjshonen", "shonen"], "scripts/constants.lua"),
-            SystemModel.SuperFamicom => new("shvc", "usr/share/ui/shvc", ["shvc", "superfamicom"], SnesPalette),
-            SystemModel.SnesPal => new("snes-eur", "usr/share/ui/snes-eur", ["sneseur"], SnesPalette),
-            _ => new("snes-usa", "usr/share/ui/snes-usa", ["snesusa", "snes"], SnesPalette),
+            SystemModel.Nes => new("NES Classic Edition", "nes", "usr/share/clover-ui", ["nes"], "scripts/colors_nes.lua"),
+            SystemModel.Famicom => new("Famicom Mini", "hvc", "usr/share/clover-ui", ["hvc", "famicom"], "scripts/colors_hvc.lua", "scripts/constants.lua"),
+            SystemModel.Shonen => new("Famicom Shonen Jump 50th", "hvcj", "usr/share/ui/hvc", ["hvcj", "hvcjshonen", "shonen"], "scripts/constants.lua"),
+            SystemModel.SuperFamicom => new("Super Famicom", "shvc", "usr/share/ui/shvc", ["shvc", "superfamicom"], SnesPalette),
+            SystemModel.SnesPal => new("SNES Mini (Europe)", "snes-eur", "usr/share/ui/snes-eur", ["sneseur"], SnesPalette),
+            _ => new("SNES Mini (USA)", "snes-usa", "usr/share/ui/snes-usa", ["snesusa", "snes"], SnesPalette),
         };
 
         /// <summary>

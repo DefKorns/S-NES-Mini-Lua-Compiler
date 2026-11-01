@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public bool CanImport => !IsBusy;
 
+        /// <summary>The consoles the last import kept (a firmware file or a folder can hold several).</summary>
+        internal IReadOnlyList<ImportedConsole> ImportedConsoles { get; private set; } = [];
+
         /// <summary>Raised when the originals were imported.</summary>
         public event EventHandler? Imported;
 
@@ -49,7 +53,7 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public void Cancel() => _cancellation?.Cancel();
 
-        private async Task RunAsync(string working, Func<CancellationToken, Task<ImportResult>> import)
+        private async Task RunAsync(string working, Func<CancellationToken, Task<IReadOnlyList<ImportedConsole>>> import)
         {
             using var cancellation = new CancellationTokenSource();
             _cancellation = cancellation;
@@ -59,8 +63,10 @@ namespace SNESMiniLuaCompiler.ViewModels
 
             try
             {
-                ImportResult result = await import(cancellation.Token);
-                Message = $"{result.Files} Lua files imported.";
+                ImportedConsoles = await import(cancellation.Token);
+                Message = ImportedConsoles.Count == 1
+                    ? $"{ImportedConsoles[0].Result.Files} Lua files imported."
+                    : $"Imported {ImportedConsoles.Count} consoles.";
                 Imported?.Invoke(this, EventArgs.Empty);
             }
             catch (OperationCanceledException)

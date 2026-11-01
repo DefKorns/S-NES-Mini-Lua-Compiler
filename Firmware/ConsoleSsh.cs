@@ -17,13 +17,9 @@ namespace SNESMiniLuaCompiler.Firmware
         public static bool IsValidHost(string host) =>
             host.Length is > 0 and <= 253 && !host.StartsWith('-') && host.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or ':' or '_');
 
-        public static async Task DownloadLuaAsync(
-            string host,
-            ConsoleLayout layout,
-            string destination,
-            ImportResult result,
-            CancellationToken cancellationToken)
+        public static async Task DownloadLuaAsync(string host, ConsoleTarget target, CancellationToken cancellationToken)
         {
+            ConsoleLayout layout = target.Layout;
             if (!IsValidHost(host))
                 throw new ArgumentException("That is not a valid address.", nameof(host));
 
@@ -43,7 +39,7 @@ namespace SNESMiniLuaCompiler.Firmware
             // only the Lua files travel: the UI folder also holds the images, fonts and sounds
             using Process process = Start(host, $"cd {Quote(folder)} && tar -cf - $(find resources -type f -name '*.lua')");
             Task<string> error = process.StandardError.ReadToEndAsync(cancellationToken);
-            await Task.Run(() => LuaSourceReader.ExtractFromTar(process.StandardOutput.BaseStream, string.Empty, destination, result, cancellationToken), cancellationToken);
+            await Task.Run(() => LuaSourceReader.ExtractFromTar(process.StandardOutput.BaseStream, target, cancellationToken), cancellationToken);
 
             // tar pads the archive after its end marker: read it, or ssh blocks writing it and never exits
             await process.StandardOutput.BaseStream.CopyToAsync(Stream.Null, cancellationToken);

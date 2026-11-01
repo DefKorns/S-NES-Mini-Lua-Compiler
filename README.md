@@ -23,6 +23,10 @@ fonts or sounds:
 - **From a firmware file**: a squashfs image (`.hsqs`) or a `.tar` / `.tar.gz` of the firmware.
 - **From a folder**: the console's UI folder (the one that has `resources/scripts` inside), or any folder above it.
 
+A firmware file or a folder can hold several consoles (for example a "base UI" folder with `nes`, `hvc`, `snesusa`...
+side by side): the app keeps every console it finds, so it does not ask again for the others. A console is only
+accepted if its files look like that console (a NES is not imported as a SNES).
+
 They are kept in `%AppData%\SNESMiniLuaCompiler\Originals` (Linux: `~/.config/SNESMiniLuaCompiler/Originals`), so
 the app works with the files of your firmware version. Importing again replaces them.
 

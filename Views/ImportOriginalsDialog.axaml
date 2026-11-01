@@ -54,7 +54,7 @@
 				<LucideIcon Kind="FileArchive" Size="26" VerticalAlignment="Top" Foreground="{DynamicResource BrandAccent}" />
 				<StackPanel Grid.Column="1" Spacing="2">
 					<TextBlock Text="From a firmware file" FontWeight="SemiBold" FontSize="14" />
-					<TextBlock Text="A squashfs image (.hsqs) or a .tar / .tar.gz of the firmware." TextWrapping="Wrap" Opacity="0.75" />
+					<TextBlock Text="A squashfs image (.hsqs) or a .tar / .tar.gz of the firmware. Every console it holds is kept." TextWrapping="Wrap" Opacity="0.75" />
 				</StackPanel>
 				<Button Grid.Column="2" Name="btn_file" Content="Choose file..." Theme="{DynamicResource OutlineButton}" Classes="Tertiary"
 						VerticalAlignment="Top" IsEnabled="{Binding CanImport}" Click="ChooseFile_Click" />
@@ -67,7 +67,7 @@
 				<LucideIcon Kind="FolderInput" Size="26" VerticalAlignment="Top" Foreground="{DynamicResource BrandAccent}" />
 				<StackPanel Grid.Column="1" Spacing="2">
 					<TextBlock Text="From a folder" FontWeight="SemiBold" FontSize="14" />
-					<TextBlock Text="The console's UI folder: the one that has resources/scripts inside." TextWrapping="Wrap" Opacity="0.75" />
+					<TextBlock Text="The console's UI folder (the one with resources/scripts), or a folder with several consoles: all of them are kept." TextWrapping="Wrap" Opacity="0.75" />
 				</StackPanel>
 				<Button Grid.Column="2" Name="btn_folder" Content="Choose folder..." Theme="{DynamicResource OutlineButton}" Classes="Tertiary"
 						VerticalAlignment="Top" IsEnabled="{Binding CanImport}" Click="ChooseFolder_Click" />
