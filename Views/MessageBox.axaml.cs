@@ -8,6 +8,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using SNESMiniLuaCompiler.Models;
 
 namespace SNESMiniLuaCompiler.Views
@@ -26,14 +27,12 @@ namespace SNESMiniLuaCompiler.Views
             private Geometry? _iconGeometry;
             private IBrush? _iconForeground;
             private readonly List<(string Caption, MessageBoxResult Result, bool IsDefault, string? StyleClass)> _buttons = [];
-            private ControlTheme? _buttonTheme;
 
             public Builder Title(string title) { _title = title; return this; }
             public Builder Text(string text) { _text = text; return this; }
             public Builder Icon(Geometry? geometry, IBrush? foreground = null) { _iconGeometry = geometry; _iconForeground = foreground; return this; }
             public Builder Button(string caption, MessageBoxResult result, bool isDefault = false, string? styleClass = null)
             { _buttons.Add((caption, result, isDefault, styleClass)); return this; }
-            public Builder ButtonTheme(ControlTheme? theme) { _buttonTheme = theme; return this; }
 
             private void Validate()
             {
@@ -45,7 +44,13 @@ namespace SNESMiniLuaCompiler.Views
                     throw new InvalidOperationException("Button captions must be unique.");
             }
 
+            // Dialogs are windows: callers on a background thread (error handlers, for example) are moved to the UI thread
             public Task<MessageBoxResult> ShowAsync(Window? parent = null)
+                => Dispatcher.UIThread.CheckAccess()
+                    ? ShowOnUiThread(parent)
+                    : Dispatcher.UIThread.InvokeAsync(() => ShowOnUiThread(parent));
+
+            private Task<MessageBoxResult> ShowOnUiThread(Window? parent)
             {
                 Validate();
 
@@ -96,7 +101,6 @@ namespace SNESMiniLuaCompiler.Views
         public static Task<MessageBoxResult> Show(string text, string title, MessageBoxButtons buttons)
         {
             Builder builder = new Builder().Title(title).Text(text);
-            var solidButtonTheme = Application.Current?.FindResource("SolidButton") as ControlTheme;
 
             switch (buttons)
             {
@@ -118,60 +122,41 @@ namespace SNESMiniLuaCompiler.Views
                     break;
             }
 
-            builder.ButtonTheme(solidButtonTheme);
             return builder.ShowAsync();
         }
 
         public static Task<MessageBoxResult> ShowError(string text, string title = "Error")
-        {
-            Builder builder = new Builder()
-                .Title(title)
-                .Text(text)
-                .Icon(Application.Current?.FindResource("SemiIconAlertCircle") as Geometry,
-                      Application.Current?.FindResource("NotificationCardErrorIconForeground") as IBrush)
-                .Button("Ok", MessageBoxResult.Ok, true, "Danger")
-                .ButtonTheme(Application.Current?.FindResource("SolidButton") as ControlTheme);
-
-            return builder.ShowAsync();
-        }
+            => ShowWithIcon(text, title, "SemiIconAlertCircle", "NotificationCardErrorIconForeground",
+                ("Ok", MessageBoxResult.Ok, true, "Danger"));
 
         public static Task<MessageBoxResult> ShowWarning(string text, string title = "Warning")
-        {
-            Builder builder = new Builder()
-                .Title(title)
-                .Text(text)
-                .Icon(Application.Current?.FindResource("SemiIconAlertTriangle") as Geometry,
-                      Application.Current?.FindResource("NotificationCardWarningIconForeground") as IBrush)
-                .Button("Yes", MessageBoxResult.Yes, false, "Warning")
-                .Button("No", MessageBoxResult.No, true, "Warning")
-                .ButtonTheme(Application.Current?.FindResource("SolidButton") as ControlTheme)
-                .ButtonTheme(Application.Current?.FindResource("OutlineButton") as ControlTheme);
-
-            return builder.ShowAsync();
-        }
+            => ShowWithIcon(text, title, "SemiIconAlertTriangle", "NotificationCardWarningIconForeground",
+                ("Yes", MessageBoxResult.Yes, false, "Warning"),
+                ("No", MessageBoxResult.No, true, "Warning"));
 
         public static Task<MessageBoxResult> ShowSuccess(string text, string title = "Success")
-        {
-            Builder builder = new Builder()
-                .Title(title)
-                .Text(text)
-                .Icon(Application.Current?.FindResource("SemiIconTickCircle") as Geometry,
-                      Application.Current?.FindResource("NotificationCardSuccessIconForeground") as IBrush)
-                .Button("Ok", MessageBoxResult.Ok, false, "Success")
-                .ButtonTheme(Application.Current?.FindResource("SolidButton") as ControlTheme);
-
-            return builder.ShowAsync();
-        }
+            => ShowWithIcon(text, title, "SemiIconTickCircle", "NotificationCardSuccessIconForeground",
+                ("Ok", MessageBoxResult.Ok, false, "Success"));
 
         public static Task<MessageBoxResult> ShowInformation(string text, string title = "Information")
+            => ShowWithIcon(text, title, "SemiIconInfoCircle", "NotificationCardInformationIconForeground",
+                ("Ok", MessageBoxResult.Ok, false, "Primary"));
+
+        private static Task<MessageBoxResult> ShowWithIcon(
+            string text,
+            string title,
+            string iconKey,
+            string iconForegroundKey,
+            params (string Caption, MessageBoxResult Result, bool IsDefault, string StyleClass)[] buttons)
         {
             Builder builder = new Builder()
                 .Title(title)
                 .Text(text)
-                .Icon(Application.Current?.FindResource("SemiIconInfoCircle") as Geometry,
-                      Application.Current?.FindResource("NotificationCardInformationIconForeground") as IBrush)
-                .Button("Ok", MessageBoxResult.Ok, false, "Primary")
-                .ButtonTheme(Application.Current?.FindResource("SolidButton") as ControlTheme);
+                .Icon(Application.Current?.FindResource(iconKey) as Geometry,
+                      Application.Current?.FindResource(iconForegroundKey) as IBrush);
+
+            foreach ((string caption, MessageBoxResult result, bool isDefault, string styleClass) in buttons)
+                builder.Button(caption, result, isDefault, styleClass);
 
             return builder.ShowAsync();
         }

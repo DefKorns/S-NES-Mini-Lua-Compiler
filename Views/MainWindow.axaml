@@ -125,7 +125,7 @@
 						Theme="{DynamicResource OutlineButton}"
 						Classes="Warning"
 						VerticalContentAlignment="Center"
-						IsEnabled="{Binding IsRecodeButtonEnabled}"
+						IsEnabled="{Binding CanEncode}"
 						Click="EncryptButton_Click"
 						HorizontalAlignment="Center"
 						Margin="0">
@@ -162,7 +162,7 @@
 								HorizontalAlignment="Center"
 								Spacing="5">
 						<TextBlock Text="Status:" VerticalAlignment="Center"/>
-						<TextBlock Margin="0,5" x:Name="status" VerticalAlignment="Center">Ready...</TextBlock>
+						<TextBlock Margin="0,5" Text="{Binding StatusText}" VerticalAlignment="Center"/>
 					</StackPanel>
 					<TextBlock Grid.Column="1"
 							   Text="{Binding AppVersion}"

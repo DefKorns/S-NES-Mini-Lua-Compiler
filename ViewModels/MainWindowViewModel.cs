@@ -23,7 +23,11 @@ namespace SNESMiniLuaCompiler.ViewModels
         private SystemModel? _selectedConsole;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanEncode))]
         private bool _isRecodeButtonEnabled;
+
+        [ObservableProperty]
+        private string _statusText = "Ready...";
 
         [ObservableProperty]
         private bool _isTrashButtonEnabled;
@@ -34,6 +38,7 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        [NotifyPropertyChangedFor(nameof(CanEncode))]
         private bool _isDecryptionInProgress;
 
         [ObservableProperty]
@@ -42,10 +47,13 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowSelectConsoleHint))]
+        [NotifyPropertyChangedFor(nameof(CanEncode))]
         private bool _isEncryptionInProgress;
 
         public bool ShowSelectConsoleHint =>
             !SelectedConsole.HasValue && !IsDecryptionInProgress && !IsEncryptionInProgress;
+
+        public bool CanEncode => IsRecodeButtonEnabled && !IsDecryptionInProgress && !IsEncryptionInProgress;
 
         public Func<Task>? DecryptFilesAsyncDelegate { get; set; }
 
@@ -99,6 +107,48 @@ namespace SNESMiniLuaCompiler.ViewModels
                                     FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
             IsTrashButtonEnabled = (SelectedConsole.HasValue && FileUtils.SafeDirectoryExists(AppUtils.DecodedPath)) ||
                                     FileUtils.SafeDirectoryExists(AppUtils.RecodedPath);
+        }
+
+        // The work itself runs in MainWindow; these only change what the window shows. Call them on the UI thread.
+        public void BeginDecryption()
+        {
+            StatusText = "Decrypting files, please wait...";
+            DecryptionProgress = 0;
+            IsDecryptionInProgress = true;
+            IsTrashButtonEnabled = false;
+            SetConsolesEnabled(false);
+        }
+
+        public void EndDecryption(string statusText, double progress)
+        {
+            StatusText = statusText;
+            DecryptionProgress = progress;
+            IsDecryptionInProgress = false;
+            SetConsolesEnabled(true);
+            UpdateButtonStates();
+            IsTrashButtonEnabled = true;
+        }
+
+        public void BeginEncryption(bool hasFiles)
+        {
+            StatusText = "Encrypting files, please wait...";
+            EncryptionProgress = 0;
+            IsEncryptionInProgress = hasFiles;
+            SetConsolesEnabled(false);
+        }
+
+        public void EndEncryption(string statusText)
+        {
+            StatusText = statusText;
+            EncryptionProgress = 100;
+            IsEncryptionInProgress = false;
+            SetConsolesEnabled(true);
+        }
+
+        private void SetConsolesEnabled(bool isEnabled)
+        {
+            foreach (Consoles console in ConsoleList)
+                console.IsEnabled = isEnabled;
         }
 
         [RelayCommand]
