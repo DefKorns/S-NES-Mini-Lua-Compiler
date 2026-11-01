@@ -26,7 +26,7 @@ The app extracts LuaJIT 2.0 (the version the consoles use, bytecode version 1) a
 ### **Building**
 - Windows: `dotnet build` (Native AOT publish: `dotnet publish -c Release`, needs Visual Studio with the C++ tools).
 - The LuaJIT used for encoding is built from [`third_party/luajit`](third_party/luajit/NINTENDO.md):
-  `scriptsuild-luajit-windows.bat` (Visual Studio, writes `Lib\luajit`) and `scripts/build-luajit-linux.sh`
+  `scripts\build-luajit-windows.bat` (Visual Studio, writes `Lib\luajit`) and `scripts/build-luajit-linux.sh`
   (static, writes `Lib/luajit-linux`). The Windows binary is committed; the Linux one is built by the CI.
 - Linux: the decompiler comes from the
   [Linux port](https://github.com/DefKorns/luajit-decompiler-v2/tree/linux-support) (CMake, static), copied to
