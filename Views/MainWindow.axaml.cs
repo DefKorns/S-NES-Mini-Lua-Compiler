@@ -26,10 +26,14 @@ namespace SNESMiniLuaCompiler.Views
                 if (Vm is { } vm)
                 {
                     vm.DecryptFilesAsyncDelegate = DecryptFilesAsync;
+                    vm.ImportOriginalsDelegate = ShowImportDialogAsync;
                     vm.UpdateButtonStates();
                 }
             };
         }
+
+        private async Task<bool> ShowImportDialogAsync(SystemModel system, string consoleName) =>
+            await new ImportOriginalsDialog(new ImportOriginalsViewModel(system, consoleName)).ShowDialog<bool>(this);
 
         private async Task DecryptFilesAsync()
         {

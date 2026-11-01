@@ -5,12 +5,26 @@ Based on the work from [frostyfire03530](https://github.com/frostyfire03530).
 This app decompiles and recompiles the Lua files (LuaJIT bytecode) of the SNES Mini, NES Mini and Famicom Mini, for theme creation.
 
 ### **How to use it**
-- Click the icon of your console: the app decodes its Lua files; use **Open folder** to reach the `decoded` folder
+- Click the icon of your console. The first time, the app asks for the console's **original Lua files** (see below);
+  after that it decodes them, and **Open folder** takes you to the `decoded` folder
 - Edit the files you need with your favourite Lua/text editor
 - Choose `Encode`: only the files you changed are encoded, and **Open folder** takes you to the output folder
 - Copy the re-encoded files to your theme
 
 Enjoy
+
+### **The original files of your console**
+The app does not include the console's Lua files (they are Nintendo's, not part of the open source it publishes).
+You import them once per console, from your own console or backup. Only the Lua files are read, never the images,
+fonts or sounds:
+- **From my console**: over SSH (hakchi); the console connected by USB (`169.254.13.37`) or on the network. It
+  needs the `ssh` client (on Windows: Settings > Apps > Optional features > OpenSSH Client). The app reads the
+  untouched original (`/var/squashfs/...`), not a theme you installed.
+- **From a firmware file**: a squashfs image (`.hsqs`) or a `.tar` / `.tar.gz` of the firmware.
+- **From a folder**: the console's UI folder (the one that has `resources/scripts` inside), or any folder above it.
+
+They are kept in `%AppData%\SNESMiniLuaCompiler\Originals` (Linux: `~/.config/SNESMiniLuaCompiler/Originals`), so
+the app works with the files of your firmware version. Importing again replaces them.
 
 ### **Requirements**
 - **Windows**: nothing to install.

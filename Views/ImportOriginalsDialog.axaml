@@ -1,0 +1,87 @@
+<Window x:Class="SNESMiniLuaCompiler.Views.ImportOriginalsDialog"
+		xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:SNESMiniLuaCompiler.ViewModels"
+		Title="Import the original files"
+		x:CompileBindings="true"
+		x:DataType="vm:ImportOriginalsViewModel"
+		CanResize="False"
+		CanMinimize="False"
+		Width="560"
+		SizeToContent="Height"
+		WindowStartupLocation="CenterOwner"
+		mc:Ignorable="d">
+	<Window.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="FontSize" Value="12"/>
+		</Style>
+		<Style Selector="Border.option">
+			<Setter Property="Background" Value="{DynamicResource SemiColorFill0}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource SemiColorBorder}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="CornerRadius" Value="12"/>
+			<Setter Property="Padding" Value="16,12"/>
+		</Style>
+	</Window.Styles>
+
+	<StackPanel Margin="24,20,24,20" Spacing="14">
+		<StackPanel Spacing="4">
+			<TextBlock Text="{Binding ConsoleName, StringFormat='Original files of {0}'}" FontSize="18" FontWeight="SemiBold" />
+			<TextBlock TextWrapping="Wrap" Opacity="0.75"
+					   Text="The app needs the original Lua files of this console. They come from your own console or backup: the app does not include them or download them. Only the Lua files are read." />
+		</StackPanel>
+
+		<!-- the console, over SSH -->
+		<Border Classes="option">
+			<Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14">
+				<LucideIcon Grid.RowSpan="2" Kind="Usb" Size="26" VerticalAlignment="Top" Foreground="{DynamicResource BrandAccent}" />
+				<StackPanel Grid.Column="1" Spacing="2">
+					<TextBlock Text="From my console" FontWeight="SemiBold" FontSize="14" />
+					<TextBlock Text="Over SSH (hakchi), the console connected by USB or on the network." TextWrapping="Wrap" Opacity="0.75" />
+				</StackPanel>
+				<Button Grid.Column="2" Content="Import" Theme="{DynamicResource OutlineButton}" Classes="Tertiary"
+						VerticalAlignment="Top" IsEnabled="{Binding CanImport}" Command="{Binding ImportFromConsoleCommand}" />
+				<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,8,0,0" Watermark="Console address"
+						 Text="{Binding Host}" IsEnabled="{Binding CanImport}" />
+			</Grid>
+		</Border>
+
+		<!-- a firmware file -->
+		<Border Classes="option">
+			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+				<LucideIcon Kind="FileArchive" Size="26" VerticalAlignment="Top" Foreground="{DynamicResource BrandAccent}" />
+				<StackPanel Grid.Column="1" Spacing="2">
+					<TextBlock Text="From a firmware file" FontWeight="SemiBold" FontSize="14" />
+					<TextBlock Text="A squashfs image (.hsqs) or a .tar / .tar.gz of the firmware." TextWrapping="Wrap" Opacity="0.75" />
+				</StackPanel>
+				<Button Grid.Column="2" Name="btn_file" Content="Choose file..." Theme="{DynamicResource OutlineButton}" Classes="Tertiary"
+						VerticalAlignment="Top" IsEnabled="{Binding CanImport}" Click="ChooseFile_Click" />
+			</Grid>
+		</Border>
+
+		<!-- a folder -->
+		<Border Classes="option">
+			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+				<LucideIcon Kind="FolderInput" Size="26" VerticalAlignment="Top" Foreground="{DynamicResource BrandAccent}" />
+				<StackPanel Grid.Column="1" Spacing="2">
+					<TextBlock Text="From a folder" FontWeight="SemiBold" FontSize="14" />
+					<TextBlock Text="The console's UI folder: the one that has resources/scripts inside." TextWrapping="Wrap" Opacity="0.75" />
+				</StackPanel>
+				<Button Grid.Column="2" Name="btn_folder" Content="Choose folder..." Theme="{DynamicResource OutlineButton}" Classes="Tertiary"
+						VerticalAlignment="Top" IsEnabled="{Binding CanImport}" Click="ChooseFolder_Click" />
+			</Grid>
+		</Border>
+
+		<StackPanel Spacing="6">
+			<ProgressBar IsIndeterminate="True" Height="6" IsVisible="{Binding IsBusy}" />
+			<TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+					   Foreground="{DynamicResource SemiColorDanger}" IsVisible="{Binding IsError}" />
+			<TextBlock Text="{Binding Message}" TextWrapping="Wrap" Opacity="0.8" IsVisible="{Binding !IsError}" />
+		</StackPanel>
+
+		<Button Content="Cancel" HorizontalAlignment="Right" Theme="{DynamicResource BorderlessButton}" Classes="Tertiary"
+				Click="Cancel_Click" />
+	</StackPanel>
+</Window>

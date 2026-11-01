@@ -8,6 +8,7 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Semi.Avalonia;
+using SNESMiniLuaCompiler.Firmware;
 using SNESMiniLuaCompiler.Helpers;
 using SNESMiniLuaCompiler.Models;
 
@@ -94,6 +95,9 @@ namespace SNESMiniLuaCompiler.ViewModels
 
         public Func<Task>? DecryptFilesAsyncDelegate { get; set; }
 
+        /// <summary>Shows the import dialog for a console (system, console name); true when the originals were imported.</summary>
+        public Func<SystemModel, string, Task<bool>>? ImportOriginalsDelegate { get; set; }
+
         public MainWindowViewModel()
         {
             UpdateButtonStates();
@@ -139,6 +143,15 @@ namespace SNESMiniLuaCompiler.ViewModels
                     return;
             }
 
+            if (!OriginalsStore.IsImported(systemModel) && !await ImportOriginalsAsync(systemModel))
+            {
+                // nothing to decode without the originals: undo the selection
+                SelectedConsole = null;
+                foreach (Consoles console in ConsoleList)
+                    console.IsChecked = false;
+                return;
+            }
+
             AppUtils.SaveConfig("system", Path.GetFileName(AppUtils.GetSystemPath(systemModel)));
             AppUtils.EnsureDirectoryExists(AppUtils.DecodedPath);
             UpdateButtonStates();
@@ -148,6 +161,10 @@ namespace SNESMiniLuaCompiler.ViewModels
             if (DecryptFilesAsyncDelegate is not null)
                 await DecryptFilesAsyncDelegate.Invoke();
         }
+
+        private async Task<bool> ImportOriginalsAsync(SystemModel systemModel) =>
+            ImportOriginalsDelegate is not null
+            && await ImportOriginalsDelegate(systemModel, ConsoleList.First(c => c.SystemModel == systemModel).FullName);
 
         public void UpdateButtonStates()
         {

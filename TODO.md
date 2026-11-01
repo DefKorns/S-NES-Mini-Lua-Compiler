@@ -5,6 +5,9 @@ in the CI) and the pre-commit hooks.
 
 ## Test before releasing
 
+- [ ] Import the originals from a real console over SSH, and from a real firmware `.hsqs` / `.tar.gz` (tested
+      here with an image built from the Famicom files, a test host and folders, not with a real console or firmware).
+      Check that the firmware has the Lua files in `<ui folder>/resources/scripts` as assumed.
 - [ ] Decode the Lua files of each console (NES, Famicom, SNES, Super Famicom, Shonen Jump) in the app and
       compare a few of them with what the Python decompiler gave. Linux: only Famicom Mini was run through
       the UI (virtual display); the other consoles were only decompiled/recompiled by a test program.
